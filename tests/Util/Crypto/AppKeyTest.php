@@ -24,6 +24,9 @@ class AppKeyTest extends TestCase
         $encoded = $key->encoded();
         self::assertTrue(\str_starts_with($encoded, 'base64:'));
         self::assertSame($key->value, (new AppKey($encoded))->value);
+
+        self::assertSame('blake2b:' . \bin2hex(\sodium_crypto_generichash($key->value)), $key->id());
+        self::assertSame($key->value, $key->paseto()->shared());
     }
 
     #[Test]

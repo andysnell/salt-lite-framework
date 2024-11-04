@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Util\Crypto;
 
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto\PasetoKey;
+
 final readonly class AppKey implements \Stringable
 {
     public const int LENGTH = \SODIUM_CRYPTO_AUTH_BYTES; // 256-bit key
@@ -26,6 +28,11 @@ final readonly class AppKey implements \Stringable
     public function id(): string
     {
         return 'blake2b:' . \bin2hex(\sodium_crypto_generichash($this->value));
+    }
+
+    public function paseto(): PasetoKey
+    {
+        return new PasetoKey($this->value);
     }
 
     public function encoded(): string
