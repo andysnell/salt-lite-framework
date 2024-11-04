@@ -27,6 +27,10 @@
     {
       "type": "github",
       "url": "https://github.com/PhoneBurnerOpenSource/php-coding-standard"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/phoneburner/salt-lite-phpstan"
     }
   ],
   "autoload": {
@@ -112,6 +116,7 @@
     "brianium/paratest": "^7.5",
     "filp/whoops": "^2.16",
     "phoneburner/coding-standard": "dev-main",
+    "phoneburner/salt-lite-phpstan": "dev-main",
     "php-parallel-lint/php-parallel-lint": "^1.4",
     "phpspec/prophecy": "^1.19",
     "phpspec/prophecy-phpunit": "^2.2",

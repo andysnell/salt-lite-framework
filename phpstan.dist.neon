@@ -7,10 +7,6 @@ parameters:
     tmpDir: build/phpstan
 
     paths:
-        - config
-        - html
-        - includes
-        - lib
         - src
         - tests
 
