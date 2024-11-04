@@ -23,6 +23,11 @@ final readonly class AppKey implements \Stringable
         $this->value = $value;
     }
 
+    public function id(): string
+    {
+        return 'blake2b:' . \bin2hex(\sodium_crypto_generichash($this->value));
+    }
+
     public function encoded(): string
     {
         return 'base64:' . \base64_encode($this->value);

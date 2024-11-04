@@ -6,18 +6,30 @@ namespace PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto;
 
 final readonly class PasetoKey
 {
-    public const int MINIMUM_LENGTH = 32;
+    public const int KEY_LENGTH_BYTES = 32;
 
-    private function __construct(private string $key)
+    public function __construct(#[\SensitiveParameter] private string $key)
     {
-        if (\strlen($this->key) < self::MINIMUM_LENGTH) {
+        if (\strlen($this->key) !== self::KEY_LENGTH_BYTES) {
             throw new \InvalidArgumentException('Invalid Key Length');
         }
     }
 
-    public static function make(string $key): self
+    /**
+     * Make a key from an existing string input.
+     */
+    public static function make(#[\SensitiveParameter] string $key): self
     {
-        return new self($key);
+        if (\strlen($key) < self::KEY_LENGTH_BYTES) {
+            throw new \InvalidArgumentException('Invalid Key Length');
+        }
+
+        return new self(\sodium_crypto_generichash($key, '', self::KEY_LENGTH_BYTES));
+    }
+
+    public function id(): string
+    {
+        return 'blake2b:' . \bin2hex(\sodium_crypto_generichash($this->key));
     }
 
     /**
@@ -27,7 +39,7 @@ final readonly class PasetoKey
      */
     public function shared(): string
     {
-        return \sodium_crypto_generichash($this->key, '', \SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_KEYBYTES);
+        return $this->key;
     }
 
     /**
@@ -37,9 +49,7 @@ final readonly class PasetoKey
      */
     public function secret(): string
     {
-        $seed = \sodium_crypto_generichash($this->key, '', \SODIUM_CRYPTO_SIGN_SEEDBYTES);
-        $key_pair = \sodium_crypto_sign_seed_keypair($seed);
-        return \sodium_crypto_sign_secretkey($key_pair);
+        return \sodium_crypto_sign_secretkey(\sodium_crypto_sign_seed_keypair($this->key));
     }
 
     /**
@@ -49,8 +59,6 @@ final readonly class PasetoKey
      */
     public function public(): string
     {
-        $seed = \sodium_crypto_generichash($this->key, '', \SODIUM_CRYPTO_SIGN_SEEDBYTES);
-        $key_pair = \sodium_crypto_sign_seed_keypair($seed);
-        return \sodium_crypto_sign_publickey($key_pair);
+        return \sodium_crypto_sign_publickey(\sodium_crypto_sign_seed_keypair($this->key));
     }
 }
