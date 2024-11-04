@@ -1,0 +1,64 @@
+includes:
+    - phar://phpstan.phar/conf/bleedingEdge.neon
+
+parameters:
+    level: 8
+
+    tmpDir: build/phpstan
+
+    paths:
+        - config
+        - html
+        - includes
+        - lib
+        - src
+        - tests
+
+    ignoreErrors:
+        - identifier: missingType.iterableValue
+        - identifier: staticMethod.alreadyNarrowedType
+
+    # Strict Analysis
+    # https://phpstan.org/config-reference#stricter-analysis
+    checkDynamicProperties: true
+    checkExplicitMixedMissingReturn: true
+    checkFunctionNameCase: true
+    checkImplicitMixed: false
+    checkInternalClassCaseSensitivity: true
+    checkTooWideReturnTypesInProtectedAndPublicMethods: true
+    checkUninitializedProperties: true
+    reportMaybesInMethodSignatures: true
+    reportMaybesInPropertyPhpDocTypes: true
+    reportStaticMethodSignatures: true
+    reportUnmatchedIgnoredErrors: false
+    treatPhpDocTypesAsCertain: false
+
+    # Extension: Disallowed Calls For PHPStan
+    # https://github.com/spaze/phpstan-disallowed-calls
+    disallowedConstants:
+        - class: 'DateTimeInterface'
+          constant: 'ISO8601'
+          message: 'use DateTimeInterface::ATOM instead'
+
+    disallowedNamespaces:
+        - namespace: '\DateTime'
+          message: 'Use DateTimeImmutable instead'
+          allowIn:
+            - '*/tests/unit/Module/Telephony/Router/ReservationTest.php'
+
+        - namespace: \Carbon\Carbon
+          message: 'Use \Carbon\CarbonImmutable instead'
+          allowIn:
+            - '*/tests/unit/TestSupport/TimeStopper.php'
+            - '*/tests/unit/TestSupport/ResetCarbonTestNowAfterTests.php'
+            - '*/tests/unit/TestSupport/ResetCarbonTestNowBeforeClass.php'
+
+    disallowedFunctionCalls:
+        - function: 'var_dump()'
+        - function: 'dd()'
+        - function: 'phpinfo()'
+        - function: 'die()'
+        - function: 'exit()'
+        - function: 'uniqid()'
+        - function: 'rand()'
+        - function: 'mt_rand()'

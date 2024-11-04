@@ -1,0 +1,150 @@
+{
+  "name": "phoneburner/salt-lite-framework",
+  "description": "Salt-Lite Framework",
+  "type": "library",
+  "license": "proprietary",
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "phpstan/extension-installer": false,
+      "sllh/composer-lint": true
+    }
+  },
+  "repositories": [
+    {
+      "type": "github",
+      "url": "https://github.com/andysnell/http-tortilla"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/tjlytle/api-handler"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/PhoneBurnerOpenSource/composer-replacements"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/PhoneBurnerOpenSource/php-coding-standard"
+    }
+  ],
+  "autoload": {
+    "files": [
+      "src/functions.php"
+    ],
+    "psr-4": {
+      "PhoneBurner\\SaltLite\\Framework\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "PhoneBurner\\SaltLite\\Framework\\Tests\\": "tests/"
+    }
+  },
+  "require": {
+    "php": "^8.3 || ^8.4",
+    "ext-bcmath": "*",
+    "ext-ctype": "*",
+    "ext-curl": "*",
+    "ext-exif": "*",
+    "ext-gmp": "*",
+    "ext-iconv": "*",
+    "ext-igbinary": "*",
+    "ext-intl": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*",
+    "ext-pdo": "*",
+    "ext-random": "*",
+    "ext-redis": "*",
+    "ext-sodium": "*",
+    "ext-zip": "*",
+    "ext-zlib": "*",
+    "brick/varexporter": "^0.5.0",
+    "crell/api-problem": "^3.7",
+    "crell/attributeutils": "^1.2",
+    "doctrine/dbal": "^4.2",
+    "doctrine/migrations": "^3.8",
+    "doctrine/orm": "^3.3",
+    "dragonmantank/cron-expression": "^3.4",
+    "eventsauce/eventsauce": "^3.6",
+    "guzzlehttp/guzzle": "^7.9",
+    "guzzlehttp/psr7": "^2.7",
+    "josegonzalez/dotenv": "^4.0",
+    "laminas/laminas-diactoros": "^3.5",
+    "laminas/laminas-httphandlerrunner": "^2.10",
+    "league/flysystem": "^3.29",
+    "league/flysystem-aws-s3-v3": "^3.29",
+    "monolog/monolog": "^3.7",
+    "nesbot/carbon": "^3.8",
+    "nikic/fast-route": "^1.3",
+    "phoneburner/api-handler": "dev-RC2-dev as 1.0.0",
+    "phoneburner/composer-replacements": "dev-main",
+    "phoneburner/http-tortilla": "dev-v2.x-dev as 2.0.0",
+    "php-di/php-di": "^7.0",
+    "psr/cache": "^3.0.0",
+    "psr/clock": "^1.0.0",
+    "psr/container": "^2.0.2",
+    "psr/event-dispatcher": "^1.0.0",
+    "psr/http-client": "^1.0.3",
+    "psr/http-factory": "^1.1.0",
+    "psr/http-message": "^2.0.0",
+    "psr/http-server-handler": "^1.0.2",
+    "psr/http-server-middleware": "^1.0.2",
+    "psr/link": "^2.0.1",
+    "psr/log": "^3.0.2",
+    "psr/simple-cache": "^3.0.0",
+    "ramsey/uuid": "^4.7",
+    "ramsey/uuid-doctrine": "^2.1",
+    "symfony/amqp-messenger": "^7.1",
+    "symfony/cache": "^7.1",
+    "symfony/event-dispatcher": "^7.1",
+    "symfony/http-client": "^7.1",
+    "symfony/lock": "^7.1",
+    "symfony/mailer": "^7.1",
+    "symfony/messenger": "^7.1",
+    "symfony/mime": "^7.1",
+    "symfony/process": "^7.1",
+    "symfony/scheduler": "^7.1",
+    "symfony/sendgrid-mailer": "^7.1"
+  },
+  "require-dev": {
+    "brianium/paratest": "^7.5",
+    "filp/whoops": "^2.16",
+    "phoneburner/coding-standard": "dev-main",
+    "php-parallel-lint/php-parallel-lint": "^1.4",
+    "phpspec/prophecy": "^1.19",
+    "phpspec/prophecy-phpunit": "^2.2",
+    "phpunit/phpunit": "^11",
+    "rector/rector": "^1.2.7",
+    "roave/security-advisories": "dev-latest",
+    "symfony/var-dumper": "^7.1.5"
+  },
+  "scripts": {
+    "lint": "@php vendor/bin/parallel-lint -j $(nproc) --show-deprecated --exclude vendor --exclude build .",
+    "phpcbf": "@php vendor/bin/phpcbf --parallel=$(nproc) --report=full",
+    "phpcs": "@php vendor/bin/phpcs --parallel=$(nproc) --report=full",
+    "phpstan": "@php vendor/bin/phpstan analyze --memory-limit=-1",
+    "test": [
+      "@putenv XDEBUG_MODE=off",
+      "@php vendor/bin/phpunit"
+    ],
+    "test-coverage": [
+      "@putenv XDEBUG_MODE=coverage",
+      "@php vendor/bin/phpunit --coverage-html=html/phpunit"
+    ],
+    "test-parallel": [
+      "@php vendor/bin/paratest"
+    ],
+    "rector": "@php vendor/bin/rector process",
+    "ci": [
+      "@lint",
+      "@phpcs",
+      "@test",
+      "@phpstan",
+      "@php vendor/bin/rector process --dry-run --clear-cache"
+    ]
+  },
+  "extra": {
+  }
+}

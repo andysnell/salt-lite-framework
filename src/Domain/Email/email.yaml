@@ -1,0 +1,14 @@
+openapi: 3.0.3
+info:
+  title: Email Components
+  description: Reusable OpenAPI Components Related to Email Domain Objects
+  version: 1.0.0
+paths: { }
+components:
+  schemas:
+    EmailAddress:
+      title: Email Address
+      description: >
+       A Syntactically Valid [RFC 5322 Addr-Spec](https://datatracker.ietf.org/doc/html/rfc5322#section-3.4.1) Email Address
+      type: string
+      example: "john.doe@example.com"

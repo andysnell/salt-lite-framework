@@ -1,0 +1,12 @@
+/.idea/
+/.github/
+/build/
+/vendor/
+/html/phpunit
+
+.env
+phpunit.xml
+settings.ini
+user.ini
+docker-compose.override.yml
+phpstan.neon
