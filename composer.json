@@ -7,7 +7,7 @@
     "sort-packages": true,
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
-      "phpstan/extension-installer": false,
+      "phpstan/extension-installer": true,
       "sllh/composer-lint": true
     }
   },
@@ -98,6 +98,7 @@
     "psr/link": "^2.0.1",
     "psr/log": "^3.0.2",
     "psr/simple-cache": "^3.0.0",
+    "psy/psysh": "^0.12.4",
     "ramsey/uuid": "^4.7",
     "ramsey/uuid-doctrine": "^2.1",
     "symfony/amqp-messenger": "^7.1",
@@ -115,28 +116,34 @@
   "require-dev": {
     "brianium/paratest": "^7.5",
     "filp/whoops": "^2.16",
+    "jangregor/phpstan-prophecy": "^1.0",
     "phoneburner/coding-standard": "dev-main",
-    "phoneburner/salt-lite-phpstan": "dev-main",
     "php-parallel-lint/php-parallel-lint": "^1.4",
     "phpspec/prophecy": "^1.19",
     "phpspec/prophecy-phpunit": "^2.2",
+    "phpstan/extension-installer": "^1.4",
+    "phpstan/phpstan": "^1.12",
+    "phpstan/phpstan-deprecation-rules": "^1.2",
+    "phpstan/phpstan-doctrine": "^1.5",
+    "phpstan/phpstan-phpunit": "^1.4",
     "phpunit/phpunit": "^11",
     "rector/rector": "^1.2.7",
     "roave/security-advisories": "dev-latest",
+    "spaze/phpstan-disallowed-calls": "^3.5",
     "symfony/var-dumper": "^7.1.5"
   },
   "scripts": {
     "lint": "@php vendor/bin/parallel-lint -j $(nproc) --show-deprecated --exclude vendor --exclude build .",
     "phpcbf": "@php vendor/bin/phpcbf --parallel=$(nproc) --report=full",
     "phpcs": "@php vendor/bin/phpcs --parallel=$(nproc) --report=full",
-    "phpstan": "@php vendor/bin/phpstan analyze --memory-limit=-1",
+    "phpstan": "@php vendor/bin/phpstan analyze --memory-limit=-1 --verbose",
     "test": [
       "@putenv XDEBUG_MODE=off",
       "@php vendor/bin/phpunit"
     ],
     "test-coverage": [
       "@putenv XDEBUG_MODE=coverage",
-      "@php vendor/bin/phpunit --coverage-html=html/phpunit"
+      "@php vendor/bin/phpunit --coverage-html=build/phpunit"
     ],
     "test-parallel": [
       "@php vendor/bin/paratest"

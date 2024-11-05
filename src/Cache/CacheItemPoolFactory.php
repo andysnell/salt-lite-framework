@@ -21,15 +21,13 @@ use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 use Symfony\Component\Cache\Adapter\ProxyAdapter;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
 
-use const PhoneBurner\SaltLite\Framework\APP_ROOT;
-
 class CacheItemPoolFactory
 {
     public const string DEFAULT_NAMESPACE = 'cache';
 
-    public const string DEFAULT_STATIC_CACHE_FILE = APP_ROOT . '/storage/bootstrap/static.cache.php';
+    public const string DEFAULT_STATIC_CACHE_FILE = '/storage/bootstrap/static.cache.php';
 
-    public const string DEFAULT_FILE_CACHE_DIRECTORY = APP_ROOT . '/storage/';
+    public const string DEFAULT_FILE_CACHE_DIRECTORY = '/storage/';
 
     private CacheItemPoolInterface|null $pool = null;
 
@@ -70,7 +68,11 @@ class CacheItemPoolFactory
             return $this->make(CacheDriver::Memory);
         }
 
-        return new PhpFilesAdapter($namespace ?: self::DEFAULT_NAMESPACE, directory: $directory, appendOnly: true);
+        return new PhpFilesAdapter(
+            $namespace ?: self::DEFAULT_NAMESPACE,
+            directory: $this->environment->root() . $directory,
+            appendOnly: true,
+        );
     }
 
     /**
@@ -102,6 +104,6 @@ class CacheItemPoolFactory
 
         $cache = new ChainAdapter([new ArrayAdapter(storeSerialized: false), $cache]);
 
-        return new PhpArrayAdapter(self::DEFAULT_STATIC_CACHE_FILE, $cache);
+        return new PhpArrayAdapter($this->environment->root() . self::DEFAULT_STATIC_CACHE_FILE, $cache);
     }
 }

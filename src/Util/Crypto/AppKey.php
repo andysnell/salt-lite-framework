@@ -10,6 +10,9 @@ final readonly class AppKey implements \Stringable
 {
     public const int LENGTH = \SODIUM_CRYPTO_AUTH_BYTES; // 256-bit key
 
+    /**
+     * @var non-empty-string $value
+     */
     public string $value;
 
     public function __construct(#[\SensitiveParameter] string $value)

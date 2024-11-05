@@ -17,12 +17,14 @@ The generic `\PhoneBurner\SaltLite\Framework\Mailer\Email` class can be used for
 mutable object with a fluent interface.
 
 ```php
-public function sendMessage(\PhoneBurner\SaltLite\Framework\Mailer\Mailer $mailer): void
-{
+public function sendMessage(
+    \PhoneBurner\SaltLite\Framework\Mailer\Mailer $mailer,
+    \PhoneBurner\SaltLite\Framework\App\Environment $environment,
+): void {
     $email = (new \PhoneBurner\SaltLite\Framework\Mailer\Email($subject))
         ->addTo(new EmailAddress($recipient))
         ->setTextBody("Hello, World!")
-        ->attach(Attachment::fromPath(\PhoneBurner\SaltLite\Framework\APP_ROOT . '/storage/doc.pdf'));
+        ->attach(Attachment::fromPath($environment->root() . '/storage/doc.pdf'));
     
     $mailer->send($email);
 }

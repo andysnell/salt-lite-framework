@@ -14,9 +14,15 @@ class Environment
     public function __construct(
         public readonly array $server,
         public readonly Context $context,
+        public readonly string $root = '',
     ) {
         $this->stage = BuildStage::tryFrom(
             $this->server['SALT_BUILD_STAGE'] ?? BuildStage::Production->value,
         ) ?? BuildStage::Production;
+    }
+
+    public function root(): string
+    {
+        return $this->root;
     }
 }

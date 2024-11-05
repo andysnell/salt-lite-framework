@@ -14,8 +14,6 @@ use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\EnvironmentProcesso
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\LogTraceProcessor;
 use Psr\Log\LoggerInterface;
 
-use const PhoneBurner\SaltLite\Framework\APP_ROOT;
-
 class LoggerFactory
 {
     public function make(
@@ -33,7 +31,7 @@ class LoggerFactory
         $handler->setFormatter(new LineFormatter('%channel%.%level_name%: %message% %context% %extra%'));
         $logger->pushHandler($handler);
 
-        $handler = new RotatingFileHandler(APP_ROOT . '/storage/logs/salt-lite.log', 7);
+        $handler = new RotatingFileHandler($environment->root() . '/storage/logs/salt-lite.log', 7);
         $logger->pushHandler($handler);
 
         return $logger;

@@ -13,6 +13,7 @@ parameters:
     ignoreErrors:
         - identifier: missingType.iterableValue
         - identifier: staticMethod.alreadyNarrowedType
+        - message: '#PhoneBurner\\SaltLite\\Framework\\APP_ROOT not found.$#'
 
     # Strict Analysis
     # https://phpstan.org/config-reference#stricter-analysis

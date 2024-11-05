@@ -62,7 +62,7 @@ class IpAddress implements \Stringable
         // use left-most address since the ones to the right are the prox(y|ies).
         $addresses = \explode(',', (string)$addresses);
 
-        return self::tryFrom(\reset($addresses));
+        return self::tryFrom(\trim(\reset($addresses)));
     }
 
     public static function local(): self

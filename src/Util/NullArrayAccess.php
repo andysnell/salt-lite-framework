@@ -36,7 +36,7 @@ class NullArrayAccess implements ArrayAccess, IteratorAggregate, Countable, Arra
      */
     #[\ReturnTypeWillChange]
     #[\Override]
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset)
     {
         return $this->array[$offset] ?? null;
     }
@@ -46,7 +46,7 @@ class NullArrayAccess implements ArrayAccess, IteratorAggregate, Countable, Arra
      * @param TValue $value
      */
     #[\Override]
-    public function offsetSet($offset, $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->array[$offset] = $value;
     }

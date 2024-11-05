@@ -11,6 +11,8 @@ use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
 use Psr\Container\ContainerInterface;
 
+use const PhoneBurner\SaltLite\Framework\APP_ROOT;
+
 final class App
 {
     private static self|null $instance = null;
@@ -41,7 +43,7 @@ final class App
 
     private function __construct(public readonly Context $context)
     {
-        $environment = new Environment($_SERVER, $context);
+        $environment = new Environment($_SERVER, $context, APP_ROOT);
 
         // resolve configuration.
         $this->config = ConfigurationFactory::make($environment);

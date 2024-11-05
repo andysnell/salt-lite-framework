@@ -8,6 +8,7 @@ final readonly class PasetoKey
 {
     public const int KEY_LENGTH_BYTES = 32;
 
+    /** @param non-empty-string $key */
     public function __construct(#[\SensitiveParameter] private string $key)
     {
         if (\strlen($this->key) !== self::KEY_LENGTH_BYTES) {
