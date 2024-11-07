@@ -4,7 +4,13 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Database\Doctrine;
 
+use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types as DoctrineTypes;
+use PhoneBurner\SaltLite\Framework\Database\Doctrine\Type\AreaCodeType;
+use PhoneBurner\SaltLite\Framework\Database\Doctrine\Type\NullablePhoneNumberType;
+use PhoneBurner\SaltLite\Framework\Database\Doctrine\Type\PhoneNumberType;
+use Ramsey\Uuid\Doctrine\UuidBinaryType;
+use Ramsey\Uuid\Doctrine\UuidType;
 
 final class Types
 {
@@ -33,6 +39,24 @@ final class Types
     public const string TIME_MUTABLE = DoctrineTypes::TIME_MUTABLE;
     public const string TIME_IMMUTABLE = DoctrineTypes::TIME_IMMUTABLE;
 
+    // Custom Types
+    public const string BINARY_UUID = 'uuid_binary';
+    public const string STRING_UUID = 'uuid_string';
+    public const string NULLABLE_PHONE_NUMBER = 'nullable_phone_number';
+    public const string PHONE_NUMBER = 'phone_number';
+    public const string AREA_CODE = 'area_code';
+
+    private const array REGISTRATION_MAP = [
+        // Register Vendor Doctrine Types
+        self::BINARY_UUID => UuidBinaryType::class, // Use with BINARY(16) columns
+        self::STRING_UUID => UuidType::class, // Use with CHAR(36) columns
+
+        // Register Application Doctrine Types
+        self::NULLABLE_PHONE_NUMBER => NullablePhoneNumberType::class,
+        self::PHONE_NUMBER => PhoneNumberType::class,
+        self::AREA_CODE => AreaCodeType::class,
+    ];
+
     private static bool $called = false;
 
     private function __construct()
@@ -45,19 +69,12 @@ final class Types
             return;
         }
 
-//        foreach (self::REGISTRATION_MAP as $name => $class_name) {
-//            if (Type::hasType($name)) {
-//                continue;
-//            }
-//            Type::addType($name, $class_name);
-//        }
-//
-//        foreach (EnumObjectTypes::REGISTRATION_MAP as $enum_class) {
-//            if (Type::hasType($enum_class)) {
-//                continue;
-//            }
-//            Type::getTypeRegistry()->register($enum_class, EnumObjectType::make($enum_class));
-//        }
+        foreach (self::REGISTRATION_MAP as $name => $class_name) {
+            if (Type::hasType($name)) {
+                continue;
+            }
+            Type::addType($name, $class_name);
+        }
 
         self::$called = true;
     }
