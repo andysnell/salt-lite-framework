@@ -116,13 +116,6 @@ class DomesticPhoneNumberTest extends TestCase
         self::assertSame($expected, (string)$deserialized->toE164());
     }
 
-    #[DataProvider('e164DataProvider')]
-    #[Test]
-    public function normalized_returns_e164_formatted_phone_number(string $test, string $normalized): void
-    {
-        self::assertSame($normalized, DomesticPhoneNumber::make($test)->normalize());
-    }
-
     #[DataProvider('formatDataProvider')]
     #[Test]
     public function format_returns_the_phone_number_expected_string_format(string $test, array $formats): void
@@ -158,12 +151,22 @@ class DomesticPhoneNumberTest extends TestCase
         );
     }
 
+    #[Test]
+    public function npa_nxx_and_line_functions_return_expected_(): void
+    {
+        $phone = DomesticPhoneNumber::make('3145550123');
+
+        self::assertSame('314', $phone->npa());
+        self::assertSame('555', $phone->nxx());
+        self::assertSame('0123', $phone->line());
+    }
+
     #[DataProvider('e164DataProvider')]
     #[Test]
     public function toString_returns_the_unformatted_phone_number(string $test, string $normalized): void
     {
         $phone = DomesticPhoneNumber::make($test);
-        self::assertSame(\substr($normalized, 2), (string)$phone);
+        self::assertSame((string)E164::make($normalized), (string)$phone);
     }
 
     #[DataProvider('provideAreaCodes')]

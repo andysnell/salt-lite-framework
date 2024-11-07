@@ -19,6 +19,8 @@ final readonly class AreaCode implements
     PhpSerializable
 {
     /**
+     * Numbering Plan Area (NPA) Code for this Area Code.
+     *
      * @var int<200,999>
      */
     public int $npa;

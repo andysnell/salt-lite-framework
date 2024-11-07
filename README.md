@@ -29,6 +29,8 @@ framework and trying to adapt that to our needs.
 - PHPUnit 11 is used for testing, with ParaTest for parallel execution, this is
   a significant upgrade from the previous version. Notably unit tests are defined
   with attributes and data providers must be defined as static functions.
+- When cast to a string, `\PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\DomesticPhoneNumber` is formatted as an
+  E.164 phone number ("+13145551234"), instead a ten-digit number ("3145551234").
 
 ### Backwards Capability Guarantees
 

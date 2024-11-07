@@ -65,7 +65,7 @@ final readonly class E164 implements
     public static function tryFrom(mixed $phone_number): self|null
     {
         try {
-            return $phone_number !== null ? self::make($phone_number) : null;
+            return $phone_number ? self::make($phone_number) : null;
         } catch (\Throwable) {
             return null;
         }
