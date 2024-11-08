@@ -6,12 +6,14 @@ namespace PhoneBurner\SaltLite\Framework\Database\Doctrine\Orm;
 
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Tools\Console\ConnectionProvider as DockerConnectionProvider;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Cache\DefaultCacheFactory;
 use Doctrine\ORM\Cache\Region\DefaultRegion;
 use Doctrine\ORM\Cache\RegionsConfiguration;
 use Doctrine\ORM\Configuration as EntityManagerConfiguration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\DefaultTypedFieldMapper;
 use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\Proxy\ProxyFactory;
 use Doctrine\ORM\Tools\Console\EntityManagerProvider\UnknownManagerException;
@@ -66,7 +68,7 @@ class EntityManagerFactory
     public function init(
         string $name = ConnectionFactory::DEFAULT,
     ): EntityManagerInterface {
-        Types::register();
+        $this->registerCustomTypes();
 
         $config = $this->configuration->get("database.doctrine.connections.$name.entity_manager") ?? [];
         if ($config === []) {
@@ -110,6 +112,11 @@ class EntityManagerFactory
 
         $this->configureEntityCache($doctrine_config, $config, $name, $cache_path);
 
+        $mapped_field_types = $config['mapped_field_types'] ?? [];
+        if ($mapped_field_types) {
+            $doctrine_config->setTypedFieldMapper(new DefaultTypedFieldMapper($mapped_field_types));
+        }
+
         $em = new EntityManager($this->connection_provider->getConnection($name), $doctrine_config);
 
         foreach ($config['event_subscribers'] ?? [] as $subscriber) {
@@ -119,6 +126,22 @@ class EntityManagerFactory
         }
 
         return $em;
+    }
+
+    private function registerCustomTypes(): void
+    {
+        static $registered = false;
+        if ($registered) {
+            return;
+        }
+
+        foreach ([Types::REGISTRATION_MAP, $this->configuration->get("database.doctrine.types") ?? []] as $types) {
+            foreach ($types as $type_name => $class_name) {
+                Type::addType($type_name, $class_name);
+            }
+        }
+
+        $registered = true;
     }
 
     private function configureEntityCache(
