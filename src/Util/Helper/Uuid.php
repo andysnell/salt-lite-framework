@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Util\Helper;
 
-use Ramsey\Uuid\Codec\TimestampFirstCombCodec;
-use Ramsey\Uuid\Generator\CombGenerator;
-use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\UuidFactory;
-use Ramsey\Uuid\UuidFactoryInterface;
 use Ramsey\Uuid\UuidInterface;
 
 /**
@@ -24,30 +20,12 @@ abstract class Uuid
 
     /**
      * Create an RFC 4122 Version 4 (Random) UUID instance.
-     * We set the generator to the default generator in order to set a private
-     * flag in the vendor factory class that will return a more strict interface
      *
      * @link https://uuid.ramsey.dev/en/latest/rfc4122/version4.html
      */
     public static function random(): UuidInterface
     {
-        return self::getRandomFactory()->uuid4();
-    }
-
-    /**
-     * We set the generator to the default generator in order to flip a private
-     * flag in the vendor factory class that will return the more strict RFC4122
-     * interface instead of a generic `LazyUuidFromString` instance.
-     */
-    public static function getRandomFactory(): UuidFactoryInterface
-    {
-        static $random_factory;
-        return $random_factory ??= (static function (): UuidFactoryInterface {
-            $factory = new UuidFactory();
-            $factory->setRandomGenerator($factory->getRandomGenerator());
-
-            return $factory;
-        })();
+        return self::factory()->uuid4();
     }
 
     /**
@@ -61,31 +39,7 @@ abstract class Uuid
      */
     public static function ordered(): UuidInterface
     {
-        static $previous;
-        $previous ??= self::nil();
-
-        do {
-            $uuid = self::getOrderedFactory()->uuid4();
-        } while ($uuid->getBytes() <= $previous->getBytes());
-
-        $previous = $uuid;
-
-        return UuidV4::fromString($uuid->toString());
-    }
-
-    public static function getOrderedFactory(): UuidFactoryInterface
-    {
-        static $ordered_factory;
-        return $ordered_factory ??= (static function (): UuidFactoryInterface {
-            $factory = new UuidFactory();
-            $factory->setCodec(new TimestampFirstCombCodec($factory->getUuidBuilder()));
-            $factory->setRandomGenerator(new CombGenerator(
-                $factory->getRandomGenerator(),
-                $factory->getNumberConverter(),
-            ));
-
-            return $factory;
-        })();
+        return self::factory()->uuid7();
     }
 
     /**
@@ -95,8 +49,8 @@ abstract class Uuid
      */
     public static function nil(): UuidInterface
     {
-        static $nil_uuid;
-        return $nil_uuid ??= (new UuidFactory())->fromString(self::NIL);
+        static $nil_uuid = self::factory()->fromString(self::NIL);
+        return $nil_uuid;
     }
 
     /**
@@ -106,10 +60,12 @@ abstract class Uuid
      */
     public static function instance(UuidInterface|\Stringable|string $uuid): UuidInterface
     {
-        if ($uuid instanceof UuidInterface) {
-            return $uuid;
-        }
+        return $uuid instanceof UuidInterface ? $uuid : self::factory()->fromString((string)$uuid);
+    }
 
-        return (new UuidFactory())->fromString((string)$uuid);
+    public static function factory(): UuidFactory
+    {
+        static $factory = new UuidFactory();
+        return $factory;
     }
 }

@@ -14,14 +14,10 @@ readonly final class LogTrace implements \Stringable, \JsonSerializable
     }
 
     /**
-     * Create a log trace ID based on the "Timestamp First COMB" derivative of
-     * the RFC 4122 Version 4 (Random) UUID. These UUIDs replace the first 48
-     * bits with the microsecond timestamp, retaining 6 bits for the version/variant,
-     * and 74 bits of randomness. This produces UUIDs that are monotonically
-     * increasing and lexicographically sortable in both hex and byte formats.
-     *
-     * This allows us to be able to compare logged entries by when the request
-     * started, and not necessarily when the log entry was made.
+     * Create a log trace ID based on an RFC 4122 v7 UUID. This produces UUIDs
+     * that are monotonically increasing and lexicographically sortable in both
+     * hex and byte formats. This allows us to be able to compare logged entries
+     * by when the request started, and not necessarily when the log entry was made.
      */
     public static function make(): self
     {
@@ -75,7 +71,7 @@ readonly final class LogTrace implements \Stringable, \JsonSerializable
      */
     public function __unserialize(array $data): void
     {
-        $this->uuid = Uuid::getOrderedFactory()->fromString($data['uuid']);
+        $this->uuid = Uuid::instance($data['uuid']);
     }
 
     #[\Override]
