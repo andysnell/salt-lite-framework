@@ -31,9 +31,9 @@ class InteractiveSaltShell extends Command
 
     public const string DESCRIPTION = 'Interactive PHP REPL Shell (PsySH)';
 
-    private const string MESSAGE = "Interactive PHP REPL Shell (PsySH) \r\nEnter \"ls -l\" to List Defined Variables or \"exit\" to Quit";
+    public const string MESSAGE = "Interactive PHP REPL Shell (PsySH) \r\nEnter \"ls -l\" to List Defined Variables or \"exit\" to Quit";
 
-    private const array SERVICES = [
+    public const array DEFAULT_SERVICES = [
         'config' => Configuration::class,
         'container' => MutableContainer::class,
         'environment' => Environment::class,
@@ -50,6 +50,11 @@ class InteractiveSaltShell extends Command
         'mailer' => MailerInterface::class,
     ];
 
+    private const array DEFAULT_CONFIG = [
+        'startupMessage' => self::MESSAGE,
+        'updateCheck' => 'never',
+    ];
+
     public function __construct(private readonly MutableContainer $container)
     {
         parent::__construct(self::NAME);
@@ -59,14 +64,21 @@ class InteractiveSaltShell extends Command
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $shell_config = new PsyConfiguration([
-            'startupMessage' => self::MESSAGE,
-            'updateCheck' => 'never',
-        ]);
+        $config = $this->container->get(Configuration::class)->get('shell') ?? [];
+        $shell_config = new PsyConfiguration($config['psysh_config'] ?? self::DEFAULT_CONFIG);
 
         $shell = new Shell($shell_config);
-        $shell->setScopeVariables(\array_map($this->container->get(...), self::SERVICES));
 
+        $shell->setScopeVariables(\array_map(
+            $this->container->get(...),
+            \array_merge(self::DEFAULT_SERVICES, $config['services'] ?? []),
+        ));
+
+        foreach ($config['imports'] ?? [] as $import) {
+            $shell->addCode(\sprintf('use %s;', $import), true);
+        }
+
+        $shell->setIncludes();
         return $shell->run();
     }
 }
