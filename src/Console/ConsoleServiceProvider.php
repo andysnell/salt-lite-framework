@@ -40,20 +40,6 @@ class ConsoleServiceProvider implements ServiceProvider
         });
 
         $container->set(Application::class, function (MutableContainer $container): Application {
-            $application = new class extends Application{
-                protected function configureIO(InputInterface $input, OutputInterface $output): void
-                {
-                    parent::configureIO($input, $output);
-                    $output->getFormatter()->setStyle('error', new OutputFormatterStyle('red'));
-                }
-
-                protected function doRenderThrowable(\Throwable $e, OutputInterface $output): void
-                {
-                    $output->getFormatter()->setStyle('error', new OutputFormatterStyle('default', 'red'));
-                    parent::doRenderThrowable($e, $output);
-                }
-            };
-
             $configuration = $container->get(Configuration::class)->get('database.doctrine.connections.default.migrations') ?? [];
 
             $dependency_factory = DependencyFactory::fromConnection(
@@ -62,6 +48,7 @@ class ConsoleServiceProvider implements ServiceProvider
                 $container->get(LoggerInterface::class),
             );
 
+            $application = $container->get(ConsoleApplicationFactory::class)->make();
             MigrationConsoleRunner::addCommands($application, $dependency_factory);
             OrmConsoleRunner::addCommands($application, $container->get(EntityManagerProvider::class));
 
