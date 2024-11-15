@@ -9,7 +9,7 @@ class ErrorReporting
     public const int ALL_ERRORS = \E_ERROR | \E_PARSE | \E_CORE_ERROR | \E_COMPILE_ERROR | \E_USER_ERROR | \E_RECOVERABLE_ERROR;
     public const int ALL_WARNINGS = \E_WARNING | \E_CORE_WARNING | \E_COMPILE_WARNING | \E_USER_WARNING;
     public const int ALL_NOTICES = \E_NOTICE | \E_USER_NOTICE;
-    public const int ALL_DEPRECATIONS = \E_STRICT | \E_DEPRECATED | \E_USER_DEPRECATED;
+    public const int ALL_DEPRECATIONS = \E_DEPRECATED | \E_USER_DEPRECATED;
 
     /**
      * Safely override the existing runtime error reporting level configuration.

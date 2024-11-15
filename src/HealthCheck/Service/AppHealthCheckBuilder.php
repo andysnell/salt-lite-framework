@@ -1,0 +1,74 @@
+<?php
+
+declare(strict_types=1);
+
+namespace PhoneBurner\SaltLite\Framework\HealthCheck\Service;
+
+use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthCheckService;
+use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthCheck;
+use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthStatus;
+use PhoneBurner\SaltLite\Framework\HealthCheck\HealthCheckBuilder;
+use PhoneBurner\SaltLite\Framework\Util\Clock\Clock;
+use Psr\Log\LoggerInterface;
+
+class AppHealthCheckBuilder implements HealthCheckBuilder
+{
+    /**
+     * @param array<ComponentHealthCheckService> $check_services
+     */
+    public function __construct(
+        private readonly Clock $clock,
+        private readonly LoggerInterface $logger,
+        private array $check_services = [],
+        private string|null $description = '',
+        private array $links = [],
+    ) {
+    }
+
+    public function withServices(ComponentHealthCheckService ...$check_services): self
+    {
+        $this->check_services = $check_services;
+        return $this;
+    }
+
+    public function withDescription(string $description): self
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    public function withLinks(array $links): self
+    {
+        $this->links = $links;
+        return $this;
+    }
+
+    public function make(): HealthCheck
+    {
+        try {
+            $checks = [];
+            foreach ($this->check_services as $check_service) {
+                foreach ($check_service($this->clock) as $check) {
+                    $checks[] = $check;
+                }
+            }
+
+            return new HealthCheck(
+                checks: $checks,
+                links: $this->links,
+                description: $this->description,
+            );
+        } catch (\Throwable $e) {
+            $this->logger->error('Health Check Factory Failure', [
+                'exception' => $e,
+            ]);
+
+            return new HealthCheck(
+                status: HealthStatus::Fail,
+                checks: [],
+                links: $this->links,
+                description: $this->description,
+            );
+        }
+    }
+}

@@ -8,6 +8,7 @@ class ContentType
 {
     public const string JSON = 'application/json';
     public const string HAL_JSON = 'application/hal+json';
+    public const string HEALTH_JSON = 'application/health+json';
     public const string PNG = 'image/png';
     public const string HTML = 'text/html';
     public const string PROBLEM_DETAILS_JSON = 'application/problem+json';
