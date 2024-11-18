@@ -116,6 +116,7 @@
     "symfony/messenger": "^7.1.6",
     "symfony/mime": "^7.1.6",
     "symfony/process": "^7.1.7",
+    "symfony/redis-messenger": "^7.1",
     "symfony/scheduler": "^7.1.6",
     "symfony/sendgrid-mailer": "^7.1.6"
   },

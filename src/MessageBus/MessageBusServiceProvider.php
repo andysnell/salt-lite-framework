@@ -9,6 +9,7 @@ use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
 use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\Scheduler\ScheduleCollection;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
@@ -16,7 +17,9 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpTransport;
-use Symfony\Component\Messenger\Bridge\Amqp\Transport\Connection;
+use Symfony\Component\Messenger\Bridge\Amqp\Transport\Connection as AmqpConnection;
+use Symfony\Component\Messenger\Bridge\Redis\Transport\Connection as RedisConnection;
+use Symfony\Component\Messenger\Bridge\Redis\Transport\RedisTransport;
 use Symfony\Component\Messenger\Command\ConsumeMessagesCommand;
 use Symfony\Component\Messenger\EventListener\AddErrorDetailsStampListener;
 use Symfony\Component\Messenger\EventListener\DispatchPcntlSignalListener;
@@ -32,6 +35,8 @@ use Symfony\Component\Messenger\Middleware\HandleMessageMiddleware;
 use Symfony\Component\Messenger\Middleware\SendMessageMiddleware;
 use Symfony\Component\Messenger\RoutableMessageBus;
 use Symfony\Component\Messenger\Transport\Sender\SendersLocator;
+use Symfony\Component\Messenger\Transport\Sync\SyncTransport;
+use Symfony\Component\Messenger\Transport\TransportInterface;
 use Symfony\Component\Scheduler\Generator\MessageGenerator;
 use Symfony\Component\Scheduler\Messenger\SchedulerTransport;
 
@@ -71,9 +76,33 @@ class MessageBusServiceProvider implements ServiceProvider
         );
 
         $container->set(
+            TransportInterface::class,
+            static function (ContainerInterface $container): TransportInterface {
+                $transport_class = $container->get(Configuration::class)->get('bus.transport') ?? SyncTransport::class;
+                return $container->get($transport_class);
+            },
+        );
+
+        $container->set(
+            SyncTransport::class,
+            static function (ContainerInterface $container): SyncTransport {
+                return new SyncTransport($container->get(MessageBusInterface::class));
+            },
+        );
+
+        $container->set(
             AmqpTransport::class,
             static function (ContainerInterface $container): AmqpTransport {
-                return new AmqpTransport(Connection::fromDsn('amqp://user:password@rabbitmq:5672/%2f'));
+                return new AmqpTransport(AmqpConnection::fromDsn('amqp://user:password@rabbitmq:5672/%2f'));
+            },
+        );
+
+        $container->set(
+            RedisTransport::class,
+            static function (ContainerInterface $container): RedisTransport {
+                return new RedisTransport(new RedisConnection([
+                    'group' => Str::kabob($container->get(Configuration::class)->get('app.name')) ?? 'salt-lite',
+                ], $container->get(\Redis::class)));
             },
         );
 
@@ -98,10 +127,7 @@ class MessageBusServiceProvider implements ServiceProvider
                     $container,
                     $container->get(SymfonyEventDispatcher::class),
                     $container->get(LoggerInterface::class),
-                    [
-                        AmqpTransport::class,
-                        SchedulerTransport::class,
-                    ],
+                    $container->get(Configuration::class)->get('bus.receivers') ?? [],
                 );
             },
         );

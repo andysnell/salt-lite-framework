@@ -29,7 +29,7 @@ class MailerServiceProvider implements ServiceProvider
             static function (MutableContainer $container): Mailer {
                 return new SymfonyMailerAdapter(
                     $container->get(MailerInterface::class),
-                    new EmailAddress($container->get(Configuration::class)->get('mailer.default_from')),
+                    new EmailAddress($container->get(Configuration::class)->get('mailer.default_from_address')),
                 );
             },
         );
