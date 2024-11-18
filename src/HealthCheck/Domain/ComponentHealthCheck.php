@@ -29,6 +29,7 @@ class ComponentHealthCheck implements \JsonSerializable
         return \trim($this->component_name . ':' . $this->measurement_name, ':');
     }
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         return \array_filter([

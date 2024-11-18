@@ -28,6 +28,7 @@ class HealthCheckRequestHandler implements RequestHandlerInterface
     ) {
     }
 
+    #[\Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $health_check = $this->factory->withLinks([

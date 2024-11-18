@@ -25,24 +25,28 @@ class AppHealthCheckBuilder implements HealthCheckBuilder
     ) {
     }
 
+    #[\Override]
     public function withServices(ComponentHealthCheckService ...$check_services): self
     {
         $this->check_services = $check_services;
         return $this;
     }
 
+    #[\Override]
     public function withDescription(string $description): self
     {
         $this->description = $description;
         return $this;
     }
 
+    #[\Override]
     public function withLinks(array $links): self
     {
         $this->links = $links;
         return $this;
     }
 
+    #[\Override]
     public function make(): HealthCheck
     {
         try {

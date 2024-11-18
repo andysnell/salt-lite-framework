@@ -47,6 +47,7 @@ class HealthCheck implements \JsonSerializable
         };
     }
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         return \array_filter([

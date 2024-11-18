@@ -5,13 +5,10 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Tests\Domain\Uuid;
 
 use PhoneBurner\SaltLite\Framework\Domain\Uuid\UuidString;
-use PhoneBurner\SaltLite\Framework\Domain\Uuid\UuidWrapper;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Uuid;
-use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-#[CoversClass(UuidWrapper::class)]
 class UuidStringTest extends TestCase
 {
     #[Test]

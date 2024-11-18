@@ -20,6 +20,7 @@ class PhpRuntimeHealthCheckService implements ComponentHealthCheckService
     ) {
     }
 
+    #[\Override]
     public function __invoke(Clock $clock): array
     {
         return [

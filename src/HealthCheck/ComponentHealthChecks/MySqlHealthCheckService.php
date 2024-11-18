@@ -19,7 +19,7 @@ class MySqlHealthCheckService implements ComponentHealthCheckService
 {
     public const string COMPONENT_NAME = 'mysql';
 
-    private const string SQL = <<<SQL
+    public const string SQL = <<<SQL
         SELECT COUNT(`host`) AS connections FROM information_schema.processlist;
         SQL;
 
@@ -30,6 +30,7 @@ class MySqlHealthCheckService implements ComponentHealthCheckService
     ) {
     }
 
+    #[\Override]
     public function __invoke(Clock $clock): array
     {
         $now = $clock->now();

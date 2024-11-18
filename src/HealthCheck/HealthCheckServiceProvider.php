@@ -28,6 +28,7 @@ use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpTransport;
 #[Internal('Override Definitions in Application Service Providers')]
 class HealthCheckServiceProvider implements ServiceProvider
 {
+    #[\Override]
     public function register(MutableContainer $container): void
     {
          $container->set(

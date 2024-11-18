@@ -25,6 +25,7 @@ class RedisHealthCheckService implements ComponentHealthCheckService
     ) {
     }
 
+    #[\Override]
     public function __invoke(Clock $clock): array
     {
         $now = $clock->now();
