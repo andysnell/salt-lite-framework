@@ -6,6 +6,8 @@ namespace PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto;
 
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto\Exception\PasetoCryptoException;
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto\Exception\PasetoLogicException;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Cast\NonEmpty;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
 use Stringable;
 
 /**
@@ -102,11 +104,7 @@ final readonly class Paseto implements Stringable
             return $this->decrypt($key);
         }
 
-        if ($this->version === PasetoVersion::V4 && $this->purpose === PasetoPurpose::PUBLIC) {
-            return $this->verify($key, $implicit);
-        }
-
-        throw new PasetoCryptoException('Unsupported Version/Purpose Combination');
+        return $this->verify($key, $implicit);
     }
 
     #[\Override]
@@ -122,16 +120,13 @@ final readonly class Paseto implements Stringable
 
     private function verify(PasetoKey $key, string $implicit = ''): PasetoMessage
     {
-        $header = $this->filterHeaderString(PasetoVersion::V4, PasetoPurpose::PUBLIC);
+        $header = self::header(PasetoVersion::V4, PasetoPurpose::PUBLIC);
         $length = $this->filterPayloadLength(\SODIUM_CRYPTO_SIGN_BYTES);
         $data = \substr($this->payload, 0, $length - \SODIUM_CRYPTO_SIGN_BYTES);
         $signature = \substr($this->payload, $length - \SODIUM_CRYPTO_SIGN_BYTES);
-        if (\strlen($signature) < \SODIUM_CRYPTO_SIGN_BYTES) {
-            throw new PasetoCryptoException(' Invalid Token Signature Length');
-        }
 
         $encoded = self::encode($header, $data, $this->footer, $implicit);
-        if (\sodium_crypto_sign_verify_detached($signature, $encoded, $key->public())) {
+        if (\sodium_crypto_sign_verify_detached(NonEmpty::string($signature), $encoded, $key->public())) {
             return new PasetoMessage($data, $this->footer, $implicit);
         }
 
@@ -140,7 +135,7 @@ final readonly class Paseto implements Stringable
 
     private function decrypt(PasetoKey $key): PasetoMessage
     {
-        $header = $this->filterHeaderString(PasetoVersion::V2, PasetoPurpose::LOCAL);
+        $header = self::header(PasetoVersion::V2, PasetoPurpose::LOCAL);
         $length = $this->filterPayloadLength(self::NONCE_BYTES);
         $nonce = \substr($this->payload, 0, self::NONCE_BYTES);
         $data = \sodium_crypto_aead_xchacha20poly1305_ietf_decrypt(
@@ -154,7 +149,7 @@ final readonly class Paseto implements Stringable
             return new PasetoMessage($data, $this->footer);
         }
 
-        throw new PasetoCryptoException(' Invalid Token Signature');
+        throw new PasetoCryptoException('Invalid Token Signature');
     }
 
     /**
@@ -167,27 +162,15 @@ final readonly class Paseto implements Stringable
             || ($version === PasetoVersion::V4 && $purpose === PasetoPurpose::PUBLIC);
     }
 
+    /** @phpstan-assert non-empty-string $this->payload */
     private function filterPayloadLength(int $minimum_length): int
     {
         $length = \strlen($this->payload);
         if ($length < $minimum_length) {
-            throw new PasetoCryptoException(' Invalid Token Message Length');
+            throw new PasetoCryptoException('Invalid Token Message Length');
         }
 
         return $length;
-    }
-
-    /**
-     * @param PasetoVersion::*&string $version
-     * @param PasetoPurpose::*&string $purpose
-     */
-    private function filterHeaderString(string $version, string $purpose): string
-    {
-        if ($this->version !== $version || $this->purpose !== $purpose) {
-            throw new PasetoLogicException('Invalid Operation on Token');
-        }
-
-        return self::header($version, $purpose);
     }
 
     /**
@@ -213,10 +196,6 @@ final readonly class Paseto implements Stringable
             $accumulator .= $string;
         }
 
-        if ($accumulator === '') {
-            throw new PasetoLogicException('Accumulator String Cannot Be Empty');
-        }
-
-        return $accumulator;
+        return NonEmpty::string($accumulator, new PasetoLogicException('Accumulator String Cannot Be Empty'));
     }
 }

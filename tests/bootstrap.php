@@ -16,3 +16,5 @@ define('PhoneBurner\SaltLite\Framework\PASSWORD_ARGON2_OPTIONS', [
 define('PhoneBurner\SaltLite\Framework\CONTEXT', Context::Test);
 
 define('PhoneBurner\SaltLite\Framework\UNIT_TEST_ROOT', __DIR__);
+
+defined('PhoneBurner\SaltLite\Framework\APP_ROOT') || define('PhoneBurner\SaltLite\Framework\APP_ROOT', dirname(__DIR__));

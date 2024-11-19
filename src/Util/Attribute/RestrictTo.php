@@ -17,6 +17,8 @@ class RestrictTo
      */
     public function __construct(string ...$classes)
     {
-        $this->classes = $classes;
+        $this->classes = $classes ?: throw new \InvalidArgumentException(
+            'At least one class string must be provided',
+        );
     }
 }

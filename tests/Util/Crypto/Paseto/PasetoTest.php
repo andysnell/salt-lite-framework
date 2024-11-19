@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Tests\Util\Crypto\Paseto;
 
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto\Exception\PasetoCryptoException;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto\Exception\PasetoLogicException;
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto\Paseto;
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto\PasetoKey;
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto\PasetoMessage;
@@ -32,6 +33,8 @@ final class PasetoTest extends TestCase
         self::assertSame([
             'foo' => 42,
         ], $paseto->decode($key)->getData());
+
+        self::assertEquals($paseto, Paseto::parse((string)$paseto));
     }
 
     #[Test]
@@ -52,6 +55,7 @@ final class PasetoTest extends TestCase
         $decoded = $paseto->decode($key);
         self::assertSame(['foo' => 42], $decoded->getData());
         self::assertSame($footer, $decoded->getFooter());
+        self::assertEquals($paseto, Paseto::parse((string)$paseto));
     }
 
     #[Test]
@@ -89,6 +93,7 @@ final class PasetoTest extends TestCase
         self::assertSame([
             'foo' => 42,
         ], $paseto->decode($key)->getData());
+        self::assertEquals($paseto, Paseto::parse((string)$paseto));
     }
 
     #[Test]
@@ -109,6 +114,7 @@ final class PasetoTest extends TestCase
         $decoded = $paseto->decode($key);
         self::assertSame(['foo' => 42], $decoded->getData());
         self::assertSame($footer, $decoded->getFooter());
+        self::assertEquals($paseto, Paseto::parse((string)$paseto));
     }
 
     #[Test]
@@ -127,5 +133,33 @@ final class PasetoTest extends TestCase
 
         $this->expectException(PasetoCryptoException::class);
         $paseto->decode(PasetoKey::make('3f09f3b08a4c50631b725da2397b4f4e3d976b01681703f4842a22501d6d0f7'));
+    }
+
+    #[Test]
+    public function sad_path_invalid_version_purpose(): void
+    {
+        $this->expectException(PasetoLogicException::class);
+        $this->expectExceptionMessage('Unsupported Version/Purpose: v1.local');
+        Paseto::parse('v1.local.Zm9v.YmFy');
+    }
+
+    #[Test]
+    public function sad_path_invalid_payload(): void
+    {
+        $this->expectException(PasetoLogicException::class);
+        $this->expectExceptionMessage('Payload Cannot Be Empty');
+        Paseto::parse('v4.public..YmFy');
+    }
+
+    #[Test]
+    public function sad_path_invalid_message_length(): void
+    {
+        $key = PasetoKey::make('3f09f3b08a4c50631b725da2397b4f4e3d976b01681703f4842a22501d6d0f6');
+
+        $paseto = Paseto::parse('v4.public.Zm9v.YmFy');
+
+        $this->expectException(PasetoCryptoException::class);
+        $this->expectExceptionMessage('Invalid Token Message Length');
+        $paseto->decode($key);
     }
 }

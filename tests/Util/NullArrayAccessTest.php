@@ -52,7 +52,8 @@ final class NullArrayAccessTest extends TestCase
         self::assertNull($sut['non_existent']);
     }
 
-    public function offsetSet_sets_the_expected_value(): void
+    #[Test]
+    public function offsetSet_and_offsetUnset_manipulate_the_expected_value(): void
     {
     /** @var NullArrayAccess<string, mixed> $sut */
         $sut = new NullArrayAccess([]);
@@ -77,5 +78,15 @@ final class NullArrayAccessTest extends TestCase
             self::assertSame($value, $sut[$key]);
             self::assertSame($value, $sut->offsetGet($key));
         }
+
+        foreach ($this->test as $key => $value) {
+            unset($sut[$key]);
+            self::assertArrayNotHasKey($key, $sut);
+            self::assertFalse($sut->offsetExists($key));
+            self::assertNull($sut[$key]);
+            self::assertNull($sut->offsetGet($key));
+        }
+        self::assertCount(0, $sut);
+        self::assertSame([], $sut->toArray());
     }
 }

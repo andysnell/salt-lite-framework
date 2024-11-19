@@ -51,9 +51,9 @@ class Random
             throw new \InvalidArgumentException(\sprintf('Class %s is not a UnitEnum', $enum_class));
         }
 
-        $key = $this->randomizer->pickArrayKeys($enum_class::cases(), 1)[0]
-            ?? throw new \LogicException('Enum has no cases');
+        $cases = $enum_class::cases() ?: throw new \LogicException('Enum has no cases');
+        $key = $this->randomizer->pickArrayKeys($enum_class::cases(), 1)[0];
 
-        return $enum_class::cases()[$key];
+        return $cases[$key];
     }
 }

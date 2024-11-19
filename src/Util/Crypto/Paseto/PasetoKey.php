@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto;
 
+use PhoneBurner\SaltLite\Framework\Util\Helper\Cast\NonEmpty;
+
 final readonly class PasetoKey
 {
     public const int KEY_LENGTH_BYTES = 32;
@@ -21,11 +23,12 @@ final readonly class PasetoKey
      */
     public static function make(#[\SensitiveParameter] string $key): self
     {
-        if (\strlen($key) < self::KEY_LENGTH_BYTES) {
-            throw new \InvalidArgumentException('Invalid Key Length');
-        }
-
-        return new self(\sodium_crypto_generichash($key, '', self::KEY_LENGTH_BYTES));
+        $key_length = \strlen($key);
+        return match (true) {
+            $key_length === self::KEY_LENGTH_BYTES => new self(NonEmpty::string($key)),
+            $key_length > self::KEY_LENGTH_BYTES => new self(\sodium_crypto_generichash($key, '', self::KEY_LENGTH_BYTES)),
+            default => throw new \InvalidArgumentException('Invalid Key Length'),
+        };
     }
 
     public function id(): string

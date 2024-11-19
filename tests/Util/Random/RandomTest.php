@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Tests\Util\Random;
 
 use PhoneBurner\SaltLite\Framework\Logging\LogLevel;
+use PhoneBurner\SaltLite\Framework\Tests\Fixtures\CaselessEnum;
 use PhoneBurner\SaltLite\Framework\Tests\Fixtures\NotAnEnum;
 use PhoneBurner\SaltLite\Framework\Util\Random\Random;
 use PHPUnit\Framework\Attributes\Test;
@@ -117,6 +118,15 @@ final class RandomTest extends TestCase
     public function enum_throws_exception_if_passed_not_enum(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        Random::make()->enum(NotAnEnum::class); // @phpstan-ignore-line
+        /** @phpstan-ignore argument.type, argument.templateType (intentional defect for testing) */
+        Random::make()->enum(NotAnEnum::class);
+    }
+
+    #[Test]
+    public function enum_throws_exception_if_enum_has_no_cases(): void
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Enum has no cases');
+        Random::make()->enum(CaselessEnum::class);
     }
 }

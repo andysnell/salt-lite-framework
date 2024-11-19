@@ -32,6 +32,41 @@ final class ObservableIteratorTest extends TestCase
     }
 
     #[Test]
+    public function detach_removes_observers(): void
+    {
+        $foo = ['foo' => 2343, 'bar' => 23, 'baz' => 32, 'qux' => 42];
+
+        $observer_1 = self::getObserver();
+        $observer_2 = self::getObserver();
+
+        $sut = new ObservableIterator($foo);
+        $sut->attach($observer_1);
+        $sut->attach($observer_2);
+
+        $counter = 0;
+        foreach ($sut as $value) {
+            ++$counter;
+            if ($counter === 2) {
+                $sut->detach($observer_1);
+            }
+        }
+
+        self::assertSame(2, $observer_1->counter);
+        self::assertSame([
+            ['key' => 'foo', 'value' => 2343],
+            ['key' => 'bar', 'value' => 23],
+        ], $observer_1->updated);
+
+        self::assertSame(4, $observer_2->counter);
+        self::assertSame([
+            ['key' => 'foo', 'value' => 2343],
+            ['key' => 'bar', 'value' => 23],
+            ['key' => 'baz', 'value' => 32],
+            ['key' => 'qux', 'value' => 42],
+        ], $observer_2->updated);
+    }
+
+    #[Test]
     public function getIterator_does_empty_case(): void
     {
         $foo = [];
