@@ -6,10 +6,10 @@ namespace PhoneBurner\SaltLite\Framework\App;
 
 use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
 use PhoneBurner\SaltLite\Framework\Configuration\ConfigurationFactory;
+use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
 use PhoneBurner\SaltLite\Framework\Container\PhpDiContainerAdapter;
 use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
-use Psr\Container\ContainerInterface;
 
 use const PhoneBurner\SaltLite\Framework\APP_ROOT;
 
@@ -17,7 +17,7 @@ final class App
 {
     private static self|null $instance = null;
 
-    public readonly ContainerInterface $container;
+    public readonly MutableContainer $container;
 
     public readonly Configuration $config;
 

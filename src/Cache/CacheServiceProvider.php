@@ -23,6 +23,9 @@ use Symfony\Component\Lock\LockFactory as SymfonyLockFactory;
 use Symfony\Component\Lock\Store\InMemoryStore;
 use Symfony\Component\Lock\Store\RedisStore;
 
+/**
+ * @codeCoverageIgnore
+ */
 #[Internal('Override Definitions in Application Service Providers')]
 class CacheServiceProvider implements ServiceProvider
 {

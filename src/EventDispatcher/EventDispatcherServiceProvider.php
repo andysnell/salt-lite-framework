@@ -13,6 +13,9 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ * @codeCoverageIgnore
+ */
 #[Internal('Override Definitions in Application Service Providers')]
 class EventDispatcherServiceProvider implements ServiceProvider
 {

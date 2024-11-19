@@ -18,6 +18,9 @@ use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
+/**
+ * @codeCoverageIgnore
+ */
 #[Internal('Override Definitions in Application Service Providers')]
 class MailerServiceProvider implements ServiceProvider
 {

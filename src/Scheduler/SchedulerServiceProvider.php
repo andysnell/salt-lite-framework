@@ -27,6 +27,9 @@ use Symfony\Component\Scheduler\Schedule;
 use Symfony\Component\Scheduler\ScheduleProviderInterface;
 use Symfony\Component\Scheduler\Scheduler;
 
+/**
+ * @codeCoverageIgnore
+ */
 #[Internal('Override Definitions in Application Service Providers')]
 class SchedulerServiceProvider implements ServiceProvider
 {

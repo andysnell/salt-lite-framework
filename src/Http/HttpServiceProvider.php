@@ -20,6 +20,9 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @codeCoverageIgnore
+ */
 #[Internal('Override Definitions in Application Service Providers')]
 class HttpServiceProvider implements ServiceProvider
 {

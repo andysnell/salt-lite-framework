@@ -7,6 +7,7 @@ namespace PhoneBurner\SaltLite\Framework\Http;
 use Laminas\HttpHandlerRunner\Emitter\EmitterInterface;
 use PhoneBurner\SaltLite\Framework\App\Kernel;
 use PhoneBurner\SaltLite\Framework\Http\Response\HtmlResponse;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
 use Whoops\Handler\PrettyPageHandler;
@@ -23,10 +24,10 @@ class HttpKernel implements Kernel
     }
 
     #[\Override]
-    public function run(): void
+    public function run(ServerRequestInterface|null $request = null): void
     {
         try {
-            $request = $this->request_factory->fromGlobals();
+            $request ??= $this->request_factory->fromGlobals();
             $this->logger->debug('Processing request: ' . $request->getMethod() . ' ' . $request->getUri());
             $response = $this->request_handler->handle($request);
         } catch (\Throwable $e) {

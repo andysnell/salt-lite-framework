@@ -26,6 +26,9 @@ use PhoneBurner\SaltLite\Framework\Util\Crypto\AppKey;
 use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
 
+/**
+ * @codeCoverageIgnore
+ */
 #[Internal('Override Definitions in Application Service Providers')]
 class AppServiceProvider implements ServiceProvider
 {

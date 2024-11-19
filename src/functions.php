@@ -6,6 +6,8 @@ namespace PhoneBurner\SaltLite\Framework;
 
 use PhoneBurner\SaltLite\Framework\App\App;
 
+use const PhoneBurner\SaltLite\Framework\APP_ROOT;
+
 function app(): App
 {
     return App::instance();
@@ -29,4 +31,11 @@ function env(string $key, mixed $default = null): mixed
     }
 
     return $value ?? $default;
+}
+
+/** Get full path relative to the application root */
+function path(string $path): string
+{
+    \assert(\defined('\PhoneBurner\SaltLite\Framework\APP_ROOT'), 'APP_ROOT must be defined');
+    return APP_ROOT . $path;
 }

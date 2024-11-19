@@ -40,6 +40,9 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
 use Symfony\Component\Scheduler\Generator\MessageGenerator;
 use Symfony\Component\Scheduler\Messenger\SchedulerTransport;
 
+/**
+ * @codeCoverageIgnore
+ */
 #[Internal('Override Definitions in Application Service Providers')]
 class MessageBusServiceProvider implements ServiceProvider
 {
@@ -101,7 +104,7 @@ class MessageBusServiceProvider implements ServiceProvider
             RedisTransport::class,
             static function (ContainerInterface $container): RedisTransport {
                 return new RedisTransport(new RedisConnection([
-                    'group' => Str::kabob($container->get(Configuration::class)->get('app.name')) ?? 'salt-lite',
+                    'group' => Str::kabob($container->get(Configuration::class)->get('app.name') ?? 'salt-lite'),
                 ], $container->get(\Redis::class)));
             },
         );
