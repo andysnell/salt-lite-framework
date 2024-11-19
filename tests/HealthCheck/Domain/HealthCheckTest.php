@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class HealthCheckTest extends TestCase
+final class HealthCheckTest extends TestCase
 {
     #[Test]
     #[TestWith([HealthStatus::Pass, HealthStatus::Pass])]

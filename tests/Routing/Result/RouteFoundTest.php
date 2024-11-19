@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class RouteFoundTest extends TestCase
+final class RouteFoundTest extends TestCase
 {
     protected const array PATH_PARAMS = [
         'test' => 'data',
@@ -27,7 +27,7 @@ class RouteFoundTest extends TestCase
         MiddlewareInterface::class => [],
     ];
 
-    protected RouteDefinition $definition;
+    private RouteDefinition $definition;
 
     #[\Override]
     protected function setUp(): void
@@ -49,8 +49,8 @@ class RouteFoundTest extends TestCase
 
         $match = $sut->getRouteMatch();
 
-        self::assertEquals([...self::DEFAULT_ROUTE_ATTRIBUTES, ...self::ROUTE_ATTRIBUTES], $match->getAttributes());
+        self::assertSame([...self::DEFAULT_ROUTE_ATTRIBUTES, ...self::ROUTE_ATTRIBUTES], $match->getAttributes());
 
-        self::assertEquals(self::PATH_PARAMS, $match->getPathParameters());
+        self::assertSame(self::PATH_PARAMS, $match->getPathParameters());
     }
 }

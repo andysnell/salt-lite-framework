@@ -8,7 +8,7 @@ use PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto\PasetoMessage;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class PasetoMessageTest extends TestCase
+final class PasetoMessageTest extends TestCase
 {
     #[Test]
     public function null_case(): void

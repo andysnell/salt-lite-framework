@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class HmacKeyTest extends TestCase
+final class HmacKeyTest extends TestCase
 {
     private const string VALID_KEY_STRING = 'e03518c3bc776d427de90c477fde1a23fa5103237a13d095089b9ea0ec11045f';
 

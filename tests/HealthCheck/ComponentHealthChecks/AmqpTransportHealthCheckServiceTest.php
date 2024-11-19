@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpTransport;
 
-class AmqpTransportHealthCheckServiceTest extends TestCase
+final class AmqpTransportHealthCheckServiceTest extends TestCase
 {
     #[Test]
     public function happy_path(): void

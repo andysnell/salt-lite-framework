@@ -8,7 +8,7 @@ use PhoneBurner\SaltLite\Framework\Util\Filesystem\FileWriter;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class FileWriterTest extends TestCase
+final class FileWriterTest extends TestCase
 {
     #[\Override]
     protected function tearDown(): void

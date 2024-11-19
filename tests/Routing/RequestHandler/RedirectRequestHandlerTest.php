@@ -16,7 +16,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 
-class RedirectRequestHandlerTest extends TestCase
+final class RedirectRequestHandlerTest extends TestCase
 {
     private RouteMatch&MockObject $route_match;
 

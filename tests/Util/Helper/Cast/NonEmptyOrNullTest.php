@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class NonEmptyOrNullTest extends TestCase
+final class NonEmptyOrNullTest extends TestCase
 {
     #[DataProvider('providesIntegerTestCases')]
     #[Test]

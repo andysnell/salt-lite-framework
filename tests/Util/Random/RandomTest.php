@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class RandomTest extends TestCase
+final class RandomTest extends TestCase
 {
     private const float PROBABILITY_THRESHOLD = 0.99999;
 

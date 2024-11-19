@@ -16,7 +16,7 @@ use stdClass;
 use Stringable;
 use Throwable;
 
-class UuidTest extends TestCase
+final class UuidTest extends TestCase
 {
     #[Test]
     public function random_returns_version4_uuid_instances(): void

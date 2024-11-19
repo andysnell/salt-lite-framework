@@ -9,7 +9,7 @@ use PhoneBurner\SaltLite\Framework\Util\Helper\Uuid;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class UuidStringTest extends TestCase
+final class UuidStringTest extends TestCase
 {
     #[Test]
     public function it_is_a_UUID(): void

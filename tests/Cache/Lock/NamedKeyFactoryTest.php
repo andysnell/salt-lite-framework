@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class NamedKeyFactoryTest extends TestCase
+final class NamedKeyFactoryTest extends TestCase
 {
     #[Test]
     public function it_makes_and_caches_a_named_key(): void

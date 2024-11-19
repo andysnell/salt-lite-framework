@@ -21,7 +21,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class AttachRouteToRequestTest extends TestCase
+final class AttachRouteToRequestTest extends TestCase
 {
     use ProphecyTrait;
 

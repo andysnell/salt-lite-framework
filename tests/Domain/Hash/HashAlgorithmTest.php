@@ -8,7 +8,7 @@ use PhoneBurner\SaltLite\Framework\Domain\Hash\HashAlgorithm;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class HashAlgorithmTest extends TestCase
+final class HashAlgorithmTest extends TestCase
 {
     #[Test]
     public function default_returns_the_default_instance(): void

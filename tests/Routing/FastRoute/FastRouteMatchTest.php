@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use UnexpectedValueException;
 
-class FastRouteMatchTest extends TestCase
+final class FastRouteMatchTest extends TestCase
 {
     #[DataProvider('provideInvalidMatch')]
     #[Test]

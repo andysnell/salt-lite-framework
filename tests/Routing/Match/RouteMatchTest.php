@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class RouteMatchTest extends TestCase
+final class RouteMatchTest extends TestCase
 {
     #[DataProvider('provideConstructorArgs')]
     #[Test]
@@ -55,7 +55,7 @@ class RouteMatchTest extends TestCase
             RequestHandlerInterface::class => TestRequestHandler::class,
         ]), []);
 
-        self::assertEquals(TestRequestHandler::class, $route->getHandler());
+        self::assertSame(TestRequestHandler::class, $route->getHandler());
     }
 
     #[DataProvider('provideConstructorArgs')]

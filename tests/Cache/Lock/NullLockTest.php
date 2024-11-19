@@ -9,7 +9,7 @@ use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class NullLockTest extends TestCase
+final class NullLockTest extends TestCase
 {
     #[Test]
     public function default_values_are_sane_for_a_null_lock(): void

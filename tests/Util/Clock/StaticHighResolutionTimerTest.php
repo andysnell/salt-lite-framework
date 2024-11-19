@@ -8,13 +8,13 @@ use PhoneBurner\SaltLite\Framework\Util\Clock\StaticHighResolutionTimer;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class StaticHighResolutionTimerTest extends TestCase
+final class StaticHighResolutionTimerTest extends TestCase
 {
     #[Test]
     public function happy_path(): void
     {
         $timer = new StaticHighResolutionTimer(42);
-        for ($i = 0; $i < 100; $i++) {
+        for ($i = 0; $i < 100; ++$i) {
             self::assertSame(42, $timer->now());
         }
     }

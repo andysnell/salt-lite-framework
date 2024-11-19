@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class HalResourceTest extends TestCase
+final class HalResourceTest extends TestCase
 {
     private function makeMockDataForSUT(array $overrides = []): array
     {
@@ -101,7 +101,7 @@ class HalResourceTest extends TestCase
             ],],];
         }
 
-        yield from static::providesInvalidPropertyNamesAndValues();
+        yield from self::providesInvalidPropertyNamesAndValues();
 
         yield 'links_must_be_LinkInterfaces_0' => [['links' => [
             'https://example.com',
@@ -119,7 +119,7 @@ class HalResourceTest extends TestCase
             ],],];
         }
 
-        yield from static::providesInvalidEmbeddedPropertyNamesAndValues();
+        yield from self::providesInvalidEmbeddedPropertyNamesAndValues();
     }
 
     #[Test]
@@ -445,7 +445,7 @@ class HalResourceTest extends TestCase
             Link::make('test_relation', '/api/rest/test/1234')->asArray(),
         ]);
 
-        self::assertEquals($expected_json, \json_encode($sut, \JSON_THROW_ON_ERROR));
+        self::assertSame($expected_json, \json_encode($sut, \JSON_THROW_ON_ERROR));
     }
 
     #[Test]

@@ -8,7 +8,7 @@ use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\NullPhoneNumber;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class NullPhoneNumberTest extends TestCase
+final class NullPhoneNumberTest extends TestCase
 {
     #[Test]
     public function NullPhoneNumber_represents_empty_phone_number(): void

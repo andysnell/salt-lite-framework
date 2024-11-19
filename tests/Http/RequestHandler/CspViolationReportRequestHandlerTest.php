@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
-class CspViolationReportRequestHandlerTest extends TestCase
+final class CspViolationReportRequestHandlerTest extends TestCase
 {
     #[Test]
     public function respond_logs_reported_violations(): void

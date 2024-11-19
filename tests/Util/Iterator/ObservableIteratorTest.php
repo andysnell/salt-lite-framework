@@ -8,7 +8,7 @@ use PhoneBurner\SaltLite\Framework\Util\Iterator\ObservableIterator;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class ObservableIteratorTest extends TestCase
+final class ObservableIteratorTest extends TestCase
 {
     #[Test]
     public function getIterator_notifies_observers_on_each_iteration(): void
@@ -51,7 +51,7 @@ class ObservableIteratorTest extends TestCase
     /**
      * @return \SplObserver&object{updated: array<array{key: string, value: int}>,counter: int}
      */
-    protected static function getObserver(): \SplObserver
+    private static function getObserver(): \SplObserver
     {
         return new class implements \SplObserver {
             /**

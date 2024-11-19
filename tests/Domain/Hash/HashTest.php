@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 
 use const PhoneBurner\SaltLite\Framework\UNIT_TEST_ROOT;
 
-class HashTest extends TestCase
+final class HashTest extends TestCase
 {
     #[DataProvider('providesStringsWithValidHashFormats')]
     #[Test]

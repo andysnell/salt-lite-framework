@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class IntegerIdTest extends TestCase
+final class IntegerIdTest extends TestCase
 {
     #[DataProvider('provides_valid_values_and_namespaces')]
     #[Test]

@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class EmailAddressTest extends TestCase
+final class EmailAddressTest extends TestCase
 {
     private const string VALID_EMAIL = 'test@phoneburner.com';
 

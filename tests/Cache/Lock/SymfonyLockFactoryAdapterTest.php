@@ -17,7 +17,7 @@ use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\LockFactory as SymfonyLockFactory;
 use Symfony\Component\Lock\SharedLockInterface;
 
-class SymfonyLockFactoryAdapterTest extends TestCase
+final class SymfonyLockFactoryAdapterTest extends TestCase
 {
     #[Test]
     public function lock_factory_sets_logger_on_wrapped_factory(): void

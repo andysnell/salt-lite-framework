@@ -16,7 +16,7 @@ use PhoneBurner\SaltLite\Framework\Routing\Result\RouteNotFound;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class FastRouteResultFactoryTest extends TestCase
+final class FastRouteResultFactoryTest extends TestCase
 {
     private SUT $sut;
 

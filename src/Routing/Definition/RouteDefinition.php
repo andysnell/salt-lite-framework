@@ -150,7 +150,7 @@ class RouteDefinition implements Route, Definition, JsonSerializable
     private function syncUri(): void
     {
         $this->setWrapped(new Uri(
-            (string)(new UriTemplate($this->path))->render($this->params),
+            (new UriTemplate($this->path))->render($this->params),
         ));
     }
 

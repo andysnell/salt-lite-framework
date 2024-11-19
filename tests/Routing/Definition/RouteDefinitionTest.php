@@ -28,7 +28,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use stdClass;
 use TypeError;
 
-class RouteDefinitionTest extends TestCase
+final class RouteDefinitionTest extends TestCase
 {
     #[DataProvider('provideTestDataWithMethod')]
     #[Test]
@@ -54,8 +54,8 @@ class RouteDefinitionTest extends TestCase
         );
 
         self::assertSame('/example', $sut->getRoutePath());
-        self::assertEquals([HttpMethod::Get->value, HttpMethod::Put->value, HttpMethod::Post->value], $sut->getMethods());
-        self::assertEquals([], $sut->getAttributes());
+        self::assertSame([HttpMethod::Get->value, HttpMethod::Put->value, HttpMethod::Post->value], $sut->getMethods());
+        self::assertSame([], $sut->getAttributes());
     }
 
     #[TestWith(['just a string'])]
@@ -269,13 +269,13 @@ class RouteDefinitionTest extends TestCase
 
         // not changed
         self::assertSame('/example', $sut->getRoutePath());
-        self::assertEquals([HttpMethod::Get->value], $sut->getMethods());
-        self::assertEquals(['old' => 'data1'], $sut->getAttributes());
+        self::assertSame([HttpMethod::Get->value], $sut->getMethods());
+        self::assertSame(['old' => 'data1'], $sut->getAttributes());
 
         // changed
         self::assertSame('/example', $new->getRoutePath());
-        self::assertEquals([HttpMethod::Get->value], $new->getMethods());
-        self::assertEquals([
+        self::assertSame([HttpMethod::Get->value], $new->getMethods());
+        self::assertSame([
             'old' => 'data1',
             'new' => 'data2',
         ], $new->getAttributes());
@@ -298,16 +298,16 @@ class RouteDefinitionTest extends TestCase
 
         // not changed
         self::assertSame('/example', $sut->getRoutePath());
-        self::assertEquals([HttpMethod::Get->value], $sut->getMethods());
-        self::assertEquals([
+        self::assertSame([HttpMethod::Get->value], $sut->getMethods());
+        self::assertSame([
             'old' => 'data1',
             'replace' => 'old data',
         ], $sut->getAttributes());
 
         // changed
         self::assertSame('/example', $new->getRoutePath());
-        self::assertEquals([HttpMethod::Get->value], $new->getMethods());
-        self::assertEquals([
+        self::assertSame([HttpMethod::Get->value], $new->getMethods());
+        self::assertSame([
             'old' => 'data1',
             'replace' => 'new data',
         ], $new->getAttributes());
@@ -337,13 +337,13 @@ class RouteDefinitionTest extends TestCase
 
         // not changed
         self::assertSame('/example', $sut->getRoutePath());
-        self::assertEquals([HttpMethod::Get->value], $sut->getMethods());
-        self::assertEquals($old_attributes, $sut->getAttributes());
+        self::assertSame([HttpMethod::Get->value], $sut->getMethods());
+        self::assertSame($old_attributes, $sut->getAttributes());
 
         // changed
         self::assertSame('/example', $new->getRoutePath());
-        self::assertEquals([HttpMethod::Get->value], $new->getMethods());
-        self::assertEquals($new_attributes, $new->getAttributes());
+        self::assertSame([HttpMethod::Get->value], $new->getMethods());
+        self::assertSame($new_attributes, $new->getAttributes());
     }
 
     #[Test]
@@ -371,13 +371,13 @@ class RouteDefinitionTest extends TestCase
 
         // not changed
         self::assertSame('/example', $sut->getRoutePath());
-        self::assertEquals([HttpMethod::Get->value], $sut->getMethods());
-        self::assertEquals($old_attributes, $sut->getAttributes());
+        self::assertSame([HttpMethod::Get->value], $sut->getMethods());
+        self::assertSame($old_attributes, $sut->getAttributes());
 
         // changed
         self::assertSame('/example', $new->getRoutePath());
-        self::assertEquals([HttpMethod::Get->value], $new->getMethods());
-        self::assertEquals([
+        self::assertSame([HttpMethod::Get->value], $new->getMethods());
+        self::assertEqualsCanonicalizing([
             'old' => 'data1',
             'totally' => 'new',
             'set' => 'of data',
@@ -401,12 +401,12 @@ class RouteDefinitionTest extends TestCase
         // not changed
         self::assertSame('/example', $sut->getRoutePath());
         self::assertEquals(Enum::values(...$old_methods), $sut->getMethods());
-        self::assertEquals(['old' => 'data1'], $sut->getAttributes());
+        self::assertSame(['old' => 'data1'], $sut->getAttributes());
 
         // changed
         self::assertSame('/example', $new->getRoutePath());
         self::assertEqualsCanonicalizing(Enum::values(...$new_methods), $new->getMethods());
-        self::assertEquals(['old' => 'data1'], $new->getAttributes());
+        self::assertSame(['old' => 'data1'], $new->getAttributes());
     }
 
     #[DataProvider('provideAddedMethods')]
@@ -425,12 +425,12 @@ class RouteDefinitionTest extends TestCase
         // not changed
         self::assertSame('/example', $sut->getRoutePath());
         self::assertEquals(\array_column($old_methods, 'value'), $sut->getMethods());
-        self::assertEquals(['old' => 'data1'], $sut->getAttributes());
+        self::assertSame(['old' => 'data1'], $sut->getAttributes());
 
         // changed
         self::assertSame('/example', $new->getRoutePath());
         self::assertEqualsCanonicalizing(\array_column($new_methods, 'value'), $new->getMethods());
-        self::assertEquals(['old' => 'data1'], $new->getAttributes());
+        self::assertSame(['old' => 'data1'], $new->getAttributes());
     }
 
     #[Test]
@@ -447,13 +447,13 @@ class RouteDefinitionTest extends TestCase
 
         // not changed
         self::assertSame('/example', $sut->getRoutePath());
-        self::assertEquals([HttpMethod::Get->value], $sut->getMethods());
-        self::assertEquals(['old' => 'data'], $sut->getAttributes());
+        self::assertSame([HttpMethod::Get->value], $sut->getMethods());
+        self::assertSame(['old' => 'data'], $sut->getAttributes());
 
         // changed
         self::assertSame('/new', $new->getRoutePath());
         self::assertEqualsCanonicalizing([HttpMethod::Get->value], $new->getMethods());
-        self::assertEquals(['old' => 'data'], $new->getAttributes());
+        self::assertSame(['old' => 'data'], $new->getAttributes());
     }
 
     #[DataProvider('provideNamedSettersAndValues')]

@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class RegionNameTest extends TestCase
+final class RegionNameTest extends TestCase
 {
     #[Test]
     public static function region_names_are_unique_and_non_empty(): void

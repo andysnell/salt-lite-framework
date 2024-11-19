@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class E164Test extends TestCase
+final class E164Test extends TestCase
 {
     #[DataProvider('providesValidTestCases')]
     #[Test]

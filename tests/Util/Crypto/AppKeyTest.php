@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class AppKeyTest extends TestCase
+final class AppKeyTest extends TestCase
 {
     #[Test]
     public function app_key_happy_path(): void

@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class IteratorStreamTest extends TestCase
+final class IteratorStreamTest extends TestCase
 {
     private const array METADATA_KEYS = [
         'wrapper_type',
@@ -73,7 +73,7 @@ class IteratorStreamTest extends TestCase
     }
 
     #[Test]
-    public function write_throws_exception(): void
+    public function write_throws_exception(): never
     {
         $iterator = new \ArrayIterator(['foo', 'bar']);
         $stream = new IteratorStream($iterator);
@@ -84,7 +84,7 @@ class IteratorStreamTest extends TestCase
     }
 
     #[Test]
-    public function seek_throws_exception(): void
+    public function seek_throws_exception(): never
     {
         $iterator = new \ArrayIterator(['foo', 'bar']);
         $stream = new IteratorStream($iterator);

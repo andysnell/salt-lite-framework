@@ -8,22 +8,22 @@ use PhoneBurner\SaltLite\Framework\Domain\Time\StopWatch;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class StopWatchTest extends TestCase
+final class StopWatchTest extends TestCase
 {
     #[Test]
     public function elapsed_returns_the_duration(): void
     {
         $stopwatch = StopWatch::start();
-        static::assertLessThan(1, $stopwatch->elapsed()->inSeconds());
+        self::assertLessThan(1, $stopwatch->elapsed()->inSeconds());
 
         \sleep(1);
         $elapsed = $stopwatch->elapsed();
-        static::assertGreaterThanOrEqual(1, $elapsed->inSeconds());
-        static::assertLessThan(1.2, $elapsed->inSeconds());
+        self::assertGreaterThanOrEqual(1, $elapsed->inSeconds());
+        self::assertLessThan(1.2, $elapsed->inSeconds());
 
         \sleep(1);
         $elapsed = $stopwatch->elapsed();
-        static::assertGreaterThanOrEqual(2, $elapsed->inSeconds());
-        static::assertLessThan(2.2, $elapsed->inSeconds());
+        self::assertGreaterThanOrEqual(2, $elapsed->inSeconds());
+        self::assertLessThan(2.2, $elapsed->inSeconds());
     }
 }

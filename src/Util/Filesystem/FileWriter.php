@@ -43,7 +43,7 @@ class FileWriter
     {
         $bytes = 0;
         foreach ($pump as $chunk) {
-            $bytes += \is_iterable($chunk) ? self::pump($stream, $chunk) : (int)$stream->fwrite((string)$chunk);
+            $bytes += \is_iterable($chunk) ? self::pump($stream, $chunk) : $stream->fwrite((string)$chunk);
         }
         return $bytes;
     }

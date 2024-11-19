@@ -13,7 +13,7 @@ use PhoneBurner\SaltLite\Framework\Util\Clock\StaticClock;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class PhpRuntimeHealthCheckServiceTest extends TestCase
+final class PhpRuntimeHealthCheckServiceTest extends TestCase
 {
     #[Test]
     public function happy_path(): void

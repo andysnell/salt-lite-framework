@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 
-class ErrorRequestHandlerTest extends TestCase
+final class ErrorRequestHandlerTest extends TestCase
 {
     #[TestWith([400])]
     #[TestWith([403])]

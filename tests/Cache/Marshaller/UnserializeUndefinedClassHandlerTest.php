@@ -8,10 +8,10 @@ use PhoneBurner\SaltLite\Framework\Cache\Marshaller\UnserializeUndefinedClassHan
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class UnserializeUndefinedClassHandlerTest extends TestCase
+final class UnserializeUndefinedClassHandlerTest extends TestCase
 {
     #[Test]
-    public function handleUndefinedClass_throws_exception(): void
+    public function handleUndefinedClass_throws_exception(): never
     {
         $this->expectException(\DomainException::class);
         UnserializeUndefinedClassHandler::fail('foo');

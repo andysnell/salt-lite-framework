@@ -34,7 +34,7 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Log\LoggerInterface;
 
-class FastRouterTest extends TestCase
+final class FastRouterTest extends TestCase
 {
     use MockRequest;
     use ProphecyTrait;

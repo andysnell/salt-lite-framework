@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
-class MySqlHealthCheckServiceTest extends TestCase
+final class MySqlHealthCheckServiceTest extends TestCase
 {
     #[Test]
     public function happy_path(): void

@@ -9,7 +9,7 @@ use PhoneBurner\SaltLite\Framework\Routing\Domain\StaticFile;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class StaticFileTest extends TestCase
+final class StaticFileTest extends TestCase
 {
     #[Test]
     public function happy_path_is_happy(): void

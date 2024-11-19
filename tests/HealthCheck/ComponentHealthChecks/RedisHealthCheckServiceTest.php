@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
-class RedisHealthCheckServiceTest extends TestCase
+final class RedisHealthCheckServiceTest extends TestCase
 {
     #[Test]
     public function happy_path(): void

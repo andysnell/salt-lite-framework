@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class DomesticPhoneNumberTest extends TestCase
+final class DomesticPhoneNumberTest extends TestCase
 {
     #[DataProvider('invalidPhoneDataProvider')]
     #[Test]

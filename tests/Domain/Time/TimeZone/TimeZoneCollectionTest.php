@@ -11,7 +11,7 @@ use PhoneBurner\SaltLite\Framework\Domain\Time\TimeZone\Tz;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class TimeZoneCollectionTest extends TestCase
+final class TimeZoneCollectionTest extends TestCase
 {
     #[Test]
     public function zero_time_zone_case_behavior(): void

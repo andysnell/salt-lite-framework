@@ -15,10 +15,8 @@ use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 
-class AppendOnlyCacheAdapterTest extends TestCase
+final class AppendOnlyCacheAdapterTest extends TestCase
 {
-    private ArrayAdapter $cache_pool;
-
     private CacheInterface $psr_cache;
 
     private AppendOnlyCacheAdapter $sut;
@@ -26,8 +24,8 @@ class AppendOnlyCacheAdapterTest extends TestCase
     #[\Override]
     protected function setUp(): void
     {
-        $this->cache_pool = new ArrayAdapter(storeSerialized: false);
-        $this->psr_cache = new Psr16Cache($this->cache_pool);
+        $cache_pool = new ArrayAdapter(storeSerialized: false);
+        $this->psr_cache = new Psr16Cache($cache_pool);
         $this->sut = new AppendOnlyCacheAdapter($this->psr_cache);
     }
 

@@ -10,7 +10,7 @@ use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\AreaCode\AreaCodeCollectio
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class AreaCodeCollectionTest extends TestCase
+final class AreaCodeCollectionTest extends TestCase
 {
     #[Test]
     public function collects_area_codes(): void

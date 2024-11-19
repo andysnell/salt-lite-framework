@@ -17,7 +17,7 @@ use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 
-class CacheAdapterTest extends TestCase
+final class CacheAdapterTest extends TestCase
 {
     private ArrayAdapter $cache_pool;
 

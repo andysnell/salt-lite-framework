@@ -18,7 +18,7 @@ use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 
-class HealthCheckRequestHandlerTest extends TestCase
+final class HealthCheckRequestHandlerTest extends TestCase
 {
     #[Test]
     #[TestWith([HealthStatus::Pass, HttpStatus::OK])]
@@ -43,9 +43,9 @@ class HealthCheckRequestHandlerTest extends TestCase
         $response = $handler->handle($request);
 
         self::assertInstanceOf(JsonResponse::class, $response);
-        self::assertEquals($http_status, $response->getStatusCode());
+        self::assertSame($http_status, $response->getStatusCode());
         self::assertEquals($health_check, $response->getPayload());
-        self::assertSame($response->getHeaderLine(HttpHeader::CONTENT_TYPE), ContentType::HEALTH_JSON);
-        self::assertSame($response->getHeaderLine(HttpHeader::CACHE_CONTROL), 'no-store');
+        self::assertSame(ContentType::HEALTH_JSON, $response->getHeaderLine(HttpHeader::CONTENT_TYPE));
+        self::assertSame('no-store', $response->getHeaderLine(HttpHeader::CACHE_CONTROL));
     }
 }

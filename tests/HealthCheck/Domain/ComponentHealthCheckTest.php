@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class ComponentHealthCheckTest extends TestCase
+final class ComponentHealthCheckTest extends TestCase
 {
     #[Test]
     #[TestWith([HealthStatus::Pass])]
@@ -112,7 +112,7 @@ class ComponentHealthCheckTest extends TestCase
     {
         $health_check = new ComponentHealthCheck();
 
-        $this->assertEquals('', $health_check->name());
+        $this->assertSame('', $health_check->name());
         $this->assertSame([], $health_check->jsonSerialize());
     }
 }

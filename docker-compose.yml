@@ -1,5 +1,5 @@
 services:
-  php:
+  app:
     container_name: "salt-lite-framework-php"
     build:
       context: ./
@@ -8,7 +8,7 @@ services:
     platform: linux/amd64
     volumes:
       - ${SOURCE_DIR:-./}:/app
-      - ./php-development.ini:/usr/local/etc/php/conf.d/settings.ini
+      - ./settings.ini:/usr/local/etc/php/conf.d/settings.ini
     env_file:
       - .env
     environment:

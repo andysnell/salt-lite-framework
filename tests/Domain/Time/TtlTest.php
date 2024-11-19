@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class TtlTest extends TestCase
+final class TtlTest extends TestCase
 {
     #[Test]
     public function sut_can_be_instantiated_with_defaults(): void

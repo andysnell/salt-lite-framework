@@ -14,10 +14,9 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\SharedLockInterface;
 
-class SymfonyLockAdapterTest extends TestCase
+final class SymfonyLockAdapterTest extends TestCase
 {
     #[Test]
     public function adapter_sets_logger_on_wrapped_lock(): void
@@ -76,7 +75,6 @@ class SymfonyLockAdapterTest extends TestCase
     #[Test]
     public function adapter_acquires_write_lock_without_blocking(bool $acquired): void
     {
-        $key = new Key('test');
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->once())->method('acquire')->with(false)->willReturn($acquired);
 
@@ -90,7 +88,6 @@ class SymfonyLockAdapterTest extends TestCase
     #[Test]
     public function adapter_acquires_read_lock_without_blocking(bool $acquired): void
     {
-        $key = new Key('test');
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->once())->method('acquireRead')->with(false)->willReturn($acquired);
 
@@ -103,7 +100,6 @@ class SymfonyLockAdapterTest extends TestCase
     #[Test]
     public function adapter_acquires_successful_write_lock_with_blocking(): void
     {
-        $key = new Key('test');
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->exactly(3))
             ->method('acquire')
@@ -119,7 +115,6 @@ class SymfonyLockAdapterTest extends TestCase
     #[Test]
     public function adapter_acquires_successful_read_lock_with_blocking(): void
     {
-        $key = new Key('test');
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->exactly(3))
             ->method('acquireRead')
@@ -135,7 +130,6 @@ class SymfonyLockAdapterTest extends TestCase
     #[Test]
     public function adapter_times_out_on_write_lock_with_blocking(): void
     {
-        $key = new Key('test');
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->atLeast(2))
             ->method('acquire')
@@ -151,7 +145,6 @@ class SymfonyLockAdapterTest extends TestCase
     #[Test]
     public function adapter_times_out_on_read_lock_with_blocking(): void
     {
-        $key = new Key('test');
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->atLeast(2))
             ->method('acquireRead')
@@ -209,7 +202,6 @@ class SymfonyLockAdapterTest extends TestCase
     #[Test]
     public function adapter_returns_non_null_ttl(int|float $ttl): void
     {
-        $key = new Key('test');
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->once())->method('getRemainingLifetime')->willReturn($ttl);
 
@@ -221,7 +213,6 @@ class SymfonyLockAdapterTest extends TestCase
     #[Test]
     public function adapter_returns_null_ttl(): void
     {
-        $key = new Key('test');
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->once())->method('getRemainingLifetime')->willReturn(null);
 

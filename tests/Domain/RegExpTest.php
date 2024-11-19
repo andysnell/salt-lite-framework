@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class RegExpTest extends TestCase
+final class RegExpTest extends TestCase
 {
     #[DataProvider('regular_expressions')]
     #[Test]

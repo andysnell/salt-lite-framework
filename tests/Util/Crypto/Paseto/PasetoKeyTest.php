@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class PasetoKeyTest extends TestCase
+final class PasetoKeyTest extends TestCase
 {
     #[TestWith(['3f09f3b08a4c50631b725da2397b4f4e3d976b01681703f4842a22501d6d0f6'])]
     #[TestWith(['zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'])]

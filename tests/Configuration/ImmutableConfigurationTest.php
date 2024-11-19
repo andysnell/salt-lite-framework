@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class ImmutableConfigurationTest extends TestCase
+final class ImmutableConfigurationTest extends TestCase
 {
     private const array TEST_HAYSTACK = [
         'key.includes.dot' => 'key-includes-dot-value',

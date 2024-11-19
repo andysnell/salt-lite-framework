@@ -9,7 +9,7 @@ use PhoneBurner\SaltLite\Framework\Util\NullArrayAccess;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class NullArrayAccessTest extends TestCase
+final class NullArrayAccessTest extends TestCase
 {
     /**
      * @var array<string,mixed>

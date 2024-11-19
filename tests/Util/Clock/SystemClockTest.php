@@ -8,7 +8,7 @@ use PhoneBurner\SaltLite\Framework\Util\Clock\SystemClock;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class SystemClockTest extends TestCase
+final class SystemClockTest extends TestCase
 {
     #[Test]
     public function happy_path(): void
@@ -19,7 +19,7 @@ class SystemClockTest extends TestCase
 
         $now = $timer->now();
         self::assertGreaterThanOrEqual($reference, $now);
-        for ($i = 0; $i < 10000; $i++) {
+        for ($i = 0; $i < 10000; ++$i) {
             self::assertGreaterThan($now, $now = $timer->now());
         }
     }

@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 
-class NullHandlerTest extends TestCase
+final class NullHandlerTest extends TestCase
 {
     #[Test]
     public function handle_returns_page_not_found(): void

@@ -22,7 +22,7 @@ use PHPUnit\Framework\TestCase;
 use ReturnTypeWillChange;
 use stdClass;
 
-class ArrTest extends TestCase
+final class ArrTest extends TestCase
 {
     #[DataProvider('providesAccessibleTestCases')]
     #[Test]
@@ -40,7 +40,7 @@ class ArrTest extends TestCase
         yield [true, [1, 2, 3]];
         yield [true, ['foo' => 1, 'bar' => 2, 'baz' => 3]];
         yield [true, new NullArrayAccess(['foo' => 1, 'bar' => 2, 'baz' => 3])];
-        yield [true, static::makeArrayAccess([1, 2, 3, 4])];
+        yield [true, self::makeArrayAccess([1, 2, 3, 4])];
 
         $not_arrays = [true, false, null, 123, 'hello world', static fn(): array => [1, 2, 3], new stdClass()];
         foreach ($not_arrays as $not_an_array) {
@@ -111,15 +111,15 @@ class ArrTest extends TestCase
             yield 'array_' . $type => $test($array, $array);
             yield 'generator_' . $type => $test((static fn() => yield from $array)(), $array);
             yield 'iterator_' . $type => $test(new ArrayIterator($array), $array);
-            yield 'iterator_aggregate' . $type => $test(static::makeIteratorAggregate($array), $array);
-            yield 'arrayable_' . $type => $test(static::makeArrayable($array), $array);
+            yield 'iterator_aggregate' . $type => $test(self::makeIteratorAggregate($array), $array);
+            yield 'arrayable_' . $type => $test(self::makeArrayable($array), $array);
         }
     }
 
     #[Test]
     public function iterator_returns_a_Traversable_before_Arrayable(): void
     {
-        $iterable_and_arrayable = static::makeIterableArrayable(
+        $iterable_and_arrayable = self::makeIterableArrayable(
             ['foo' => 1, 'bar' => 2, 'baz' => 3],
             [0 => 'foo', 42 => 'bar', 23 => 'baz'],
         );
@@ -196,9 +196,9 @@ class ArrTest extends TestCase
             yield 'array_' . $type => [$test['expected'], $test['array'],];
             yield 'generator_' . $type => [$test['expected'], (static fn() => yield from $test['array'])()];
             yield 'iterator_' . $type => [$test['expected'], new ArrayIterator($test['array'])];
-            yield 'iterator_aggregate' . $type => [$test['expected'], static::makeIteratorAggregate($test['array'])];
-            yield 'arrayable_' . $type => [$test['expected'], static::makeArrayable($test['array'])];
-            yield 'iterable_arrayable' . $type => [$test['expected'], static::makeIterableArrayable(['error'], $test['array'])];
+            yield 'iterator_aggregate' . $type => [$test['expected'], self::makeIteratorAggregate($test['array'])];
+            yield 'arrayable_' . $type => [$test['expected'], self::makeArrayable($test['array'])];
+            yield 'iterable_arrayable' . $type => [$test['expected'], self::makeIterableArrayable(['error'], $test['array'])];
         }
     }
 
@@ -215,7 +215,7 @@ class ArrTest extends TestCase
     public function has_traverses_array_by_dot_notation(string $needle, bool $exists): void
     {
         $array = $this->makeTestHaystack();
-        $array_access = static::makeArrayAccess($array);
+        $array_access = self::makeArrayAccess($array);
 
         self::assertSame($exists, Arr::has($needle, $array));
         self::assertSame($exists, Arr::has($needle, $array_access));
@@ -246,7 +246,7 @@ class ArrTest extends TestCase
         mixed $default = null,
     ): void {
         $array = $this->makeTestHaystack();
-        $array_access = static::makeArrayAccess($array);
+        $array_access = self::makeArrayAccess($array);
 
         self::assertSame($expected, Arr::get($needle, $array, $default));
         self::assertSame($expected, Arr::get($needle, $array_access, $default));
@@ -287,30 +287,30 @@ class ArrTest extends TestCase
             public int $c = 3;
         };
 
-        $input = static::makeIteratorAggregate([
+        $input = self::makeIteratorAggregate([
             'foo' => 'bar',
             'baz' => [1, 2, 3],
             'qux' => new ArrayIterator([
                 [
                     'array' => [
                         ['a', 'b', 'c'],
-                        static::makeArrayable([11, 12, 13]),
-                        static::makeIteratorAggregate([21, 22, 23]),
+                        self::makeArrayable([11, 12, 13]),
+                        self::makeIteratorAggregate([21, 22, 23]),
                     ],
-                    'iterator' => static::makeIteratorAggregate([
+                    'iterator' => self::makeIteratorAggregate([
                         ['d', 'e', 'f'],
-                        static::makeArrayable([11, 12, 13]),
-                        static::makeIteratorAggregate([21, 22, 23]),
+                        self::makeArrayable([11, 12, 13]),
+                        self::makeIteratorAggregate([21, 22, 23]),
                     ]),
-                    'arrayable' => static::makeArrayable([
+                    'arrayable' => self::makeArrayable([
                         ['g', 'h', 'i'],
-                        static::makeArrayable([11, 12, 13]),
-                        static::makeIteratorAggregate([21, 22, 23]),
+                        self::makeArrayable([11, 12, 13]),
+                        self::makeIteratorAggregate([21, 22, 23]),
                     ]),
                     'keys' => [
                         ['key_0' => 'a', 'key_1' => 'b', 'key_2' => 'c'],
-                        static::makeArrayable(['key_0' => 11, 'key_1' => 12, 13]),
-                        static::makeIteratorAggregate(['key_0' => 21, 'key_1' => 22, 'key_2' => 23]),
+                        self::makeArrayable(['key_0' => 11, 'key_1' => 12, 13]),
+                        self::makeIteratorAggregate(['key_0' => 21, 'key_1' => 22, 'key_2' => 23]),
                     ],
                 ],
             ]),
@@ -413,8 +413,8 @@ class ArrTest extends TestCase
 
         foreach ($arrayable as $test => $value) {
             yield $test . '_array' => [$value, $value];
-            yield $test . '_arrayable' => [static::makeArrayable($value), $value];
-            yield $test . '_iterator' => [static::makeIteratorAggregate($value), $value];
+            yield $test . '_arrayable' => [self::makeArrayable($value), $value];
+            yield $test . '_iterator' => [self::makeIteratorAggregate($value), $value];
         }
     }
 

@@ -19,7 +19,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 use const PhoneBurner\SaltLite\Framework\UNIT_TEST_ROOT;
 
-class StaticFileRequestHandlerTest extends TestCase
+final class StaticFileRequestHandlerTest extends TestCase
 {
     protected const string GOOD_FILE = UNIT_TEST_ROOT . '/Fixtures/2500x2500.png';
 
@@ -61,12 +61,10 @@ class StaticFileRequestHandlerTest extends TestCase
         self::assertInstanceOf(ServerErrorResponse::class, $response);
     }
 
-    public static function providesInvalidStaticFile(): array
+    public static function providesInvalidStaticFile(): \Iterator
     {
-        return [
-            [[]],
-            [[StaticFile::class => new \stdClass()]],
-        ];
+        yield [[]];
+        yield [[StaticFile::class => new \stdClass()]];
     }
 
     #[Test]

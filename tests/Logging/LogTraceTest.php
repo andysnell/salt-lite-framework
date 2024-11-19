@@ -8,7 +8,7 @@ use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class LogTraceTest extends TestCase
+final class LogTraceTest extends TestCase
 {
     #[Test]
     public function it_is_a_UUID(): void

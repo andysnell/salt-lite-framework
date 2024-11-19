@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Tz::class)]
 #[CoversClass(TimeZoneFactory::class)]
-class TimeZoneFactoryTest extends TestCase
+final class TimeZoneFactoryTest extends TestCase
 {
     /**
      * @param value-of<Tz>&string $time_zone_name
@@ -33,7 +33,6 @@ class TimeZoneFactoryTest extends TestCase
     {
         yield from \array_map(Arr::wrap(...), \array_column(Tz::cases(), 'value'));
     }
-
     #[Test]
     public function collect_returns_empty_time_zone_collection(): void
     {
@@ -42,7 +41,6 @@ class TimeZoneFactoryTest extends TestCase
         self::assertSame($collection, TimeZoneFactory::collect());
         self::assertEquals($collection, TimeZoneCollection::make());
     }
-
     #[Test]
     public function collect_returns_memoized_time_zone_collection(): void
     {
@@ -69,7 +67,6 @@ class TimeZoneFactoryTest extends TestCase
             new \DateTimeZone(Tz::LosAngeles->value),
         ));
     }
-
     #[Test]
     public function default_returns_expected_memoized_timezone(): void
     {

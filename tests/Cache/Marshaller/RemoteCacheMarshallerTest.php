@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 use PHPUnit\Framework\TestCase;
 
-class RemoteCacheMarshallerTest extends TestCase
+final class RemoteCacheMarshallerTest extends TestCase
 {
     #[DataProvider('providesSimpleTestValuesWithSerializer')]
     #[Test]

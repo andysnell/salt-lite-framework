@@ -11,24 +11,19 @@ use PhoneBurner\SaltLite\Framework\Routing\Route;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class InMemoryDefinitionListTest extends TestCase
+final class InMemoryDefinitionListTest extends TestCase
 {
     /**
      * @var RouteDefinition[]
      */
     private array $expected_routes;
 
-    /**
-     * @var RouteDefinition[]
-     */
-    private array $routes;
-
     private SUT $sut;
 
     #[\Override]
     protected function setUp(): void
     {
-        $this->routes = [
+        $routes = [
             1 => RouteDefinition::get('/route1')->withName('route1'),
             2 => RouteDefinition::get('/route2')->withName('route2'),
             3 => RouteDefinition::get('/route3')->withName('route3'),
@@ -39,38 +34,38 @@ class InMemoryDefinitionListTest extends TestCase
         ];
 
         $this->sut = SUT::make(
-            $this->routes[1],
-            $this->routes[2],
+            $routes[1],
+            $routes[2],
             RouteGroupDefinition::make('/group1')
             ->withName('group1')
             ->withRoutes(
-                $this->routes[3],
-                $this->routes[4],
+                $routes[3],
+                $routes[4],
             )->withGroups(RouteGroupDefinition::make('/group2')
             ->withName('group2')
             ->withRoutes(
-                $this->routes[5],
-                $this->routes[6],
+                $routes[5],
+                $routes[6],
             )),
-            $this->routes[7],
+            $routes[7],
         );
 
         $this->expected_routes = [
-            1 => $this->routes[1],
-            2 => $this->routes[2],
-            3 => $this->routes[3]
+            1 => $routes[1],
+            2 => $routes[2],
+            3 => $routes[3]
                 ->withRoutePath('/group1/route3')
                 ->withName('group1.route3'),
-            4 => $this->routes[4]
+            4 => $routes[4]
                 ->withRoutePath('/group1/route4')
                 ->withName('group1.route4'),
-            5 => $this->routes[5]
+            5 => $routes[5]
                 ->withRoutePath('/group1/group2/route5')
                 ->withName('group1.group2.route5'),
-            6 => $this->routes[6]
+            6 => $routes[6]
                 ->withRoutePath('/group1/group2/route6')
                 ->withName('group1.group2.route6'),
-            7 => $this->routes[7],
+            7 => $routes[7],
         ];
     }
 

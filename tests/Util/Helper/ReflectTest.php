@@ -23,7 +23,7 @@ use ReflectionObject;
 use stdClass;
 use Traversable;
 
-class ReflectTest extends TestCase
+final class ReflectTest extends TestCase
 {
     #[Test]
     public function object_returns_ReflectionClass_for_fully_qualified_classname(): void

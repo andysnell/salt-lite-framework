@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class AreaCodePurposeTest extends TestCase
+final class AreaCodePurposeTest extends TestCase
 {
     #[DataProvider('providesLookupTestCases')]
     #[Test]

@@ -10,7 +10,7 @@ use PhoneBurner\SaltLite\Framework\Domain\I18n\SubdivisionName;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class SubdivisionNameTest extends TestCase
+final class SubdivisionNameTest extends TestCase
 {
     #[Test]
     public static function region_names_are_unique_and_non_empty(): void

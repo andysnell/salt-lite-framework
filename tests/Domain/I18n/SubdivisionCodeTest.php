@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class SubdivisionCodeTest extends TestCase
+final class SubdivisionCodeTest extends TestCase
 {
     #[Test]
     public static function region_codes_are_unique_and_non_empty(): void

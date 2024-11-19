@@ -44,7 +44,7 @@ class LazyMiddleware implements TerminableMiddleware
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $next_middleware = $this->container->get($this->middleware);
-        if ($next_middleware instanceof TerminableMiddleware && $this->fallback_request_handler !== null) {
+        if ($next_middleware instanceof TerminableMiddleware && $this->fallback_request_handler instanceof RequestHandlerInterface) {
             $next_middleware->setFallbackRequestHandler($this->fallback_request_handler);
         }
 

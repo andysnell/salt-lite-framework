@@ -24,7 +24,7 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversClass(AreaCode::class)]
 #[CoversClass(AreaCodeData::class)]
-class AreaCodeTest extends TestCase
+final class AreaCodeTest extends TestCase
 {
     #[Test]
     public function all_returns_collection_of_all_area_codes(): void

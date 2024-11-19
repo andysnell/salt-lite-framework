@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class FuncTest extends TestCase
+final class FuncTest extends TestCase
 {
     #[DataProvider('providesCallableValuesWithArgs')]
     #[Test]
@@ -57,7 +57,7 @@ class FuncTest extends TestCase
 
         self::assertSame([
             0,
-            1 * 2 * 3 * 5,
+            2 * 3 * 5,
             2 * 2 * 3 * 5,
             3 * 2 * 3 * 5,
         ], \array_map(Func::fwd('foo', 2, 3, 5), $arr));

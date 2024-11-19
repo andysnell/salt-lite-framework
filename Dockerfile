@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM php:8.3-cli as development
+FROM php:8.4-rc-cli as development
 ENV PATH "/app/vendor/bin:/home/dev/composer/bin:$PATH"
 ENV COMPOSER_HOME "/home/dev/composer"
 ENV SALT_BUILD_STAGE "development"
@@ -35,15 +35,15 @@ EOF
 # Install PHP Extensions
 RUN <<-EOF
   set -eux
-  docker-php-ext-install -j$(nproc) bcmath exif gmp intl opcache pcntl pdo_mysql zip
-  MAKEFLAGS="-j $(nproc)" pecl install amqp igbinary redis timezonedb xdebug
+  docker-php-ext-install -j$(nproc) bcmath exif gmp intl pcntl pdo_mysql zip
+  MAKEFLAGS="-j $(nproc)" pecl install amqp igbinary redis timezonedb xdebug-3.4.0beta1
   docker-php-ext-enable amqp igbinary redis timezonedb xdebug
   find "$(php-config --extension-dir)" -name '*.so' -type f -exec strip --strip-all {} \;
   rm -rf /tmp/pear
-  mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+  cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 EOF
 
-COPY --link php-development.ini /usr/local/etc/php/conf.d/settings.ini
+COPY --link settings.ini /usr/local/etc/php/conf.d/settings.ini
 
 COPY --link --from=composer/composer:latest-bin /composer /usr/bin/composer
 

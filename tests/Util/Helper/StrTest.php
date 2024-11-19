@@ -16,7 +16,7 @@ use Psr\Http\Message\StreamInterface;
 use stdClass;
 use Stringable;
 
-class StrTest extends TestCase
+final class StrTest extends TestCase
 {
     #[DataProvider('providesValidStringTestCases')]
     #[Test]

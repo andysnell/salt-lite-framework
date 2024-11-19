@@ -13,7 +13,7 @@ use PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto\PasetoVersion;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class PasetoTest extends TestCase
+final class PasetoTest extends TestCase
 {
     #[Test]
     public function v2_local(): void

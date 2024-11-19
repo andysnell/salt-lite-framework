@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 
 use const PhoneBurner\SaltLite\Framework\UNIT_TEST_ROOT;
 
-class HmacTest extends TestCase
+final class HmacTest extends TestCase
 {
     private const string HMAC_KEY = '8df08d18de44263419a39074956dc2ef8a3a0b1b26db984282bfcfc202cda41d';
 

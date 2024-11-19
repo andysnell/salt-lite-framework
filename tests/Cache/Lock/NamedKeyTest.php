@@ -9,7 +9,7 @@ use PhoneBurner\SaltLite\Framework\Cache\Lock\NamedKeyFactory;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class NamedKeyTest extends TestCase
+final class NamedKeyTest extends TestCase
 {
     #[Test]
     public function a_named_key_name_cannot_be_empty(): void

@@ -17,7 +17,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use stdClass;
 use TypeError;
 
-class RouteGroupDefinitionTest extends TestCase
+final class RouteGroupDefinitionTest extends TestCase
 {
     use ProphecyTrait;
 

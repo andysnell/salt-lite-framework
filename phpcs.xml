@@ -10,4 +10,11 @@
     <file>src</file>
     <file>tests</file>
     <rule ref="PhoneBurner"/>
+
+<!--    <rule ref="SlevomatCodingStandard.Classes.MethodSpacing">-->
+<!--        <properties>-->
+<!--            <property name="minLinesCount" value="1"/>-->
+<!--            <property name="maxLinesCount" value="1"/>-->
+<!--        </properties>-->
+<!--    </rule>-->
 </ruleset>

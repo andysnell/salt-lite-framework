@@ -16,7 +16,7 @@ use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use RuntimeException;
 
-class IntToUuidTest extends TestCase
+final class IntToUuidTest extends TestCase
 {
     #[DataProvider('providesIntegerAndNamespaceIds')]
     #[Test]

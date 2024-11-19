@@ -9,7 +9,7 @@ use PhoneBurner\SaltLite\Framework\Routing\Result\RouteNotFound as SUT;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class RouteNotFoundTest extends TestCase
+final class RouteNotFoundTest extends TestCase
 {
     #[Test]
     public function make_returns_found(): void

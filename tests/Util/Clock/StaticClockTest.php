@@ -9,7 +9,7 @@ use PhoneBurner\SaltLite\Framework\Util\Clock\StaticClock;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class StaticClockTest extends TestCase
+final class StaticClockTest extends TestCase
 {
     #[Test]
     public function happy_path(): void

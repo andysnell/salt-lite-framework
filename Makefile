@@ -1,7 +1,7 @@
 SHELL := bash
 .DEFAULT_GOAL := build
 
-app = docker compose run --rm php
+app = docker compose run --rm app
 
 # Define behavior to safely source file (1) to dist file (2), without overwriting
 # if the dist file already exists. This is more portable than using `cp --no-clobber`.
@@ -97,6 +97,14 @@ phpstan: build
 rector: build
 	@$(app) composer run-script rector
 
+.PHONY: rector-dry-run
+rector-dry-run: build
+	@$(app) composer run-script rector-dry-run
+
 .PHONY: ci
 ci: build
 	@$(app) composer run-script ci
+
+.PHONY: serve-coverage
+serve-coverage:
+	@docker compose run --rm --publish 8000:80 app php -S 0.0.0.0:80 -t /app/build/phpunit

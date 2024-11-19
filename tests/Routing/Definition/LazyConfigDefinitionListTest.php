@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class LazyConfigDefinitionListTest extends TestCase
+final class LazyConfigDefinitionListTest extends TestCase
 {
     private static bool $called = false;
 

@@ -10,7 +10,7 @@ use PhoneBurner\SaltLite\Framework\Routing\Result\MethodNotAllowed as SUT;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class MethodNotAllowedTest extends TestCase
+final class MethodNotAllowedTest extends TestCase
 {
     private array $methods;
 

@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 
 use const PhoneBurner\SaltLite\Framework\UNIT_TEST_ROOT;
 
-class FileReaderTest extends TestCase
+final class FileReaderTest extends TestCase
 {
     #[Test]
     #[DataProvider('providesTestCases')]

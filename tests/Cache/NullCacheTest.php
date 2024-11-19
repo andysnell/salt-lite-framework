@@ -9,7 +9,7 @@ use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class NullCacheTest extends TestCase
+final class NullCacheTest extends TestCase
 {
     #[Test]
     public function it_is_a_null_object_version_of_our_cache(): void

@@ -16,7 +16,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
-class AppHealthCheckBuilderTest extends TestCase
+final class AppHealthCheckBuilderTest extends TestCase
 {
     #[Test]
     public function happy_path(): void
@@ -26,8 +26,6 @@ class AppHealthCheckBuilderTest extends TestCase
 
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects($this->never())->method('error');
-
-        $checks = [];
         $services = [
             new class () implements ComponentHealthCheckService {
                 public function __invoke(Clock $clock): array

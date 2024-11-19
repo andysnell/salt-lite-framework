@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class IpAddressTest extends TestCase
+final class IpAddressTest extends TestCase
 {
     #[DataProvider('provideValidAddresses')]
     #[Test]
@@ -167,7 +167,7 @@ class IpAddressTest extends TestCase
             '255.255.255.256',
             ] as $address
         ) {
-            yield (string)$address => [$address];
+            yield $address => [$address];
         }
     }
 

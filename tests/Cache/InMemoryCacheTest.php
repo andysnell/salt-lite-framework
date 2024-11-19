@@ -15,7 +15,7 @@ use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 
-class InMemoryCacheTest extends TestCase
+final class InMemoryCacheTest extends TestCase
 {
     private CacheInterface $psr_cache;
 
