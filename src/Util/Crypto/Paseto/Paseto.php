@@ -7,7 +7,6 @@ namespace PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto;
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto\Exception\PasetoCryptoException;
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto\Exception\PasetoLogicException;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Cast\NonEmpty;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
 use Stringable;
 
 /**

@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class NonEmptyTest extends TestCase
+final class NonEmptyTest extends TestCase
 {
     #[Test]
     public function empty_string_throws_default_exception(): void

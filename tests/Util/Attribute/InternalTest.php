@@ -8,7 +8,7 @@ use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class InternalTest extends TestCase
+final class InternalTest extends TestCase
 {
     #[Test]
     public function happy_path(): void

@@ -90,7 +90,7 @@ class EntityManagerFactory
 
         $doctrine_config->setMetadataDriverImpl(new AttributeDriver($config['entity_paths'] ?? [], true));
         $doctrine_config->setMetadataCache(match ($this->getCacheDriver(CacheType::Metadata, $config)) {
-            CacheDriver::File => $this->cache_factory->createFileCacheItemPool(CacheType::Metadata->value, $cache_path, false),
+            CacheDriver::File => $this->cache_factory->createFileCacheItemPool(CacheType::Metadata->value, $cache_path),
             CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, "orm.$name.metadata."),
             CacheDriver::None => $this->cache_factory->make(CacheDriver::None),
             default => throw new \LogicException('Unsupported Cache Type for Doctrine ORM Metadata Cache'),

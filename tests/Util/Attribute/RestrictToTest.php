@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
 
-class RestrictToTest extends TestCase
+final class RestrictToTest extends TestCase
 {
     #[Test]
     public function happy_path(): void
