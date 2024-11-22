@@ -41,7 +41,7 @@ class RoutingServiceProvider implements ServiceProvider
             static function (ContainerInterface $container): FastRouteDispatcherFactory {
                 $cache_file = $container->get(Configuration::class)->get('routing.route_cache.filepath');
                 $cache_enable = $container->get(BuildStage::class) !== BuildStage::Development
-                    || $container->get(Configuration::class)->get('router.route_cache.enable');
+                    || $container->get(Configuration::class)->get('routing.route_cache.enable');
 
                 return new FastRouteDispatcherFactory(
                     $container->get(LoggerInterface::class),

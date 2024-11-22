@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Tests\Http\RequestHandler;
 
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpReasonPhrase;
+use PhoneBurner\SaltLite\Framework\Http\Domain\HttpStatus;
 use PhoneBurner\SaltLite\Framework\Http\RequestHandler\ErrorRequestHandler;
+use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\GenericHttpExceptionResponse;
 use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\HttpExceptionResponse;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\PageNotFoundResponse;
 use PhoneBurner\SaltLite\Framework\Routing\Match\RouteMatch;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
@@ -69,6 +70,8 @@ final class ErrorRequestHandlerTest extends TestCase
 
         $response = $sut->handle($request);
 
-        self::assertInstanceOf(PageNotFoundResponse::class, $response);
+        self::assertInstanceOf(GenericHttpExceptionResponse::class, $response);
+        self::assertSame(HttpStatus::NOT_FOUND, $response->getStatusCode());
+        self::assertSame(HttpReasonPhrase::NOT_FOUND, $response->getStatusTitle());
     }
 }
