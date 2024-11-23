@@ -10,6 +10,7 @@ use PhoneBurner\SaltLite\Framework\Http\Domain\HttpStatus;
 use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\ServerErrorResponse;
 use PhoneBurner\SaltLite\Framework\Http\Response\StreamResponse;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Psr7;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -62,7 +63,7 @@ class CatchExceptionalResponses implements MiddlewareInterface
         $whoops->pushHandler($handler);
 
         return new StreamResponse(
-            $whoops->handleException($e),
+            Str::stream($whoops->handleException($e)),
             HttpStatus::INTERNAL_SERVER_ERROR,
             [HttpHeader::CONTENT_TYPE => $handler->contentType()],
         );
