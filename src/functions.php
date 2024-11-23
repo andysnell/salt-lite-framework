@@ -33,9 +33,16 @@ function env(string $key, mixed $default = null): mixed
     return $value ?? $default;
 }
 
-/** Get full path relative to the application root */
+/**
+ * Get full path relative to the application root
+ *
+ * @return non-empty-string
+ */
 function path(string $path): string
 {
     \assert(\defined('\PhoneBurner\SaltLite\Framework\APP_ROOT'), 'APP_ROOT must be defined');
-    return APP_ROOT . $path;
+    $path = APP_ROOT . $path;
+    \assert($path !== '');
+
+    return $path;
 }
