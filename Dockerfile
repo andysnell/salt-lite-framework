@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM php:8.4-rc-cli as development
+FROM php:8.4-cli as development
 ENV PATH "/app/vendor/bin:/home/dev/composer/bin:$PATH"
 ENV COMPOSER_HOME "/home/dev/composer"
 ENV SALT_BUILD_STAGE "development"

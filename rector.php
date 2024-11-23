@@ -11,7 +11,6 @@ use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
 use Rector\Php83\Rector\ClassConst\AddTypeToConstRector;
 use Rector\Php84\Rector\Param\ExplicitNullableParamTypeRector;
 use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitThisCallRector;
-use Rector\TypeDeclaration\Rector\StmtsAwareInterface\DeclareStrictTypesRector;
 
 return RectorConfig::configure()
     ->withImportNames(importShortClasses: false)
@@ -21,7 +20,7 @@ return RectorConfig::configure()
         __DIR__ . '/src',
         __DIR__ . '/tests',
     ])
-    ->withPhpSets(php83: true)
+    ->withPhpSets(php84: true)
     ->withAttributesSets(all: true)
     ->withPreparedSets(
         deadCode: true,
@@ -32,12 +31,7 @@ return RectorConfig::configure()
         rectorPreset: true,
         phpunitCodeQuality: true,
         doctrineCodeQuality: true,
-        phpunit: true,
-    )->withRules([
-        AddTypeToConstRector::class,
-        ExplicitNullableParamTypeRector::class,
-    ])
-    ->withSkip([
+    )->withSkip([
         ClosureToArrowFunctionRector::class,
 
         // dead code

@@ -50,7 +50,7 @@
     }
   },
   "require": {
-    "php": "^8.3 || ^8.4",
+    "php": "^8.4",
     "ext-amqp": "*",
     "ext-bcmath": "*",
     "ext-ctype": "*",
@@ -123,21 +123,21 @@
   "require-dev": {
     "brianium/paratest": "^7.6",
     "filp/whoops": "^2.16",
-    "jangregor/phpstan-prophecy": "^1.0.2",
+    "jangregor/phpstan-prophecy": "^2",
     "phoneburner/coding-standard": "dev-main",
     "phoneburner/composer-replacements": "dev-main",
     "php-parallel-lint/php-parallel-lint": "^1.4",
     "phpspec/prophecy": "^1.20",
     "phpspec/prophecy-phpunit": "^2.3",
-    "phpstan/extension-installer": "^1.4.3",
-    "phpstan/phpstan": "^1.12.11",
-    "phpstan/phpstan-deprecation-rules": "^1.2.1",
-    "phpstan/phpstan-doctrine": "^1.5.6",
-    "phpstan/phpstan-phpunit": "^1.4.1",
+    "phpstan/extension-installer": ">=1.4.3",
+    "phpstan/phpstan": "^2.0.2",
+    "phpstan/phpstan-deprecation-rules": "^2",
+    "phpstan/phpstan-doctrine": "^2",
+    "phpstan/phpstan-phpunit": "^2.0.1",
     "phpunit/phpunit": "^11.4.3",
-    "rector/rector": "^1.2.10",
+    "rector/rector": "dev-main",
     "roave/security-advisories": "dev-latest",
-    "spaze/phpstan-disallowed-calls": "^3.5.1",
+    "spaze/phpstan-disallowed-calls": ">=4.0.1",
     "symfony/var-dumper": "^7.1.8"
   },
   "scripts": {
@@ -167,5 +167,8 @@
     ]
   },
   "extra": {
+    "branch-alias": {
+      "dev-main": "1.0.x"
+    }
   }
 }

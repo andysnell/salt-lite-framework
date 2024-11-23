@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="../../vendor/squizlabs/php_codesniffer/phpcs.xsd">
+         xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
     <arg name="report" value="full"/>
     <arg name="cache" value="build/phpcs"/>
     <arg name="extensions" value="php"/>
@@ -9,12 +9,6 @@
     <ini name="memory_limit" value="-1"/>
     <file>src</file>
     <file>tests</file>
+    <file>rector.php</file>
     <rule ref="PhoneBurner"/>
-
-<!--    <rule ref="SlevomatCodingStandard.Classes.MethodSpacing">-->
-<!--        <properties>-->
-<!--            <property name="minLinesCount" value="1"/>-->
-<!--            <property name="maxLinesCount" value="1"/>-->
-<!--        </properties>-->
-<!--    </rule>-->
 </ruleset>

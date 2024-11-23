@@ -16,19 +16,18 @@ class LazyMiddleware implements TerminableMiddleware
     private RequestHandlerInterface|null $fallback_request_handler = null;
 
     /**
-     * @var class-string<MiddlewareInterface>
+     * @param class-string<MiddlewareInterface> $middleware
      */
-    private readonly string $middleware;
-
-    private function __construct(private readonly ContainerInterface $container, string $middleware)
+    private function __construct(private readonly ContainerInterface $container, private readonly string $middleware)
     {
         if (! \is_a($middleware, MiddlewareInterface::class, true)) {
             throw new InvalidMiddlewareConfiguration(\sprintf(ErrorMessage::INVALID_CLASS, $middleware));
         }
-
-        $this->middleware = $middleware;
     }
 
+    /**
+     * @param class-string<MiddlewareInterface> $middleware
+     */
     public static function make(ContainerInterface $container, string $middleware): self
     {
         return new self($container, $middleware);

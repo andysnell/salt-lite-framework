@@ -11,14 +11,23 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 /**
  * Given an array of MiddlewareInterface instances, or MiddlewareInterface class
- * name strings, this class will produce RequestHandler structures composed of the
- * passed object instances or LazyMiddleware instances that wrap the resolved
- * middleware classes.
+ * name strings, this class will produce RequestHandler structures resolved from
+ * the PSR-11 container. If the container happens to be a `\PhoneBurner\SaltLite\Framework\Container\LazyContainer`, then
+ * the middleware will be resolved lazily.
  */
 class LazyMiddlewareRequestHandlerFactory implements MiddlewareRequestHandlerFactory
 {
-    public function __construct(protected readonly ContainerInterface $container)
+    private readonly \Closure $proxy_factory;
+
+    public function __construct(private readonly ContainerInterface $container)
     {
+        // Note that since the Lazy Proxy factory cannot return a lazy object,
+        // we need to call the `initializeLazyObject` method on the reflector of
+        // the object to return the initialized object. If the object is not lazy,
+        // this is a no-op.
+        $this->proxy_factory = static fn(object $object): object => new \ReflectionClass($object)->initializeLazyObject(
+            $container->get($object::class),
+        );
     }
 
     #[\Override]
@@ -58,10 +67,21 @@ class LazyMiddlewareRequestHandlerFactory implements MiddlewareRequestHandlerFac
         };
     }
 
+    /**
+     * @param class-string<MiddlewareInterface> $middleware_class
+     */
     protected function pushMiddlewareClass(
         MutableMiddlewareRequestHandler $handler,
         string $middleware_class,
     ): MutableMiddlewareRequestHandler {
-        return $handler->push(LazyMiddleware::make($this->container, $middleware_class));
+        $reflection = new \ReflectionClass($middleware_class);
+        if ($reflection->isInterface() || $reflection->isAbstract()) {
+            $handler->push(LazyMiddleware::make($this->container, $middleware_class));
+        }
+
+        $proxy = $reflection->newLazyProxy($this->proxy_factory);
+        \assert($proxy instanceof MiddlewareInterface);
+
+        return $handler->push($proxy);
     }
 }
