@@ -13,6 +13,7 @@ use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks\MySqlHealth
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks\PhpRuntimeHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks\RedisHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\RequestHandler\HealthCheckRequestHandler;
+use PhoneBurner\SaltLite\Framework\HealthCheck\RequestHandler\ReadyCheckRequestHandler;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Service\AppHealthCheckBuilder;
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
@@ -48,6 +49,16 @@ class HealthCheckServiceProvider implements ServiceProvider
              static function (MutableContainer $container): HealthCheckRequestHandler {
                     return new HealthCheckRequestHandler(
                         $container->get(HealthCheckBuilder::class),
+                        $container->get(LoggerInterface::class),
+                    );
+             },
+         );
+
+         $container->set(
+             ReadyCheckRequestHandler::class,
+             static function (MutableContainer $container): ReadyCheckRequestHandler {
+                    return new ReadyCheckRequestHandler(
+                        $container->get(LoggerInterface::class),
                     );
              },
          );

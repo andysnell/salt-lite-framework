@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Tests\Routing\Middleware;
 
+use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;
+use PhoneBurner\SaltLite\Framework\Http\Response\EmptyResponse;
 use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\MethodNotAllowedResponse;
 use PhoneBurner\SaltLite\Framework\Routing\Definition\RouteDefinition;
 use PhoneBurner\SaltLite\Framework\Routing\Match\RouteMatch;
@@ -13,6 +15,7 @@ use PhoneBurner\SaltLite\Framework\Routing\Result\MethodNotAllowed;
 use PhoneBurner\SaltLite\Framework\Routing\Result\RouteFound;
 use PhoneBurner\SaltLite\Framework\Routing\Result\RouteNotFound;
 use PhoneBurner\SaltLite\Framework\Routing\Router;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -57,7 +60,8 @@ final class AttachRouteToRequestTest extends TestCase
     }
 
     #[Test]
-    public function process_throws_exception_if_match_method_is_not_allowed(): void
+    #[DataProvider('providesMethodsOtherThanOptions')]
+    public function process_returns_MethodNotAllowedResponse_when_match_method_is_not_allowed(HttpMethod $method): void
     {
         $methods = [HttpMethod::Get, HttpMethod::Post];
 
@@ -65,10 +69,61 @@ final class AttachRouteToRequestTest extends TestCase
             MethodNotAllowed::make(...$methods),
         );
 
+        $this->request->getMethod()->willReturn($method->value);
+
         $response = $this->sut->process($this->request->reveal(), $this->next_handler->reveal());
         self::assertInstanceOf(MethodNotAllowedResponse::class, $response);
         self::assertSame($response->allowed_methods, [HttpMethod::Get, HttpMethod::Post]);
     }
+
+    public static function providesMethodsOtherThanOptions(): \Generator
+    {
+        yield [HttpMethod::Get];
+        yield [HttpMethod::Post];
+        yield [HttpMethod::Put];
+        yield [HttpMethod::Patch];
+        yield [HttpMethod::Delete];
+        yield [HttpMethod::Head];
+        yield [HttpMethod::Connect];
+        yield [HttpMethod::Trace];
+    }
+
+    #[Test]
+    public function process_returns_EmptyResponse_when_options_is_method(): void
+    {
+        $methods = [HttpMethod::Get, HttpMethod::Post];
+
+        $this->router->resolveForRequest($this->request->reveal())->willReturn(
+            MethodNotAllowed::make(...$methods),
+        );
+
+        $this->request->getMethod()->willReturn(HttpMethod::Options->value);
+        $this->request->getHeaderLine(HttpHeader::ACCESS_CONTROL_REQUEST_HEADERS)->willReturn('Authorization, Cookie');
+        $this->request->hasHeader(HttpHeader::ORIGIN)->willReturn(false);
+
+        $response = $this->sut->process($this->request->reveal(), $this->next_handler->reveal());
+        self::assertInstanceOf(EmptyResponse::class, $response);
+        self::assertSame('OPTIONS, GET, POST', $response->getHeaderLine(HttpHeader::ALLOW));
+    }
+
+
+    #[Test]
+    #[DataProvider('providesMethodsOtherThanOptions')]
+    public function process_returns_d(HttpMethod $method): void
+    {
+        $methods = [HttpMethod::Get, HttpMethod::Post];
+
+        $this->router->resolveForRequest($this->request->reveal())->willReturn(
+            MethodNotAllowed::make(...$methods),
+        );
+
+        $this->request->getMethod()->willReturn($method->value);
+
+        $response = $this->sut->process($this->request->reveal(), $this->next_handler->reveal());
+        self::assertInstanceOf(MethodNotAllowedResponse::class, $response);
+        self::assertSame($response->allowed_methods, [HttpMethod::Get, HttpMethod::Post]);
+    }
+
 
     #[Test]
     public function process_attaches_route_when_match_is_found(): void

@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Routing\Middleware;
 
+use PhoneBurner\SaltLite\Framework\Domain\Time\TimeConstant;
+use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
+use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;
+use PhoneBurner\SaltLite\Framework\Http\Response\EmptyResponse;
 use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\MethodNotAllowedResponse;
 use PhoneBurner\SaltLite\Framework\Routing\Match\RouteMatch;
 use PhoneBurner\SaltLite\Framework\Routing\Result\MethodNotAllowed;
@@ -26,6 +30,10 @@ class AttachRouteToRequest implements MiddlewareInterface
         $result = $this->finder->resolveForRequest($request);
 
         if ($result instanceof MethodNotAllowed) {
+            if ($request->getMethod() === HttpMethod::Options->value) {
+                return $this->handleOptionsRequest($request, $result);
+            }
+
             return new MethodNotAllowedResponse(...$result->getAllowedMethods());
         }
 
@@ -34,5 +42,31 @@ class AttachRouteToRequest implements MiddlewareInterface
         }
 
         return $handler->handle($request);
+    }
+
+    private function handleOptionsRequest(ServerRequestInterface $request, MethodNotAllowed $result): ResponseInterface
+    {
+        $allowed_methods = \array_column([HttpMethod::Options, ...$result->getAllowedMethods()], 'value');
+        $allowed_methods = \implode(', ', \array_unique($allowed_methods));
+
+        $allowed_headers = \explode(',', $request->getHeaderLine(HttpHeader::ACCESS_CONTROL_REQUEST_HEADERS));
+        $allowed_headers = [HttpHeader::AUTHORIZATION, HttpHeader::COOKIE, ...$allowed_headers];
+        $allowed_headers = \array_map(\trim(...), $allowed_headers);
+        $allowed_headers = \array_map(\strtolower(...), $allowed_headers);
+        $allowed_headers = \implode(',', \array_unique($allowed_headers));
+
+        $headers = [
+            HttpHeader::ALLOW => $allowed_methods,
+            HttpHeader::ACCESS_CONTROL_ALLOW_HEADERS => $allowed_headers,
+            HttpHeader::ACCESS_CONTROL_MAX_AGE => TimeConstant::SECONDS_IN_DAY,
+            HttpHeader::ACCESS_CONTROL_ALLOW_METHODS => $allowed_methods,
+        ];
+
+        if ($request->hasHeader(HttpHeader::ORIGIN)) {
+            $headers[HttpHeader::ACCESS_CONTROL_ALLOW_ORIGIN] = $request->getHeaderLine(HttpHeader::ORIGIN);
+            $headers[HttpHeader::VARY] = $request->getHeaderLine(HttpHeader::ORIGIN);
+        }
+
+        return new EmptyResponse(headers: $headers);
     }
 }

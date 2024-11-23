@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Http;
 
 use Laminas\HttpHandlerRunner\Emitter\EmitterInterface;
+use PhoneBurner\SaltLite\Framework\App\BuildStage;
 use PhoneBurner\SaltLite\Framework\App\Kernel;
-use PhoneBurner\SaltLite\Framework\Http\Response\HtmlResponse;
+use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\ServerErrorResponse;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
-use Whoops\Handler\PrettyPageHandler;
-use Whoops\Run;
 
 class HttpKernel implements Kernel
 {
@@ -20,6 +19,7 @@ class HttpKernel implements Kernel
         private readonly RequestHandlerInterface $request_handler,
         private readonly EmitterInterface $emitter,
         private readonly LoggerInterface $logger,
+        private readonly BuildStage $stage,
     ) {
     }
 
@@ -35,13 +35,11 @@ class HttpKernel implements Kernel
                 'exception' => $e,
             ]);
 
-            $whoops = new Run();
-            $whoops->allowQuit(false);
-            $whoops->writeToOutput(false);
-            $whoops->pushHandler(new PrettyPageHandler());
-            $html = $whoops->handleException($e);
+            if ($this->stage === BuildStage::Development) {
+                throw $e;
+            }
 
-            $response = new HtmlResponse($html);
+            $response = new ServerErrorResponse();
         }
 
         try {
@@ -50,6 +48,10 @@ class HttpKernel implements Kernel
             $this->logger->critical('An unhandled error occurred while emitting the request', [
                 'exception' => $e,
             ]);
+
+            if ($this->stage === BuildStage::Development) {
+                throw $e;
+            }
         }
     }
 }

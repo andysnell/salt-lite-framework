@@ -17,7 +17,7 @@ class ConfigurationFactory
 
     public static function make(Environment $environment): ImmutableConfiguration
     {
-        $use_cache = $environment->stage !== BuildStage::Development || $_ENV['SALT_ENABLE_CONFIG_CACHE'];
+        $use_cache = $environment->stage !== BuildStage::Development || ($_ENV['SALT_ENABLE_CONFIG_CACHE'] ?? false);
         $cache_file = $environment->root() . self::CACHE_FILE;
         if (\file_exists($cache_file)) {
             if ($use_cache) {

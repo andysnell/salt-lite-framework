@@ -13,10 +13,11 @@ use PhoneBurner\SaltLite\Framework\Http\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerInterface;
 
 class HealthCheckRequestHandler implements RequestHandlerInterface
 {
-    public const string DEFAULT_ENDPOINT = '/health';
+    public const string DEFAULT_ENDPOINT = '/healthz';
 
     public const array HEALTH_CHECK_HEADERS = [
         HttpHeader::CONTENT_TYPE => ContentType::HEALTH_JSON,
@@ -25,6 +26,7 @@ class HealthCheckRequestHandler implements RequestHandlerInterface
 
     public function __construct(
         private readonly HealthCheckBuilder $factory,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -34,6 +36,8 @@ class HealthCheckRequestHandler implements RequestHandlerInterface
         $health_check = $this->factory->withLinks([
             'self' => $request->getUri()->getPath(),
         ])->make();
+
+        $this->logger->debug('application health check: ' . $health_check->status->value);
 
         return new JsonResponse(
             $health_check,

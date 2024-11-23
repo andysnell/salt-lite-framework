@@ -17,6 +17,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\NullLogger;
 
 final class HealthCheckRequestHandlerTest extends TestCase
 {
@@ -39,7 +40,8 @@ final class HealthCheckRequestHandlerTest extends TestCase
             ->method('make')
             ->willReturn($health_check);
 
-        $handler = new HealthCheckRequestHandler($factory);
+        $logger = new NullLogger();
+        $handler = new HealthCheckRequestHandler($factory, $logger);
         $response = $handler->handle($request);
 
         self::assertInstanceOf(JsonResponse::class, $response);

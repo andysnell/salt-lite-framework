@@ -51,6 +51,7 @@
   },
   "require": {
     "php": "^8.3 || ^8.4",
+    "ext-amqp": "*",
     "ext-bcmath": "*",
     "ext-ctype": "*",
     "ext-curl": "*",
@@ -62,6 +63,7 @@
     "ext-json": "*",
     "ext-mbstring": "*",
     "ext-pdo": "*",
+    "ext-pdo_mysql": "*",
     "ext-random": "*",
     "ext-redis": "*",
     "ext-sodium": "*",
