@@ -41,7 +41,7 @@ class RouteMatch implements Route
         );
     }
 
-    private function __construct(private readonly RouteDefinition $definition, private readonly array $path_vars)
+    private function __construct(public readonly RouteDefinition $definition, public readonly array $path_vars)
     {
         $this->setWrapped($this->definition->getWrapped());
     }
