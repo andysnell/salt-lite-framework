@@ -23,9 +23,9 @@ final class FileNotFoundResponseTest extends TestCase
         self::assertSame([], $sut->getAdditional());
 
         self::assertSame(HttpStatus::NOT_FOUND, $sut->getCode());
-        self::assertSame('HTTP 404: File Not Found', $sut->getMessage());
+        self::assertSame('HTTP 404: Not Found', $sut->getMessage());
 
         self::assertSame('text/plain; charset=utf-8', $sut->getHeaderLine(HttpHeader::CONTENT_TYPE));
-        self::assertSame('HTTP 404: File Not Found', $sut->getBody()->getContents());
+        self::assertSame('HTTP 404: Not Found', $sut->getBody()->getContents());
     }
 }

@@ -6,19 +6,19 @@ namespace PhoneBurner\SaltLite\Framework\Tests\Http\Response\Exceptional;
 
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpStatus;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\PermissionDeniedResponse;
+use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\AuthorizationRequiredResponse;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-final class PermissionDeniedResponseTest extends TestCase
+final class AuthorizationRequiredResponseTest extends TestCase
 {
     #[Test]
     public function response_has_expected_defaults(): void
     {
-        $sut = new PermissionDeniedResponse();
+        $sut = new AuthorizationRequiredResponse();
 
         self::assertSame(HttpStatus::FORBIDDEN, $sut->getStatusCode());
-        self::assertSame('Permission Denied', $sut->getStatusTitle());
+        self::assertSame('Authorization Required', $sut->getStatusTitle());
         self::assertSame('You do not have permission to access the requested resource.', $sut->getStatusDetail());
         self::assertSame([], $sut->getAdditional());
 

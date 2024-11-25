@@ -10,6 +10,7 @@ use PhoneBurner\SaltLite\Framework\Http\Domain\HttpStatus;
 class DeadRouteResponse extends GenericHttpExceptionResponse
 {
     protected int $status_code = HttpStatus::GONE;
-    protected string $title = HttpReasonPhrase::GONE;
-    protected string $detail = 'This functionality is no longer supported.';
+    protected string|null $http_reason_phrase = HttpReasonPhrase::GONE;
+    protected string $title = 'No Longer Supported';
+    protected string $detail = 'The functionality formerly provided at this address is no longer supported.';
 }
