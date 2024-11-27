@@ -52,6 +52,10 @@ build: | phpstan.neon phpunit.xml .env
 	@$(app) mkdir --parents build
 	@touch build
 
+.PHONY: vendor
+vendor: build
+	@$(app) composer install
+
 .PHONY: clean
 clean:
 	$(app) -rf ./build ./vendor html/phpunit

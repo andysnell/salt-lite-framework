@@ -7,7 +7,6 @@ namespace PhoneBurner\SaltLite\Framework\Util\Helper;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionNamedType;
-use ReflectionObject;
 use ReflectionType;
 
 abstract class Reflect
@@ -15,11 +14,11 @@ abstract class Reflect
     /**
      * @template T of object
      * @param T|class-string<T> $class_or_object
-     * @return ReflectionClass<T>|ReflectionObject
+     * @return ReflectionClass<T>
      */
     public static function object(object|string $class_or_object): ReflectionClass
     {
-        return \is_object($class_or_object) ? new ReflectionObject($class_or_object) : new ReflectionClass($class_or_object);
+        return \is_object($class_or_object) ? new ReflectionClass($class_or_object::class) : new ReflectionClass($class_or_object);
     }
 
     /**
@@ -155,5 +154,56 @@ abstract class Reflect
     public static function shortName(object|string $class_or_object): string
     {
         return self::object($class_or_object)->getShortName();
+    }
+
+    /**
+     * @template T of object
+     * @param class-string<T> $class
+     * @param callable(T): void $initializer
+     * @return T&object
+     */
+    public static function ghost(
+        string $class,
+        callable $initializer,
+        bool $skip_initialization_on_serialize = false,
+    ): object {
+        $flags = 0;
+        $flags |= $skip_initialization_on_serialize ? ReflectionClass::SKIP_INITIALIZATION_ON_SERIALIZE : 0;
+
+        $ghost = self::object($class)->newLazyGhost($initializer, $flags);
+        \assert($ghost instanceof $class);
+
+        return $ghost;
+    }
+
+    /**
+     * This method wraps the passed factory in another closure that will make sure
+     * that the object ultimately returned is not a lazy object. This is useful
+     * when we do not necessarily know if the factory is going to give us something
+     * that is lazy or not, e.g. If the factory is just resolving the class from
+     * the PSR-11 container, for something like a database connection or entity,
+     * the object returned by the container may be another ghost or proxy.
+     *
+     * @template T of object
+     * @param class-string<T> $class
+     * @param callable(T): T $factory
+     * @return T
+     */
+    public static function proxy(
+        string $class,
+        callable $factory,
+        bool $skip_initialization_on_serialize = false,
+    ): object {
+        $options = 0;
+        $options |= $skip_initialization_on_serialize ? ReflectionClass::SKIP_INITIALIZATION_ON_SERIALIZE : 0;
+
+        $proxy = self::object($class)->newLazyProxy(
+            /** @phpstan-ignore argument.type */
+            static fn(object $object): object => self::object($object)->initializeLazyObject($factory($object)),
+            $options,
+        );
+        \assert($proxy instanceof $class);
+
+        return $proxy;
     }
 }

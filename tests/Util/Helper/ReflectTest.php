@@ -19,7 +19,6 @@ use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionMethod;
-use ReflectionObject;
 use stdClass;
 use Traversable;
 
@@ -32,10 +31,10 @@ final class ReflectTest extends TestCase
     }
 
     #[Test]
-    public function object_returns_ReflectionObject_for_object_instance(): void
+    public function object_returns_ReflectionClass_for_object_instance(): void
     {
         $mirror = new Mirror();
-        self::assertEquals(new ReflectionObject($mirror), Reflect::object($mirror));
+        self::assertEquals(new ReflectionClass($mirror::class), Reflect::object($mirror));
     }
 
     #[Test]
