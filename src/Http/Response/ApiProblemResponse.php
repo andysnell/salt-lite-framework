@@ -12,7 +12,7 @@ class ApiProblemResponse extends JsonResponse
 {
     public function __construct(int $status, string $title, iterable $additional = [])
     {
-        $problem = new ApiProblem($title, 'https://httpstatuses.com/' . $status);
+        $problem = new ApiProblem($title, 'https://httpstatuses.io/' . $status);
         $problem->setStatus($status);
         foreach ($additional as $key => $value) {
             $problem[$key] = $value;

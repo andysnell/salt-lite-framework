@@ -12,7 +12,7 @@ readonly final class LogTrace implements UuidInterface
 {
     use UuidWrapper;
 
-    private function __construct(public UuidInterface $uuid)
+    public function __construct(public UuidInterface $uuid)
     {
     }
 

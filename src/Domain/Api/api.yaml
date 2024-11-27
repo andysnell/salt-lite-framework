@@ -163,7 +163,7 @@ components:
           type: string
           description: A URI for the *general* error type, pointing to
             human-readable documentation of that given type.
-          example: "https://httpstatuses.com/404"
+          example: "https://httpstatuses.io/404"
         title:
           type: string
           description: A short, human-readable title for the *general* error type.
@@ -199,7 +199,7 @@ components:
                     type: string
                     example: The username is already taken, please choose again.
           example:
-            type: https://httpstatuses.com/400
+            type: https://httpstatuses.io/400
             title: Bad Request
             details: "One or more validation errors occurred and the request cannot be processed."
             invalid-params:
@@ -227,7 +227,7 @@ components:
           schema:
             $ref: "#/components/schemas/ProblemDetails"
           example:
-            type: "https://httpstatuses.com/401"
+            type: "https://httpstatuses.io/401"
             title: Unauthorized
             details: The user associated with the request could not be authenticated.
 
@@ -239,7 +239,7 @@ components:
           schema:
             $ref: "#/components/schemas/ProblemDetails"
           example:
-            type: "https://httpstatuses.com/403"
+            type: "https://httpstatuses.io/403"
             title: Forbidden
             details: The authenticated member does not have access to the requested resource.
 
@@ -251,7 +251,7 @@ components:
           schema:
             $ref: "#/components/schemas/ProblemDetails"
           example:
-            type: "https://httpstatuses.com/404"
+            type: "https://httpstatuses.io/404"
             title: Not Found
             details: Resource was not found.
 
@@ -263,6 +263,6 @@ components:
           schema:
             $ref: "#/components/schemas/ProblemDetails"
           example:
-            type: "https://httpstatuses.com/500"
+            type: "https://httpstatuses.io/500"
             title: Internal Server Error
             details: An unexpected error has occurred, and the server is unable to complete the request.
