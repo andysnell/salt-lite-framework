@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Http\Middleware;
 
 use PhoneBurner\SaltLite\Framework\App\BuildStage;
+use PhoneBurner\SaltLite\Framework\App\Context;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpStatus;
 use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\ServerErrorResponse;
@@ -26,6 +27,7 @@ class CatchExceptionalResponses implements MiddlewareInterface
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly BuildStage $stage,
+        private readonly Context $context,
     ) {
     }
 
@@ -43,7 +45,7 @@ class CatchExceptionalResponses implements MiddlewareInterface
                 'exception' => $e,
             ]);
 
-            return $this->stage === BuildStage::Development
+            return ($this->stage === BuildStage::Development && $this->context === Context::Http)
                 ? $this->whoops($e, $request)
                 : new ServerErrorResponse();
         }

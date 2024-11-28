@@ -7,6 +7,7 @@ namespace PhoneBurner\SaltLite\Framework\Http;
 use Laminas\HttpHandlerRunner\Emitter\EmitterInterface;
 use Laminas\HttpHandlerRunner\Emitter\SapiStreamEmitter;
 use PhoneBurner\SaltLite\Framework\App\BuildStage;
+use PhoneBurner\SaltLite\Framework\App\Context;
 use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
 use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
 use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
@@ -99,6 +100,7 @@ class HttpServiceProvider implements ServiceProvider
                 return new CatchExceptionalResponses(
                     $container->get(LoggerInterface::class),
                     $container->get(BuildStage::class),
+                    $container->get(Context::class),
                 );
             },
         );
