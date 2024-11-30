@@ -4,8 +4,14 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Middleware;
 
+use PhoneBurner\SaltLite\Framework\Http\Domain\ContentType;
 use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\HttpExceptionResponse;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\HttpExceptionResponseTransformer;
+use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\HttpExceptionResponseTransformerStrategy;
+use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\HtmlResponseTransformerStrategy;
+use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\JsonResponseTransformerStrategy;
+use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\TextResponseTransformerStrategy;
+use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Psr7;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -13,8 +19,12 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class TransformHttpExceptionResponses implements MiddlewareInterface
 {
+    /**
+     * @param class-string<HttpExceptionResponseTransformerStrategy> $default_strategy
+     */
     public function __construct(
-        private readonly HttpExceptionResponseTransformer $response_transformer,
+        private readonly LogTrace $log_trace,
+        private readonly string $default_strategy = TextResponseTransformerStrategy::class,
     ) {
     }
 
@@ -23,9 +33,19 @@ class TransformHttpExceptionResponses implements MiddlewareInterface
     {
         $response = $handler->handle($request);
         if ($response instanceof HttpExceptionResponse) {
-            return $this->response_transformer->transform($response, $request);
+            return $this->factory($request)->transform($response, $request, $this->log_trace);
         }
 
         return $response;
+    }
+
+    private function factory(ServerRequestInterface $request): HttpExceptionResponseTransformerStrategy
+    {
+        return match (true) {
+            Psr7::expects($request, ContentType::JSON) => new JsonResponseTransformerStrategy(),
+            Psr7::expects($request, ContentType::HTML) => new HtmlResponseTransformerStrategy(),
+            Psr7::expects($request, ContentType::TEXT) => new TextResponseTransformerStrategy(),
+            default => new $this->default_strategy(),
+        };
     }
 }

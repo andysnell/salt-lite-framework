@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Domain\Ip;
 
-class IpAddress implements \Stringable
+readonly class IpAddress implements \Stringable
 {
-    public function __construct(public readonly string $value)
+    public IpAddressType $type;
+
+    public function __construct(public string $value)
     {
         \filter_var($value, \FILTER_VALIDATE_IP) ?: throw new \InvalidArgumentException('invalid ip address: ' . $value);
-    }
-
-    public function getType(): IpAddressType
-    {
-        return \str_contains($this->value, ':') ? IpAddressType::IPv6 : IpAddressType::IPv4;
+        $this->type = \str_contains($this->value, ':') ? IpAddressType::IPv6 : IpAddressType::IPv4;
     }
 
     public static function make(string $address): self
@@ -46,6 +44,16 @@ class IpAddress implements \Stringable
     public function __toString(): string
     {
         return $this->value;
+    }
+
+    public function __serialize(): array
+    {
+        return ['value' => $this->value];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->__construct($data['value']);
     }
 
     public static function marshall(array $data): self|null

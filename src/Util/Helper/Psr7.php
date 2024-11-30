@@ -11,24 +11,30 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class Psr7
 {
+    /**
+     * @param ContentType::*&string $content_type
+     */
     public static function expects(MessageInterface $message, string $content_type): bool
     {
-        if ($content_type === ContentType::JSON) {
-            $content_type = 'json';
+        $headers = \array_filter(\array_map(
+            static fn(string $header): string => \strtolower($message->getHeaderLine($header)),
+            [HttpHeader::ACCEPT, HttpHeader::CONTENT_TYPE],
+        ));
+
+        if (\array_any($headers, static fn(string $header): bool => \str_contains($header, $content_type))) {
+            return true;
         }
 
-        return \str_contains(\strtolower($message->getHeaderLine(HttpHeader::ACCEPT)), $content_type)
-            || \str_contains(\strtolower($message->getHeaderLine(HttpHeader::CONTENT_TYPE)), $content_type);
-    }
+        // Handle content types defined with a structured syntax suffix, e.g. application/vnd.api+json
+        $suffix = match ($content_type) {
+            ContentType::JSON => '+json',
+            ContentType::GZ => '+gzip',
+            ContentType::ZIP => '+zip',
+            ContentType::XML => '+xml',
+            default => false,
+        };
 
-    public static function expectsJson(MessageInterface $message): bool
-    {
-        return self::expects($message, ContentType::JSON);
-    }
-
-    public static function expectsHtml(MessageInterface $message): bool
-    {
-        return self::expects($message, ContentType::HTML);
+        return $suffix && \array_any($headers, static fn(string $header): bool => \str_contains($header, $suffix));
     }
 
     /**

@@ -41,7 +41,7 @@ phpstan.neon:
 	@$(call copy-safe,phpstan.dist.neon,phpstan.neon)
 
 .env:
-	@$(call copy-safe,.env.example,.env)
+	@$(call copy-safe,.env.development,.env)
 
 # The build target dependencies must be set as "order-only" prerequisites to prevent
 # the target from being rebuilt everytime the dependencies are updated.

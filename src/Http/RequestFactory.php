@@ -9,6 +9,7 @@ use Laminas\Diactoros\ServerRequest;
 use Laminas\Diactoros\ServerRequestFactory;
 use Laminas\Diactoros\Stream;
 use Laminas\Diactoros\Uri;
+use PhoneBurner\SaltLite\Framework\Domain\Ip\IpAddress;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ServerRequestFactoryInterface;
@@ -20,7 +21,8 @@ class RequestFactory implements RequestFactoryInterface, ServerRequestFactoryInt
 {
     public function fromGlobals(): ServerRequestInterface
     {
-        return ServerRequestFactory::fromGlobals();
+        return ServerRequestFactory::fromGlobals()
+            ->withAttribute(IpAddress::class, IpAddress::marshall($_SERVER));
     }
 
     public function createRequest(

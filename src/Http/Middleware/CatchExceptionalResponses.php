@@ -6,6 +6,7 @@ namespace PhoneBurner\SaltLite\Framework\Http\Middleware;
 
 use PhoneBurner\SaltLite\Framework\App\BuildStage;
 use PhoneBurner\SaltLite\Framework\App\Context;
+use PhoneBurner\SaltLite\Framework\Http\Domain\ContentType;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpStatus;
 use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\ServerErrorResponse;
@@ -54,9 +55,9 @@ class CatchExceptionalResponses implements MiddlewareInterface
     private function whoops(\Throwable $e, ServerRequestInterface $request): ResponseInterface
     {
         $handler = match (true) {
-            Psr7::expectsJson($request) => new JsonResponseHandler(),
-            Psr7::expectsHtml($request) => new PrettyPageHandler(),
-            default => new PlainTextHandler(),
+            Psr7::expects($request, ContentType::JSON) => new JsonResponseHandler(),
+            Psr7::expects($request, ContentType::HTML) => new PrettyPageHandler(),
+            default => new PlainTextHandler($this->logger),
         };
 
         $whoops = new Run();

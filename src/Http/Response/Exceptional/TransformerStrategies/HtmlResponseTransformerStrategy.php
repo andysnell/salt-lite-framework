@@ -2,45 +2,25 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\SaltLite\Framework\Http\Response\Exceptional;
+namespace PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies;
 
-use PhoneBurner\SaltLite\Framework\Http\Response\ApiProblemResponse;
+use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\HttpExceptionResponse;
+use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\HttpExceptionResponseTransformerStrategy;
 use PhoneBurner\SaltLite\Framework\Http\Response\HtmlResponse;
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Psr7;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class HttpExceptionResponseTransformer
+class HtmlResponseTransformerStrategy implements HttpExceptionResponseTransformerStrategy
 {
-    public function __construct(private readonly LogTrace $log_trace)
-    {
+    public function transform(
+        HttpExceptionResponse $exception,
+        ServerRequestInterface $request,
+        LogTrace $log_trace,
+    ): HtmlResponse {
+        return new HtmlResponse($this->render($exception, $log_trace), $exception->getStatusCode());
     }
 
-    public function transform(HttpExceptionResponse $exception, ServerRequestInterface $request): ResponseInterface
-    {
-        return match (true) {
-            Psr7::expectsJson($request) => $this->toJsonResponse($exception),
-            Psr7::expectsHtml($request) => $this->toHtmlResponse($exception),
-            default => $exception, // should be a TextResponse instance
-        };
-    }
-
-    private function toJsonResponse(HttpExceptionResponse $exception): ApiProblemResponse
-    {
-        return new ApiProblemResponse($exception->getStatusCode(), $exception->getStatusTitle(), [
-            'log_trace' => $this->log_trace->toString(),
-            'detail' => $exception->getStatusDetail() ?: null,
-            ...$exception->getAdditional(),
-        ]);
-    }
-
-    private function toHtmlResponse(HttpExceptionResponse $exception): HtmlResponse
-    {
-        return new HtmlResponse($this->render($exception), $exception->getStatusCode());
-    }
-
-    private function render(HttpExceptionResponse $exception): string
+    private function render(HttpExceptionResponse $exception, LogTrace $log_trace): string
     {
         return <<<HTML
             <!doctype html>
@@ -178,7 +158,7 @@ class HttpExceptionResponseTransformer
                             <h1 class="mb-3">{$exception->getStatusTitle()}</h1>
                             <p class="mb-4">{$exception->getStatusDetail()}</p>
                             <div class="mt-5 font-weight-light text-muted small">
-                                <span>Reference: {$this->log_trace}</span>
+                                <span>Reference: {$log_trace}</span>
                             </div>
                         </div>
                     </div>

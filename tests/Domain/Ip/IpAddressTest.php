@@ -25,7 +25,8 @@ final class IpAddressTest extends TestCase
         $sut = IpAddress::marshall($data);
         self::assertSame($address, (string)$sut);
         self::assertSame($address, $sut?->value);
-        self::assertSame($type, $sut->getType());
+        self::assertSame($type, $sut->type);
+        self::assertEquals(\unserialize(\serialize($sut)), $sut);
     }
 
     #[DataProvider('provideValidAddresses')]
@@ -38,7 +39,8 @@ final class IpAddressTest extends TestCase
         $sut = IpAddress::marshall($data);
         self::assertSame($address, (string)$sut);
         self::assertSame($address, $sut?->value);
-        self::assertSame($type, $sut->getType());
+        self::assertSame($type, $sut->type);
+        self::assertEquals(\unserialize(\serialize($sut)), $sut);
     }
 
     #[DataProvider('provideValidAddresses')]
@@ -51,7 +53,8 @@ final class IpAddressTest extends TestCase
         $sut = IpAddress::marshall($data);
         self::assertSame($address, (string)$sut);
         self::assertSame($address, $sut?->value);
-        self::assertSame($type, $sut->getType());
+        self::assertSame($type, $sut->type);
+        self::assertEquals(\unserialize(\serialize($sut)), $sut);
     }
 
     #[Test]
@@ -68,7 +71,8 @@ final class IpAddressTest extends TestCase
         $sut = IpAddress::make($address);
         self::assertSame($address, (string)$sut);
         self::assertSame($address, $sut->value);
-        self::assertSame($type, $sut->getType());
+        self::assertSame($type, $sut->type);
+        self::assertEquals(\unserialize(\serialize($sut)), $sut);
     }
 
     #[DataProvider('provideInvalidAddresses')]
@@ -87,7 +91,8 @@ final class IpAddressTest extends TestCase
         self::assertNotNull($sut);
         self::assertSame($address, (string)$sut);
         self::assertSame($address, $sut->value);
-        self::assertSame($type, $sut->getType());
+        self::assertSame($type, $sut->type);
+        self::assertEquals(\unserialize(\serialize($sut)), $sut);
     }
 
     #[DataProvider('provideValidAddresses')]

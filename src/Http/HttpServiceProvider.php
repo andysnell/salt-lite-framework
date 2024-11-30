@@ -15,7 +15,7 @@ use PhoneBurner\SaltLite\Framework\Http\Middleware\CatchExceptionalResponses;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\LazyMiddlewareRequestHandlerFactory;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\MiddlewareRequestHandlerFactory;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\TransformHttpExceptionResponses;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\HttpExceptionResponseTransformer;
+use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\TextResponseTransformerStrategy;
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
 use PhoneBurner\SaltLite\Framework\Routing\RequestHandler\NullHandler;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
@@ -79,17 +79,10 @@ class HttpServiceProvider implements ServiceProvider
         $container->set(
             TransformHttpExceptionResponses::class,
             static function (ContainerInterface $container): TransformHttpExceptionResponses {
+                $default = $container->get(Configuration::class)->get('app.exceptional_responses.default_transformer');
                 return new TransformHttpExceptionResponses(
-                    $container->get(HttpExceptionResponseTransformer::class),
-                );
-            },
-        );
-
-        $container->set(
-            HttpExceptionResponseTransformer::class,
-            static function (ContainerInterface $container): HttpExceptionResponseTransformer {
-                return new HttpExceptionResponseTransformer(
                     $container->get(LogTrace::class),
+                    $default ?: TextResponseTransformerStrategy::class,
                 );
             },
         );
