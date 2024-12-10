@@ -24,7 +24,7 @@ final class UuidStringTest extends TestCase
         self::assertTrue($wrapped_uuid->equals($wrapped_uuid));
         self::assertTrue($uuid->equals($wrapped_uuid));
         self::assertSame($uuid->getBytes(), $wrapped_uuid->getBytes());
-        self::assertSame($uuid->getFields(), $wrapped_uuid->getFields());
+        self::assertEquals($uuid->getFields(), $wrapped_uuid->getFields());
         self::assertEquals($uuid->getHex(), $wrapped_uuid->getHex());
         self::assertEquals($uuid->getInteger(), $wrapped_uuid->getInteger());
         self::assertSame($uuid->toString(), $wrapped_uuid->toString());
