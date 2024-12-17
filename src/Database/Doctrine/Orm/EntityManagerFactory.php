@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Database\Doctrine\Orm;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\DBAL\Tools\Console\ConnectionProvider as DockerConnectionProvider;
+use Doctrine\DBAL\Tools\Console\ConnectionProvider as DoctrineConnectionProvider;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Cache\DefaultCacheFactory;
 use Doctrine\ORM\Cache\Region\DefaultRegion;
@@ -36,7 +36,7 @@ class EntityManagerFactory
         private readonly ContainerInterface $container,
         private readonly Environment $environment,
         private readonly Configuration $configuration,
-        private readonly DockerConnectionProvider $connection_provider,
+        private readonly DoctrineConnectionProvider $connection_provider,
         private readonly CacheItemPoolFactory $cache_factory,
     ) {
     }

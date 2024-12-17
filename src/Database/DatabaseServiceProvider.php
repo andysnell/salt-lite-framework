@@ -21,6 +21,7 @@ use PhoneBurner\SaltLite\Framework\Database\Redis\CachingRedisManager;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * @codeCoverageIgnore
@@ -62,6 +63,7 @@ class DatabaseServiceProvider implements ServiceProvider
                     $environment,
                     $container->get(Configuration::class),
                     $container->get(CacheItemPoolFactory::class),
+                    $container->get(LoggerInterface::class),
                 );
             },
         );

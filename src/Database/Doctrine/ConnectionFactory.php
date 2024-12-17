@@ -7,6 +7,7 @@ namespace PhoneBurner\SaltLite\Framework\Database\Doctrine;
 use Doctrine\DBAL\Configuration as ConnectionConfiguration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Logging\Middleware;
 use Doctrine\DBAL\Tools\Console\ConnectionNotFound;
 use PhoneBurner\SaltLite\Framework\App\BuildStage;
 use PhoneBurner\SaltLite\Framework\App\Context;
@@ -14,6 +15,7 @@ use PhoneBurner\SaltLite\Framework\App\Environment;
 use PhoneBurner\SaltLite\Framework\Cache\CacheDriver;
 use PhoneBurner\SaltLite\Framework\Cache\CacheItemPoolFactory;
 use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
+use Psr\Log\LoggerInterface;
 
 class ConnectionFactory
 {
@@ -23,6 +25,7 @@ class ConnectionFactory
         private readonly Environment $environment,
         private readonly Configuration $configuration,
         private readonly CacheItemPoolFactory $cache_factory,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -49,6 +52,12 @@ class ConnectionFactory
             CacheDriver::None => $this->cache_factory->make(CacheDriver::None),
             default => throw new \LogicException('Unsupported Cache Type for Doctrine DBAL Result Cache'),
         });
+
+        if ($params['enable_logging'] ?? false) {
+            $middleware = $connection_config->getMiddlewares();
+            $middleware[] = new Middleware($this->logger);
+            $connection_config->setMiddlewares($middleware);
+        }
 
         return DriverManager::getConnection($params, $connection_config);
     }
