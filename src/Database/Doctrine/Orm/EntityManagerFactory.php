@@ -84,8 +84,8 @@ class EntityManagerFactory
         $doctrine_config->setProxyDir($cache_path . '/proxy');
         $doctrine_config->setProxyNamespace(\ucfirst($name) . 'DoctrineProxies');
         $doctrine_config->setAutoGenerateProxyClasses(match ($this->environment->stage) {
-            BuildStage::Development => ProxyFactory::AUTOGENERATE_FILE_NOT_EXISTS_OR_CHANGED,
-            default => ProxyFactory::AUTOGENERATE_NEVER,
+            BuildStage::Production => ProxyFactory::AUTOGENERATE_NEVER,
+            default => ProxyFactory::AUTOGENERATE_FILE_NOT_EXISTS_OR_CHANGED,
         });
 
         $doctrine_config->setMetadataDriverImpl(new AttributeDriver($config['entity_paths'] ?? [], true));
