@@ -15,22 +15,13 @@ function app(): App
 
 /**
  * Get an environment variable allowing for default.
- *
- * Preserves existing (unintended) application behavior where Phinx < 0.16.0
- * which had a dependency on CakePHP 2.x, which defined the \env() function
- * with slightly different behavior than the one defined here, and which
- * would always be defined first. Note that this may have some weird behavior
- * with `null` values in $_ENV, but actually defined in the environment, so
- * that an empty string is returned instead of the default value.
+ * Note: this has slightly different behavior from SALT, as it does not check $_SERVER
+ * or fall back to getenv() if the variable is not set in $_ENV. The Salt-Lite
+ * Framework assumes that all environment variables are set in $_ENV.
  */
 function env(string $key, mixed $default = null): mixed
 {
-    $value = $_SERVER[$key] ?? $_ENV[$key] ?? null;
-    if ($value === null && \getenv($key) !== false) {
-        $value = (string)\getenv($key);
-    }
-
-    return $value ?? $default;
+    return $_ENV[$key] ?? $default;
 }
 
 /**
