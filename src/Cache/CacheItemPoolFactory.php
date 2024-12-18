@@ -10,6 +10,7 @@ use PhoneBurner\SaltLite\Framework\App\Environment;
 use PhoneBurner\SaltLite\Framework\Cache\Marshaller\RemoteCacheMarshaller;
 use PhoneBurner\SaltLite\Framework\Cache\Marshaller\Serializer;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Reflect;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -54,7 +55,9 @@ class CacheItemPoolFactory
     public function make(CacheDriver $driver, string|null $namespace = null): CacheItemPoolInterface
     {
         return $namespace !== null ? new ProxyAdapter($this->make($driver), $namespace) : match ($driver) {
-            CacheDriver::Remote => $this->pool ??= $this->createDefaultCacheItemPool(),
+            CacheDriver::Remote => $this->pool ??= Reflect::ghost(CacheItemPoolProxy::class, function (CacheItemPoolProxy $ghost): void {
+                $ghost->__construct($this->createDefaultCacheItemPool());
+            }),
             CacheDriver::File => $this->file ??= $this->createFileCacheItemPool(),
             CacheDriver::Memory => $this->memory ??= new ArrayAdapter(storeSerialized: false),
             CacheDriver::None => $this->null ??= new NullAdapter(),
