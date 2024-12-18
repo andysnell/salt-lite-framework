@@ -34,7 +34,7 @@ class CacheRoutes extends Command
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $cache_file = $this->config->get('router.route_cache.filepath');
+        $cache_file = $this->config->get('routing.route_cache.filepath');
 
         if ($this->environment->stage === BuildStage::Development) {
             $output->writeln('<comment>Route caching is disabled in development mode</comment>');
