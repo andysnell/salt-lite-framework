@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies;
 
+use PhoneBurner\SaltLite\Framework\Http\Domain\ContentType;
+use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
 use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\HttpExceptionResponse;
 use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\HttpExceptionResponseTransformerStrategy;
 use PhoneBurner\SaltLite\Framework\Http\Response\HtmlResponse;
@@ -20,7 +22,7 @@ class HtmlResponseTransformerStrategy implements HttpExceptionResponseTransforme
         return new HtmlResponse(
             $this->render($exception, $log_trace),
             $exception->getStatusCode(),
-            $exception->getHeaders(),
+            [...$exception->getHeaders(), HttpHeader::CONTENT_TYPE => ContentType::HTML],
         );
     }
 

@@ -21,6 +21,6 @@ class JsonResponseTransformerStrategy implements HttpExceptionResponseTransforme
             'log_trace' => $log_trace->toString(),
             'detail' => $exception->getStatusDetail() ?: null,
             ...$exception->getAdditional(),
-        ]);
+        ], $exception->getHeaders());
     }
 }
