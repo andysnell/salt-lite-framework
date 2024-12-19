@@ -18,9 +18,14 @@ class ErrorReporting
     public static function override(array $env, PhpRuntimeConfig $config = new PhpRuntimeConfig()): void
     {
         $config->set('error_reporting', (string)((int)$config->get('error_reporting')
-            | ($env['SALT_ENABLE_REPORTING_ERRORS'] ?? false ? self::ALL_ERRORS : 0)
-            | ($env['SALT_ENABLE_REPORTING_WARNINGS'] ?? false ? self::ALL_WARNINGS : 0)
-            | ($env['SALT_ENABLE_REPORTING_NOTICES'] ?? false ? self::ALL_NOTICES : 0)
-            | ($env['SALT_ENABLE_REPORTING_DEPRECATIONS'] ?? false ? self::ALL_DEPRECATIONS : 0)));
+            | (self::cast($env, 'SALT_ENABLE_REPORTING_ERRORS') ? self::ALL_ERRORS : 0)
+            | (self::cast($env, 'SALT_ENABLE_REPORTING_WARNINGS') ? self::ALL_WARNINGS : 0)
+            | (self::cast($env, 'SALT_ENABLE_REPORTING_NOTICES') ? self::ALL_NOTICES : 0)
+            | (self::cast($env, 'SALT_ENABLE_REPORTING_DEPRECATIONS') ? self::ALL_DEPRECATIONS : 0)));
+    }
+
+    private static function cast(array $env, string $key): bool
+    {
+        return (bool)\filter_var($env[$key] ?? null, \FILTER_VALIDATE_BOOL);
     }
 }

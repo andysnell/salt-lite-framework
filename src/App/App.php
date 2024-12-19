@@ -6,10 +6,12 @@ namespace PhoneBurner\SaltLite\Framework\App;
 
 use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
 use PhoneBurner\SaltLite\Framework\Configuration\ConfigurationFactory;
+use PhoneBurner\SaltLite\Framework\Configuration\ImmutableConfiguration;
 use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
 use PhoneBurner\SaltLite\Framework\Container\PhpDiContainerAdapter;
 use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Reflect;
 
 use const PhoneBurner\SaltLite\Framework\APP_ROOT;
 
@@ -43,21 +45,30 @@ final class App
         self::$instance = null;
     }
 
-    private function __construct(public readonly Context $context, Environment|null $environment = null)
-    {
+    private function __construct(
+        public readonly Context $context,
+        Environment|null $environment = null,
+        Configuration|null $config = null,
+        MutableContainer|null $container = null,
+    ) {
         $this->environment = $environment ?? new Environment($context, APP_ROOT);
-        $this->config = ConfigurationFactory::make($this->environment);
 
-        // instantiate container and register application service providers
-        $this->container = new PhpDiContainerAdapter();
-        foreach ($this->config->get('container.service_providers') as $provider_class) {
-            \assert(\is_a($provider_class, ServiceProvider::class, true));
-            new $provider_class()->register($this->container);
-        }
+        $this->config = $config ?? Reflect::proxy(
+            ImmutableConfiguration::class,
+            fn(ImmutableConfiguration $object): ImmutableConfiguration => ConfigurationFactory::make($this->environment),
+        );
 
-        $this->container->set(Configuration::class, $this->config);
-        $this->container->set(Environment::class, $this->environment);
-        $this->container->set(LogTrace::class, LogTrace::make());
-        $this->container->set(self::class, $this);
+        $this->container = $container ?? Reflect::ghost(PhpDiContainerAdapter::class, function (PhpDiContainerAdapter $container): void {
+                $container->__construct();
+            foreach ($this->config->get('container.service_providers') as $provider_class) {
+                \assert(\is_a($provider_class, ServiceProvider::class, true));
+                new $provider_class()->register($this->container);
+            }
+
+                $container->set(Configuration::class, $this->config);
+                $container->set(Environment::class, $this->environment);
+                $container->set(LogTrace::class, LogTrace::make());
+                $container->set(self::class, $this);
+        });
     }
 }
