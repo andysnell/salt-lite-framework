@@ -19,9 +19,13 @@ function app(): App
  * or fall back to getenv() if the variable is not set in $_ENV. The Salt-Lite
  * Framework assumes that all environment variables are set in $_ENV.
  */
-function env(string $key, mixed $default = null): mixed
-{
-    return $_ENV[$key] ?? $default;
+function env(
+    string $key,
+    mixed $production = null,
+    mixed $development = null,
+    mixed $integration = null,
+): mixed {
+    return App::instance()->environment->env($key, $production, $development, $integration);
 }
 
 /**

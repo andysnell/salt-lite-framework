@@ -80,7 +80,6 @@
     "eventsauce/eventsauce": "^3.6",
     "guzzlehttp/guzzle": "^7.9.2",
     "guzzlehttp/psr7": "^2.7",
-    "josegonzalez/dotenv": "^4.0",
     "laminas/laminas-diactoros": "^3.5",
     "laminas/laminas-httphandlerrunner": "^2.11",
     "league/flysystem": "^3.29.1",

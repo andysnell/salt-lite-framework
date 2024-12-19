@@ -17,7 +17,11 @@ class HtmlResponseTransformerStrategy implements HttpExceptionResponseTransforme
         ServerRequestInterface $request,
         LogTrace $log_trace,
     ): HtmlResponse {
-        return new HtmlResponse($this->render($exception, $log_trace), $exception->getStatusCode());
+        return new HtmlResponse(
+            $this->render($exception, $log_trace),
+            $exception->getStatusCode(),
+            $exception->getHeaders(),
+        );
     }
 
     private function render(HttpExceptionResponse $exception, LogTrace $log_trace): string

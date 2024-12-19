@@ -10,7 +10,7 @@ use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
 
 class ApiProblemResponse extends JsonResponse
 {
-    public function __construct(int $status, string $title, iterable $additional = [])
+    public function __construct(int $status, string $title, iterable $additional = [], array $headers = [])
     {
         $problem = new ApiProblem($title, 'https://httpstatuses.io/' . $status);
         $problem->setStatus($status);
@@ -19,6 +19,7 @@ class ApiProblemResponse extends JsonResponse
         }
 
         parent::__construct($problem->asArray(), $problem->getStatus(), [
+            ...$headers,
             HttpHeader::CONTENT_TYPE => ContentType::PROBLEM_DETAILS_JSON,
         ]);
     }
