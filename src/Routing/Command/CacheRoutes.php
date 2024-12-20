@@ -31,15 +31,13 @@ class CacheRoutes extends Command
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $cache_file = $this->config->get('routing.route_cache.filepath');
-        $cache_enabled = (bool)$this->config->get(Configuration::class)->get('routing.route_cache.enable');
-
-        if (! $cache_enabled) {
+        if (! $this->config->get('routing.route_cache.enable')) {
             $output->writeln('<comment>Route caching is disabled!</comment>');
             $output->writeln('Set the SALT_ENABLE_ROUTE_CACHE environment variable to `true` enable it');
             return self::SUCCESS;
         }
 
+        $cache_file = $this->config->get('routing.route_cache.filepath');
         if ($input->getOption('clear') || \file_exists($cache_file)) {
             $output->write("<comment>Clearing Existing Route Cache File:</comment> ");
 
