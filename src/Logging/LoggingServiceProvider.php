@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Logging;
 
 use Monolog\Formatter\LineFormatter;
+use Monolog\Formatter\LogglyFormatter;
 use Monolog\Handler\HandlerInterface;
+use Monolog\Handler\LogglyHandler;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -79,7 +81,7 @@ class LoggingServiceProvider implements ServiceProvider
                 $config['path'] ?? path('/storage/logs/salt-lite.log'),
                 $config['max_files'] ?? 7,
                 $config['level'] ?? LogLevel::DEBUG,
-                $config['bubble'] ?? true,
+                (bool)($config['bubble'] ?? true),
             );
 
             $handler->setFormatter(new LineFormatter());
@@ -94,10 +96,26 @@ class LoggingServiceProvider implements ServiceProvider
                 $handler = new StreamHandler(
                     $config['path'] ?? path('/storage/logs/salt-lite.log'),
                     $config['level'] ?? LogLevel::DEBUG,
-                    $config['bubble'] ?? true,
+                    (bool)($config['bubble'] ?? true),
                 );
 
                 $handler->setFormatter(new LineFormatter());
+
+                return $handler;
+            },
+        );
+
+        $container->set(
+            LogglyHandler::class,
+            static function (ContainerInterface $container): LogglyHandler {
+                $config = $container->get(Configuration::class)->get('logging.' . LogglyHandler::class) ?? [];
+                $handler = new LogglyHandler(
+                    (string)($config['token'] ?? null),
+                    $config['level'] ?? LogLevel::DEBUG,
+                    (bool)($config['bubble'] ?? true),
+                );
+
+                $handler->setFormatter(new LogglyFormatter());
 
                 return $handler;
             },
