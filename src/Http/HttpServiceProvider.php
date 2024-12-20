@@ -15,9 +15,11 @@ use PhoneBurner\SaltLite\Framework\Http\Middleware\CatchExceptionalResponses;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\LazyMiddlewareRequestHandlerFactory;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\MiddlewareRequestHandlerFactory;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\TransformHttpExceptionResponses;
+use PhoneBurner\SaltLite\Framework\Http\RequestHandler\CspViolationReportRequestHandler;
+use PhoneBurner\SaltLite\Framework\Http\RequestHandler\ErrorRequestHandler;
 use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\TextResponseTransformerStrategy;
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
-use PhoneBurner\SaltLite\Framework\Routing\RequestHandler\NullHandler;
+use PhoneBurner\SaltLite\Framework\Routing\RequestHandler\NotFoundRequestHandler;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -69,9 +71,10 @@ class HttpServiceProvider implements ServiceProvider
         $container->set(
             RequestHandlerInterface::class,
             static function (ContainerInterface $container): RequestHandlerInterface {
+                $config = $container->get(Configuration::class);
                 return $container->get(MiddlewareRequestHandlerFactory::class)->queue(
-                    new NullHandler($container->get(LoggerInterface::class)),
-                    $container->get(Configuration::class)->get('middleware') ?? [],
+                    $container->get($config->get('routing.fallback_request_handler') ?? NotFoundRequestHandler::class),
+                    $config->get('middleware') ?? [],
                 );
             },
         );
@@ -95,6 +98,27 @@ class HttpServiceProvider implements ServiceProvider
                     $container->get(BuildStage::class),
                     $container->get(Context::class),
                 );
+            },
+        );
+
+        $container->set(
+            NotFoundRequestHandler::class,
+            static function (ContainerInterface $container): NotFoundRequestHandler {
+                return new NotFoundRequestHandler($container->get(LoggerInterface::class));
+            },
+        );
+
+        $container->set(
+            CspViolationReportRequestHandler::class,
+            static function (ContainerInterface $container): CspViolationReportRequestHandler {
+                return new CspViolationReportRequestHandler($container->get(LoggerInterface::class));
+            },
+        );
+
+        $container->set(
+            ErrorRequestHandler::class,
+            static function (ContainerInterface $container): ErrorRequestHandler {
+                return new ErrorRequestHandler();
             },
         );
     }

@@ -8,7 +8,7 @@ use Generator;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;
 use PhoneBurner\SaltLite\Framework\Routing\Definition\RouteDefinition;
 use PhoneBurner\SaltLite\Framework\Routing\Match\RouteMatch as SUT;
-use PhoneBurner\SaltLite\Framework\Routing\RequestHandler\NullHandler;
+use PhoneBurner\SaltLite\Framework\Routing\RequestHandler\NotFoundRequestHandler;
 use PhoneBurner\SaltLite\Framework\Tests\Fixtures\TestRequestHandler;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -308,7 +308,7 @@ final class RouteMatchTest extends TestCase
         ];
 
         $attributes_with_defaulted_values = [
-            RequestHandlerInterface::class => NullHandler::class,
+            RequestHandlerInterface::class => NotFoundRequestHandler::class,
             MiddlewareInterface::class => [],
             ...$attributes,
         ];

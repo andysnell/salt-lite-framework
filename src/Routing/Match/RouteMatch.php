@@ -6,7 +6,7 @@ namespace PhoneBurner\SaltLite\Framework\Routing\Match;
 
 use PhoneBurner\Http\Message\UriWrapper;
 use PhoneBurner\SaltLite\Framework\Routing\Definition\RouteDefinition;
-use PhoneBurner\SaltLite\Framework\Routing\RequestHandler\NullHandler;
+use PhoneBurner\SaltLite\Framework\Routing\RequestHandler\NotFoundRequestHandler;
 use PhoneBurner\SaltLite\Framework\Routing\Route;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Arr;
 use Psr\Http\Message\UriInterface;
@@ -22,7 +22,7 @@ class RouteMatch implements Route
         // the route definition provides ways to set these, but they aren't
         // required
         $attributes = [
-            RequestHandlerInterface::class => NullHandler::class,
+            RequestHandlerInterface::class => NotFoundRequestHandler::class,
             MiddlewareInterface::class => [],
             ...$definition->getAttributes(),
         ];

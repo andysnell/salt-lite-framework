@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Routing\RequestHandler;
 
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\PageNotFoundResponse;
+use PhoneBurner\SaltLite\Framework\Domain\Ip\IpAddress;
+use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\NotFoundResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Untested since we should never get here. Once we have an easy way to throw
- * common exceptions
+ * This should be the default fallback handler for all requests that are not
+ * otherwise routed or handled by the application in some way.
  */
-class NullHandler implements RequestHandlerInterface
+class NotFoundRequestHandler implements RequestHandlerInterface
 {
     public function __construct(private readonly LoggerInterface $logger)
     {
@@ -23,11 +24,11 @@ class NullHandler implements RequestHandlerInterface
     #[\Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $this->logger->error('middleware tried to handle a request with ' . self::class, [
+        $this->logger->notice('Not Found: {path}', [
             'path' => (string)$request->getUri(),
-            'stack' => \debug_backtrace(),
+            'ip_address' => $request->getAttribute(IpAddress::class),
         ]);
 
-        return new PageNotFoundResponse();
+        return new NotFoundResponse();
     }
 }

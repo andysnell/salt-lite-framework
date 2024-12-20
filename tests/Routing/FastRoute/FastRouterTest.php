@@ -133,6 +133,7 @@ final class FastRouterTest extends TestCase
             $definition_list,
             new FastRouteDispatcherFactory(
                 $this->createMock(LoggerInterface::class),
+                false,
                 '/tmp/should_not_be_used',
             ),
             new FastRouteResultFactory(),

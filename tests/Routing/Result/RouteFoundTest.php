@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Tests\Routing\Result;
 
 use PhoneBurner\SaltLite\Framework\Routing\Definition\RouteDefinition;
-use PhoneBurner\SaltLite\Framework\Routing\RequestHandler\NullHandler;
+use PhoneBurner\SaltLite\Framework\Routing\RequestHandler\NotFoundRequestHandler;
 use PhoneBurner\SaltLite\Framework\Routing\Result\RouteFound as SUT;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -23,7 +23,7 @@ final class RouteFoundTest extends TestCase
     ];
 
     protected const array DEFAULT_ROUTE_ATTRIBUTES = [
-        RequestHandlerInterface::class => NullHandler::class,
+        RequestHandlerInterface::class => NotFoundRequestHandler::class,
         MiddlewareInterface::class => [],
     ];
 

@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Routing;
 
-use PhoneBurner\SaltLite\Framework\App\BuildStage;
 use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
 use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
 use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
+use PhoneBurner\SaltLite\Framework\Routing\Command\CacheRoutes;
 use PhoneBurner\SaltLite\Framework\Routing\Definition\DefinitionList;
 use PhoneBurner\SaltLite\Framework\Routing\Definition\LazyConfigDefinitionList;
 use PhoneBurner\SaltLite\Framework\Routing\FastRoute\FastRouteDispatcherFactory;
 use PhoneBurner\SaltLite\Framework\Routing\FastRoute\FastRouter;
 use PhoneBurner\SaltLite\Framework\Routing\FastRoute\FastRouteResultFactory;
-use PhoneBurner\SaltLite\Framework\Routing\RequestHandler\NullHandler;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
@@ -39,13 +38,10 @@ class RoutingServiceProvider implements ServiceProvider
         $container->set(
             FastRouteDispatcherFactory::class,
             static function (ContainerInterface $container): FastRouteDispatcherFactory {
-                $cache_file = $container->get(Configuration::class)->get('routing.route_cache.filepath');
-                $cache_enable = $container->get(Configuration::class)->get('routing.route_cache.enable');
-                $cache_enable ??= $container->get(BuildStage::class) !== BuildStage::Development;
-
                 return new FastRouteDispatcherFactory(
                     $container->get(LoggerInterface::class),
-                    $cache_enable ? $cache_file : null,
+                    (bool)$container->get(Configuration::class)->get('routing.route_cache.enable'),
+                    (string)$container->get(Configuration::class)->get('routing.route_cache.filepath'),
                 );
             },
         );
@@ -72,9 +68,12 @@ class RoutingServiceProvider implements ServiceProvider
         );
 
         $container->set(
-            NullHandler::class,
-            static function (ContainerInterface $container): NullHandler {
-                return new NullHandler($container->get(LoggerInterface::class));
+            CacheRoutes::class,
+            static function (ContainerInterface $container): CacheRoutes {
+                return new CacheRoutes(
+                    $container->get(Configuration::class),
+                    $container->get(FastRouter::class),
+                );
             },
         );
     }

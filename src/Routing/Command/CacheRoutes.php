@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Routing\Command;
 
-use PhoneBurner\SaltLite\Framework\App\BuildStage;
-use PhoneBurner\SaltLite\Framework\App\Environment;
 use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
 use PhoneBurner\SaltLite\Framework\Routing\FastRoute\FastRouter;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -22,7 +20,6 @@ class CacheRoutes extends Command
     public const string DESCRIPTION = 'Generate the cached routes file';
 
     public function __construct(
-        private readonly Environment $environment,
         private readonly Configuration $config,
         private readonly FastRouter $router,
     ) {
@@ -35,9 +32,10 @@ class CacheRoutes extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $cache_file = $this->config->get('routing.route_cache.filepath');
+        $cache_enabled = (bool)$this->config->get(Configuration::class)->get('routing.route_cache.enable');
 
-        if ($this->environment->stage === BuildStage::Development) {
-            $output->writeln('<comment>Route caching is disabled in development mode</comment>');
+        if (! $cache_enabled) {
+            $output->writeln('<comment>Route caching is disabled!</comment>');
             $output->writeln('Set the SALT_ENABLE_ROUTE_CACHE environment variable to `true` enable it');
             return self::SUCCESS;
         }

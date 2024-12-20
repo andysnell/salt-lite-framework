@@ -7,9 +7,10 @@ namespace PhoneBurner\SaltLite\Framework\Tests\Domain\Uuid;
 use PhoneBurner\SaltLite\Framework\Domain\Uuid\RandomUuid;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\Rfc4122\FieldsInterface;
 use Ramsey\Uuid\Uuid;
 
-class RandomUuidTest extends TestCase
+final class RandomUuidTest extends TestCase
 {
     #[Test]
     public function it_is_a_UUID(): void
@@ -17,7 +18,13 @@ class RandomUuidTest extends TestCase
         $uuid = new RandomUuid();
 
         self::assertTrue(Uuid::isValid((string)$uuid));
-        self::assertSame(Uuid::UUID_TYPE_RANDOM, $uuid->getFields()->getVersion());
-        self::assertSame(Uuid::UUID_TYPE_RANDOM, Uuid::fromString((string)$uuid)->getFields()->getVersion());
+
+        $fields = $uuid->getFields();
+        self::assertInstanceOf(FieldsInterface::class, $fields);
+        self::assertSame(Uuid::UUID_TYPE_RANDOM, $fields->getVersion());
+
+        $fields = Uuid::fromString((string)$uuid)->getFields();
+        self::assertInstanceOf(FieldsInterface::class, $fields);
+        self::assertSame(Uuid::UUID_TYPE_RANDOM, $fields->getVersion());
     }
 }

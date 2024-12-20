@@ -33,11 +33,7 @@ class Environment
         mixed $development = null,
         mixed $integration = null,
     ): string|int|float|bool|null {
-        return self::cast($this->server[$key] ?? null) ?? match ($this->stage) {
-            BuildStage::Production => $production,
-            BuildStage::Integration => $integration ?? $production,
-            BuildStage::Development => $development ?? $integration ?? $production,
-        };
+        return self::cast($this->server[$key] ?? null) ?? $this->match($production, $development, $integration);
     }
 
     public function env(
@@ -46,7 +42,12 @@ class Environment
         mixed $development = null,
         mixed $integration = null,
     ): string|int|float|bool|null {
-        return self::cast($this->env[$key] ?? null) ?? match ($this->stage) {
+        return self::cast($this->env[$key] ?? null) ?? $this->match($production, $development, $integration);
+    }
+
+    public function match(mixed $production, mixed $development = null, mixed $integration = null): mixed
+    {
+        return match ($this->stage) {
             BuildStage::Production => $production,
             BuildStage::Integration => $integration ?? $production,
             BuildStage::Development => $development ?? $integration ?? $production,

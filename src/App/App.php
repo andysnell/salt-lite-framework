@@ -59,16 +59,16 @@ final class App
         );
 
         $this->container = $container ?? Reflect::ghost(PhpDiContainerAdapter::class, function (PhpDiContainerAdapter $container): void {
-                $container->__construct();
+            $container->__construct();
             foreach ($this->config->get('container.service_providers') as $provider_class) {
                 \assert(\is_a($provider_class, ServiceProvider::class, true));
-                new $provider_class()->register($this->container);
+                new $provider_class()->register($container);
             }
 
-                $container->set(Configuration::class, $this->config);
-                $container->set(Environment::class, $this->environment);
-                $container->set(LogTrace::class, LogTrace::make());
-                $container->set(self::class, $this);
+            $container->set(Configuration::class, $this->config);
+            $container->set(Environment::class, $this->environment);
+            $container->set(LogTrace::class, LogTrace::make());
+            $container->set(self::class, $this);
         });
     }
 }

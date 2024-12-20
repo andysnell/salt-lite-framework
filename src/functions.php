@@ -28,6 +28,14 @@ function env(
     return App::instance()->environment->env($key, $production, $development, $integration);
 }
 
+function stage(
+    mixed $production = null,
+    mixed $development = null,
+    mixed $integration = null,
+): mixed {
+    return App::instance()->environment->match($production, $development, $integration);
+}
+
 /**
  * Get full path relative to the application root
  *

@@ -9,7 +9,7 @@ use PhoneBurner\SaltLite\Framework\App\Environment;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class EnvironmentTest extends TestCase
+final class EnvironmentTest extends TestCase
 {
     #[Test]
     public function env_can_get_the_value_from_the_environment_and_server(): void

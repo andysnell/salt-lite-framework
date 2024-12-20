@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Configuration;
 
 use Brick\VarExporter\VarExporter;
-use PhoneBurner\SaltLite\Framework\App\BuildStage;
 use PhoneBurner\SaltLite\Framework\App\Environment;
 use PhoneBurner\SaltLite\Framework\Util\Filesystem\FileWriter;
 
@@ -17,16 +16,12 @@ class ConfigurationFactory
 
     public static function make(Environment $environment): ImmutableConfiguration
     {
-        $use_cache = $environment->stage !== BuildStage::Development || ($_ENV['SALT_ENABLE_CONFIG_CACHE'] ?? false);
+        $cache_enabled = $environment->env('SALT_ENABLE_CONFIG_CACHE', true, false);
         $cache_file = $environment->root() . self::CACHE_FILE;
-        if (\file_exists($cache_file)) {
-            if ($use_cache) {
-                /** @phpstan-ignore include.fileNotFound (see https://github.com/phpstan/phpstan/issues/11798) */
-                return new ImmutableConfiguration(include $cache_file);
-            }
 
-            // remove stale cache file to force re-creation next time the cache is enabled
-            @\unlink($cache_file);
+        if ($cache_enabled && \file_exists($cache_file)) {
+            /** @phpstan-ignore include.fileNotFound (see https://github.com/phpstan/phpstan/issues/11798) */
+            return new ImmutableConfiguration(include $cache_file);
         }
 
         $config = [];
@@ -36,7 +31,7 @@ class ConfigurationFactory
             }
         }
 
-        if ($use_cache) {
+        if ($cache_enabled) {
             FileWriter::string($cache_file, '<?php ' . VarExporter::export($config, self::EXPORT_OPTIONS));
         }
 

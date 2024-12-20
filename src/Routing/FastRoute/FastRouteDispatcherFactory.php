@@ -21,7 +21,8 @@ class FastRouteDispatcherFactory
 
     public function __construct(
         private readonly LoggerInterface $logger,
-        private readonly string|null $cache_file = null,
+        private readonly bool $cache_enable,
+        private readonly string $cache_file,
     ) {
     }
 
@@ -40,7 +41,7 @@ class FastRouteDispatcherFactory
      */
     public function make(callable $route_definition_callback): Dispatcher
     {
-        if ($this->cache_file && \file_exists($this->cache_file)) {
+        if ($this->cache_enable && \file_exists($this->cache_file)) {
             try {
                 return new GroupCountBasedDispatcher(require $this->cache_file);
             } catch (\Throwable $e) { // Includes \ParseError
@@ -53,7 +54,7 @@ class FastRouteDispatcherFactory
         $route_definition_callback($route_collector);
         $dispatch_data = $route_collector->getData();
 
-        if ($this->cache_file) {
+        if ($this->cache_enable) {
             try {
                 FileWriter::string($this->cache_file, '<?php ' . VarExporter::export($dispatch_data, self::EXPORT_OPTIONS));
             } catch (\Throwable $e) {

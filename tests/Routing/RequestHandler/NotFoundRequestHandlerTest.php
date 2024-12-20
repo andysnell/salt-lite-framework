@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Tests\Routing\RequestHandler;
 
 use Laminas\Diactoros\Uri;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\PageNotFoundResponse;
-use PhoneBurner\SaltLite\Framework\Routing\RequestHandler\NullHandler;
+use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\NotFoundResponse;
+use PhoneBurner\SaltLite\Framework\Routing\RequestHandler\NotFoundRequestHandler;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 
-final class NullHandlerTest extends TestCase
+final class NotFoundRequestHandlerTest extends TestCase
 {
     #[Test]
     public function handle_returns_page_not_found(): void
@@ -22,17 +22,16 @@ final class NullHandlerTest extends TestCase
 
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects($this->once())
-            ->method('error')
+            ->method('notice')
             ->willReturnCallback(static function ($message, array $context): void {
-                self::assertSame('middleware tried to handle a request with ' . NullHandler::class, $message);
+                self::assertSame('Not Found: {path}', $message);
                 self::assertSame('http://example.com/test/path?with=query', $context['path']);
-                self::assertArrayHasKey('stack', $context);
             });
 
-        $sut = new NullHandler($logger);
+        $sut = new NotFoundRequestHandler($logger);
 
         $response = $sut->handle($request);
 
-        self::assertInstanceOf(PageNotFoundResponse::class, $response);
+        self::assertInstanceOf(NotFoundResponse::class, $response);
     }
 }
