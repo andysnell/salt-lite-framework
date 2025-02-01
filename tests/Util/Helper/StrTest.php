@@ -38,15 +38,7 @@ final class StrTest extends TestCase
     #[Test]
     public function string_will_cast_stringlike_thing_to_string(string $expected, string|\Stringable $test): void
     {
-        self::assertSame($expected, Str::string($test));
-    }
-
-    #[DataProvider('providesInvalidStringTestCases')]
-    #[Test]
-    public function string_throws_exception_if_argument_is_not_string_or_stringable(mixed $test): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        Str::string($test);
+        self::assertSame($expected, Str::cast($test));
     }
 
     #[Test]
@@ -71,14 +63,6 @@ final class StrTest extends TestCase
 
         self::assertInstanceOf(StreamInterface::class, $stream);
         self::assertSame($expected, $stream->getContents());
-    }
-
-    #[DataProvider('providesInvalidStringTestCases')]
-    #[Test]
-    public function stream_throws_exception_if_argument_is_not_string_or_stringable(mixed $test): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        Str::stream($test);
     }
 
     public static function providesValidStringTestCases(): Generator

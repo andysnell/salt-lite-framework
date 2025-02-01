@@ -9,7 +9,7 @@ use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;
 use PhoneBurner\SaltLite\Framework\Routing\Definition\RouteDefinition;
 use PhoneBurner\SaltLite\Framework\Routing\Definition\RouteGroupDefinition as SUT;
 use PhoneBurner\SaltLite\Framework\Tests\Fixtures\TestRequestHandler;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Arr;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Iter;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -189,7 +189,7 @@ final class RouteGroupDefinitionTest extends TestCase
         );
 
         $group = $this->prophesize(SUT::class);
-        $group->getIterator()->willReturn(Arr::iterable([
+        $group->getIterator()->willReturn(Iter::cast([
             RouteDefinition::get('/path1'),
             RouteDefinition::all('/path2'),
         ]));

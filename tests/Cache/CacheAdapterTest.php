@@ -65,7 +65,7 @@ final class CacheAdapterTest extends TestCase
     public function set_puts_item_into_cache(string|\Stringable $raw_key, string $normalized_key): void
     {
         $start_time_threshold = \microtime(true);
-        self::assertTrue($this->sut->set($raw_key, new Ttl(60), 'value'));
+        self::assertTrue($this->sut->set($raw_key, 'value', new Ttl(60)));
         $end_time_threshold = \microtime(true);
 
         $expiries = Reflect::getProperty($this->cache_pool, 'expiries');
@@ -91,7 +91,7 @@ final class CacheAdapterTest extends TestCase
         })($key_pairs);
 
         $start_time_threshold = \microtime(true);
-        self::assertTrue($this->sut->setMultiple(new Ttl(60), $values));
+        self::assertTrue($this->sut->setMultiple($values, new Ttl(60)));
         $end_time_threshold = \microtime(true);
 
         $expiries = Reflect::getProperty($this->cache_pool, 'expiries');
@@ -135,7 +135,7 @@ final class CacheAdapterTest extends TestCase
     public function remember_returns_cached_item_if_exists(string|\Stringable $raw_key, string $normalized_key): void
     {
         self::assertTrue($this->psr_cache->set($normalized_key, 'value'));
-        self::assertSame('value', $this->sut->remember($raw_key, new Ttl(60), fn(): string => 'new value'));
+        self::assertSame('value', $this->sut->remember($raw_key, fn(): string => 'new value', new Ttl(60)));
         self::assertSame('value', $this->psr_cache->get($normalized_key));
     }
 
@@ -144,7 +144,7 @@ final class CacheAdapterTest extends TestCase
     public function remember_can_force_refresh_value(string|\Stringable $raw_key, string $normalized_key): void
     {
         self::assertTrue($this->psr_cache->set($normalized_key, 'value'));
-        self::assertSame('new value', $this->sut->remember($raw_key, new Ttl(60), fn(): string => 'new value', true));
+        self::assertSame('new value', $this->sut->remember($raw_key, fn(): string => 'new value', new Ttl(60), true));
         self::assertSame('new value', $this->psr_cache->get($normalized_key));
     }
 
@@ -153,7 +153,7 @@ final class CacheAdapterTest extends TestCase
     public function remember_sets_cached_item_if_not_exists(string|\Stringable $raw_key, string $normalized_key): void
     {
         self::assertNull($this->psr_cache->get($normalized_key));
-        self::assertSame('new value', $this->sut->remember($raw_key, new Ttl(60), fn(): string => 'new value'));
+        self::assertSame('new value', $this->sut->remember($raw_key, fn(): string => 'new value', new Ttl(60)));
         self::assertSame('new value', $this->psr_cache->get($normalized_key));
         self::assertSame('new value', $this->sut->get($raw_key));
     }
@@ -173,7 +173,7 @@ final class CacheAdapterTest extends TestCase
             ->with($normalized_key, 'better value', 3600)
             ->willReturn(true);
 
-        self::assertSame('better value', (new CacheAdapter($mock))->remember($raw_key, new Ttl(3600), fn(): string => 'better value'));
+        self::assertSame('better value', (new CacheAdapter($mock))->remember($raw_key, fn(): string => 'better value', new Ttl(3600)));
     }
 
     #[DataProvider('providesNormalizedKeys')]

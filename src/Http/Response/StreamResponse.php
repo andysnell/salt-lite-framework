@@ -17,7 +17,6 @@ class StreamResponse extends Response
      */
     public static function make(string|StreamInterface $stream, int $status = HttpStatus::OK, array $headers = []): self
     {
-        $stream = $stream instanceof StreamInterface ? $stream : Str::stream($stream);
-        return new self($stream, $status, $headers);
+        return new self(Str::stream($stream), $status, $headers);
     }
 }

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Util\Helper;
 
-abstract class Func
+abstract readonly class Func
 {
     /**
      * If the $value argument is callable, call it with the parameters passed in
      * the $args array, otherwise, just pass through the value unchanged.
      */
-    public static function value(mixed $value, mixed ...$args): mixed
+    final public static function value(mixed $value, mixed ...$args): mixed
     {
         return \is_callable($value) ? \call_user_func_array($value, $args) : $value;
     }
@@ -29,12 +29,12 @@ abstract class Func
      * Old: \array_map(fn(CarbonImmutable $datetime) => $datetime->format('Y-m-d'), $dates);
      * New: \array_map(Func::fwd('getTimestamp', 'Y-m-d'), $dates);
      */
-    public static function fwd(string $method, mixed ...$args): \Closure
+    final public static function fwd(string $method, mixed ...$args): \Closure
     {
         return static fn(object $subject) => $subject->{$method}(...$args);
     }
 
-    public static function noop(): \Closure
+    final public static function noop(): \Closure
     {
         return static function (): void {
         };

@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Util\Clock;
 
+use PhoneBurner\SaltLite\Framework\App\AppServiceProvider;
+use PhoneBurner\SaltLite\Framework\Util\Attribute\DefaultServiceProvider;
+
+#[DefaultServiceProvider(AppServiceProvider::class)]
 interface HighResolutionTimer
 {
     /**

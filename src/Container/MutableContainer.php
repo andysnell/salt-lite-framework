@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Container;
 
+use PhoneBurner\SaltLite\Framework\App\AppServiceProvider;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
+use PhoneBurner\SaltLite\Framework\Util\Attribute\DefaultServiceProvider;
 use Psr\Container\ContainerInterface;
 
 #[Contract]
+#[DefaultServiceProvider(AppServiceProvider::class)]
 interface MutableContainer extends ContainerInterface
 {
     /**

@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Util\Crypto;
 
+use PhoneBurner\SaltLite\Framework\App\AppServiceProvider;
+use PhoneBurner\SaltLite\Framework\Util\Attribute\DefaultServiceProvider;
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto\PasetoKey;
 
+#[DefaultServiceProvider(AppServiceProvider::class)]
 final readonly class AppKey implements \Stringable
 {
     public const int LENGTH = \SODIUM_CRYPTO_AUTH_BYTES; // 256-bit key

@@ -9,12 +9,12 @@ use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class Psr7
+abstract readonly class Psr7
 {
     /**
      * @param ContentType::*&string $content_type
      */
-    public static function expects(MessageInterface $message, string $content_type): bool
+    final public static function expects(MessageInterface $message, string $content_type): bool
     {
         $headers = \array_filter(\array_map(
             static fn(string $header): string => \strtolower($message->getHeaderLine($header)),
@@ -46,7 +46,7 @@ class Psr7
      * @param class-string<T> $class
      * @return T|null
      */
-    public static function attribute(ServerRequestInterface $request, string $class): object|null
+    final public static function attribute(ServerRequestInterface $request, string $class): object|null
     {
         $attribute = $request->getAttribute($class);
         return $attribute instanceof $class ? $attribute : null;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\App;
 
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
+use PhoneBurner\SaltLite\Framework\Util\Attribute\DefaultServiceProvider;
 
 /**
  * Kernel instances are responsible for knowing how to run the application,
@@ -13,6 +14,7 @@ use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
  * script.
  */
 #[Contract]
+#[DefaultServiceProvider(AppServiceProvider::class)]
 interface Kernel
 {
     public function run(): void;

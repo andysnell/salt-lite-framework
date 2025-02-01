@@ -16,9 +16,9 @@ final class NullCacheTest extends TestCase
     {
         $cache = new NullCache();
         self::assertNull($cache->get('key'));
-        self::assertTrue($cache->set('key', Ttl::seconds(60), 'value'));
+        self::assertTrue($cache->set('key', 'value', Ttl::seconds(60)));
         self::assertTrue($cache->delete('key'));
         self::assertNull($cache->forget('key'));
-        self::assertSame('value', $cache->remember('key', Ttl::seconds(60), fn(): string => 'value'));
+        self::assertSame('value', $cache->remember('key', fn(): string => 'value', Ttl::seconds(60)));
     }
 }

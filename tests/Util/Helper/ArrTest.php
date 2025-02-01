@@ -7,9 +7,7 @@ namespace PhoneBurner\SaltLite\Framework\Tests\Util\Helper;
 use ArrayAccess;
 use ArrayIterator;
 use Generator;
-use Iterator;
 use IteratorAggregate;
-use IteratorIterator;
 use PhoneBurner\SaltLite\Framework\Domain\Arrayable;
 use PhoneBurner\SaltLite\Framework\Tests\Util\Helper\Fixture\NestedObject;
 use PhoneBurner\SaltLite\Framework\Tests\Util\Helper\Fixture\NestingObject;
@@ -70,26 +68,10 @@ final class ArrTest extends TestCase
     #[Test]
     public function array_returns_array_from_arrays_or_arraylike(mixed $input, array $array): void
     {
-        $converted = Arr::array($input);
+        $converted = Arr::cast($input);
         self::assertIsArray($converted);
         self::assertSame($array, $converted);
         if (\is_array($input)) {
-            self::assertSame($input, $converted);
-        }
-    }
-
-    /**
-     * @param Arrayable|iterable<mixed> $input
-     * @param array<mixed> $array
-     */
-    #[DataProvider('providesArrayAndIteratorTestCases')]
-    #[Test]
-    public function iterator_returns_an_Iterator_from_iterable(mixed $input, array $array): void
-    {
-        $converted = Arr::iterable($input);
-        self::assertInstanceOf(Iterator::class, $converted);
-        self::assertSame($array, \iterator_to_array($converted));
-        if ($input instanceof Iterator) {
             self::assertSame($input, $converted);
         }
     }
@@ -114,36 +96,6 @@ final class ArrTest extends TestCase
             yield 'iterator_aggregate' . $type => $test(self::makeIteratorAggregate($array), $array);
             yield 'arrayable_' . $type => $test(self::makeArrayable($array), $array);
         }
-    }
-
-    #[Test]
-    public function iterator_returns_a_Traversable_before_Arrayable(): void
-    {
-        $iterable_and_arrayable = self::makeIterableArrayable(
-            ['foo' => 1, 'bar' => 2, 'baz' => 3],
-            [0 => 'foo', 42 => 'bar', 23 => 'baz'],
-        );
-
-        $converted = Arr::iterable($iterable_and_arrayable);
-        self::assertInstanceOf(IteratorIterator::class, $converted);
-        self::assertSame([0 => 'foo', 42 => 'bar', 23 => 'baz'], \iterator_to_array($converted));
-    }
-
-    #[DataProvider('providesArrayInvalidTestCases')]
-    #[Test]
-    public function array_throws_exception_for_non_arraylike_things(mixed $not_arraylike): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        Arr::array($not_arraylike);
-    }
-
-    #[DataProvider('providesArrayInvalidTestCases')]
-    #[Test]
-    public function iterator_throws_exception_for_non_arraylike_things(mixed $not_arraylike): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        /** @phpstan-ignore-next-line Intentional Defect to Test Sad Path */
-        Arr::iterable($not_arraylike);
     }
 
     /**
@@ -196,18 +148,10 @@ final class ArrTest extends TestCase
             yield 'array_' . $type => [$test['expected'], $test['array'],];
             yield 'generator_' . $type => [$test['expected'], (static fn() => yield from $test['array'])()];
             yield 'iterator_' . $type => [$test['expected'], new ArrayIterator($test['array'])];
-            yield 'iterator_aggregate' . $type => [$test['expected'], self::makeIteratorAggregate($test['array'])];
+            yield 'iterator_aggregate_' . $type => [$test['expected'], self::makeIteratorAggregate($test['array'])];
             yield 'arrayable_' . $type => [$test['expected'], self::makeArrayable($test['array'])];
-            yield 'iterable_arrayable' . $type => [$test['expected'], self::makeIterableArrayable(['error'], $test['array'])];
+            yield 'iterable_arrayable_' . $type => [$test['expected'], self::makeIterableArrayable(['error'], $test['array'])];
         }
-    }
-
-    #[DataProvider('providesArrayInvalidTestCases')]
-    #[Test]
-    public function first_throws_exception_for_non_arraylike_things(mixed $not_arraylike): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        Arr::first($not_arraylike);
     }
 
     #[DataProvider('providesGetAndHasTestCases')]
@@ -632,18 +576,6 @@ final class ArrTest extends TestCase
                 yield from $this->iterator_array;
             }
         };
-    }
-
-    /**
-     * @param array<mixed> $array
-     */
-    #[DataProvider('providesAssociativeAndListArrays')]
-    #[Test]
-    public function isList_is_true_for_arrays_with_sequential_int_keys_starting_at_zero(
-        array $array,
-        bool $is_list,
-    ): void {
-        self::assertSame($is_list, Arr::isList($array));
     }
 
     /**

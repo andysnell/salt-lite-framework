@@ -829,7 +829,7 @@ final class RouteDefinitionTest extends TestCase
             yield 'all() ' . $label => [
                 $data,
                 'all',
-                Arr::array(self::getMethods()),
+                Arr::cast(self::getMethods()),
             ];
         }
     }
@@ -846,7 +846,7 @@ final class RouteDefinitionTest extends TestCase
 
             yield 'all to ' . $label => [
                 $data,
-                Arr::array(self::getMethods()),
+                Arr::cast(self::getMethods()),
             ];
         }
     }
@@ -913,7 +913,7 @@ final class RouteDefinitionTest extends TestCase
     {
         $route_definition = SUT::redirect('/foo/bar[/index]', '/bar/foo', $status_code);
 
-        self::assertSame(Arr::array(self::getMethods()), $route_definition->getMethods());
+        self::assertSame(Arr::cast(self::getMethods()), $route_definition->getMethods());
         self::assertSame('/foo/bar[/index]', $route_definition->getRoutePath());
         self::assertTrue($route_definition->hasAttribute(RequestHandlerInterface::class));
         self::assertSame(RedirectRequestHandler::class, $route_definition->getAttribute(RequestHandlerInterface::class));
@@ -928,7 +928,7 @@ final class RouteDefinitionTest extends TestCase
     {
         $route_definition = SUT::redirect('/foo/bar[/index]', '/bar/foo');
 
-        self::assertSame(Arr::array(self::getMethods()), $route_definition->getMethods());
+        self::assertSame(Arr::cast(self::getMethods()), $route_definition->getMethods());
         self::assertSame('/foo/bar[/index]', $route_definition->getRoutePath());
         self::assertTrue($route_definition->hasAttribute(RequestHandlerInterface::class));
         self::assertSame(RedirectRequestHandler::class, $route_definition->getAttribute(RequestHandlerInterface::class));

@@ -44,9 +44,7 @@ class CacheServiceProvider implements ServiceProvider
         $container->set(
             Cache::class,
             static function (ContainerInterface $container): CacheAdapter {
-                return new CacheAdapter(
-                    $container->get(CacheItemPoolFactory::class)->make(CacheDriver::Remote),
-                );
+                return new CacheAdapter($container->get(CacheInterface::class));
             },
         );
 

@@ -12,7 +12,7 @@ use Ramsey\Uuid\UuidInterface;
  * We need to create and use factory instances, as opposed to the vendor `UUID`
  * helper class, because the helper uses a static (i.e. global) factory.
  */
-abstract class Uuid
+abstract readonly class Uuid
 {
     public const string HEX_REGEX = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/';
 
@@ -23,7 +23,7 @@ abstract class Uuid
      *
      * @link https://uuid.ramsey.dev/en/latest/rfc4122/version4.html
      */
-    public static function random(): UuidInterface
+    final public static function random(): UuidInterface
     {
         return self::factory()->uuid4();
     }
@@ -37,7 +37,7 @@ abstract class Uuid
      *
      * @link https://uuid.ramsey.dev/en/latest/customize/timestamp-first-comb-codec.html
      */
-    public static function ordered(): UuidInterface
+    final public static function ordered(): UuidInterface
     {
         return self::factory()->uuid7();
     }
@@ -47,7 +47,7 @@ abstract class Uuid
      *
      * @link https://tools.ietf.org/html/rfc4122#section-4.1.7
      */
-    public static function nil(): UuidInterface
+    final public static function nil(): UuidInterface
     {
         static $nil_uuid = self::factory()->fromString(self::NIL);
         return $nil_uuid;
@@ -58,12 +58,12 @@ abstract class Uuid
      * and instance of `UuidInterface`. This method lets us cleanly cast input
      * to a `UuidInterface` instance.
      */
-    public static function instance(UuidInterface|\Stringable|string $uuid): UuidInterface
+    final public static function instance(UuidInterface|\Stringable|string $uuid): UuidInterface
     {
         return $uuid instanceof UuidInterface ? $uuid : self::factory()->fromString((string)$uuid);
     }
 
-    public static function factory(): UuidFactory
+    final public static function factory(): UuidFactory
     {
         static $factory = new UuidFactory();
         return $factory;

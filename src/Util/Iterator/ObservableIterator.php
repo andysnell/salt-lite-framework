@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Util\Iterator;
 
 use IteratorIterator;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Arr;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Iter;
 
 /**
  * @extends IteratorIterator<mixed, mixed, \Traversable<mixed, mixed>>
@@ -22,7 +22,7 @@ class ObservableIterator extends IteratorIterator implements \SplSubject
      */
     public function __construct(iterable $iterable)
     {
-        parent::__construct(Arr::iterable($iterable));
+        parent::__construct(Iter::cast($iterable));
     }
 
     #[\Override]

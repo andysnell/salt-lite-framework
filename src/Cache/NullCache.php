@@ -25,13 +25,13 @@ final class NullCache extends InMemoryCache
     }
 
     #[\Override]
-    public function set(\Stringable|string $key, Ttl $ttl, mixed $value): bool
+    public function set(\Stringable|string $key, mixed $value, Ttl $ttl = new Ttl()): bool
     {
         return true;
     }
 
     #[\Override]
-    public function setMultiple(Ttl $ttl, iterable $values): bool
+    public function setMultiple(iterable $values, Ttl $ttl = new Ttl()): bool
     {
         return true;
     }
@@ -51,8 +51,8 @@ final class NullCache extends InMemoryCache
     #[\Override]
     public function remember(
         \Stringable|string $key,
-        Ttl $ttl,
         callable $callback,
+        Ttl $ttl = new Ttl(),
         bool $force_refresh = false,
     ): mixed {
         return $callback();

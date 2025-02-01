@@ -17,6 +17,7 @@ use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
 use PhoneBurner\SaltLite\Framework\Container\PhpDiContainerAdapter;
 use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\Http\HttpKernel;
+use PhoneBurner\SaltLite\Framework\Util\Attribute\Analyzer\AttributeAnalyzer;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use PhoneBurner\SaltLite\Framework\Util\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\Util\Clock\HighResolutionTimer;
@@ -44,7 +45,7 @@ class AppServiceProvider implements ServiceProvider
         $container->set(
             Environment::class,
             static function (ContainerInterface $container): never {
-                throw new \LogicException('Environment is not defined');
+                throw new \LogicException('Environment Must Be Set Explicitly in the Container');
             },
         );
 
@@ -83,9 +84,8 @@ class AppServiceProvider implements ServiceProvider
         );
 
         $container->bind(ClockInterface::class, Clock::class);
-        $container->bind(Clock::class, SystemClock::class);
         $container->set(
-            SystemClock::class,
+            Clock::class,
             static function (ContainerInterface $container): SystemClock {
                 return new SystemClock();
             },
@@ -98,16 +98,19 @@ class AppServiceProvider implements ServiceProvider
             },
         );
 
+        $container->bind(ClassAnalyzer::class, AttributeAnalyzer::class);
         $container->set(
-            ClassAnalyzer::class,
-            static function (ContainerInterface $container): ClassAnalyzer {
+            AttributeAnalyzer::class,
+            static function (ContainerInterface $container): AttributeAnalyzer {
                 $analyzer = new Analyzer();
                 if ($container->get(BuildStage::class) !== BuildStage::Development) {
                     $pool = $container->get(CacheItemPoolFactory::class)->make(CacheDriver::File);
                     $analyzer = new Psr6CacheAnalyzer($analyzer, $pool);
                 }
 
-                return new MemoryCacheAnalyzer($analyzer);
+                $analyzer = new MemoryCacheAnalyzer($analyzer);
+
+                return new AttributeAnalyzer($analyzer);
             },
         );
     }

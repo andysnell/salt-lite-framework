@@ -8,6 +8,9 @@ use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
 
 /**
+ * This is the primary interface for interacting with the cache, and should be
+ * the default interface to inject into your classes for most use cases.
+ *
  * This is not a PSR-16 implementation, rather this interface defines is a
  * simplified version of the PSR-16 cache interface intended to cover the vast
  * majority of our use cases, without exposing the full PSR-16 interface. This
@@ -19,7 +22,7 @@ use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
  * check that the return of get() is not null.
  */
 #[Contract]
-interface Cache
+interface Cache extends AppendOnlyCache
 {
     /**
      * Retrieve an item from the cache by key. Use this method to also check if
@@ -40,7 +43,7 @@ interface Cache
     /**
      * Store an item in the cache for a given number of seconds.
      */
-    public function set(string|\Stringable $key, Ttl $ttl, mixed $value): bool;
+    public function set(string|\Stringable $key, mixed $value, Ttl $ttl = new Ttl()): bool;
 
     /**
      * Set multiple items in the cache in a single operation
@@ -48,7 +51,7 @@ interface Cache
      * @param iterable<string|\Stringable, mixed> $values A list of key => value pairs for a multiple-set operation.
      * @return bool True on success and false on failure.
      */
-    public function setMultiple(Ttl $ttl, iterable $values): bool;
+    public function setMultiple(iterable $values, Ttl $ttl = new Ttl()): bool;
 
     /**
      * Remove an item from the cache.
@@ -72,8 +75,8 @@ interface Cache
      */
     public function remember(
         string|\Stringable $key,
-        Ttl $ttl,
         callable $callback,
+        Ttl $ttl = new Ttl(),
         bool $force_refresh = false,
     ): mixed;
 

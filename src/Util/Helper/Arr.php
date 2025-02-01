@@ -4,31 +4,27 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Util\Helper;
 
-use ArrayAccess;
-use Iterator;
-use IteratorIterator;
-use JsonException;
 use PhoneBurner\SaltLite\Framework\Domain\Arrayable;
-use Traversable;
 
-abstract class Arr
+abstract readonly class Arr
 {
     /**
      * Returns true if the $array is an array primitive or an object that
      * implements `ArrayAccess`. Note that objects that implement `ArrayAccess`
      * are not required to be castable into arrays.
-     *
-     * @param array<mixed>|ArrayAccess<mixed,mixed> $array
      */
-    public static function accessible($array): bool
+    final public static function accessible(mixed $array): bool
     {
-        return \is_array($array) || $array instanceof ArrayAccess;
+        return \is_array($array) || $array instanceof \ArrayAccess;
     }
 
     /**
-     * Returns true if passed an array or an instance of Arrayable or Traversable,
+     * Returns true if passed an array or an instance of Arrayable or \Traversable.
+     *
+     * Note: This will return true for \Traversable instances that have keys
+     * that are not valid array keys.
      */
-    public static function arrayable(mixed $value): bool
+    final public static function arrayable(mixed $value): bool
     {
         return \is_iterable($value) || $value instanceof Arrayable;
     }
@@ -44,54 +40,15 @@ abstract class Arr
      * with the way PHP handles non-public object properties and considering all
      * anonymous functions are actually object instances of \Closure.
      *
-     * @param Arrayable|iterable<mixed>|Traversable $value
+     * @param Arrayable|iterable<mixed> $value
      */
-    public static function array(mixed $value): array
+    final public static function cast(Arrayable|iterable $value): array
     {
         return match (true) {
             \is_array($value) => $value,
             $value instanceof Arrayable => $value->toArray(),
-            $value instanceof Traversable => \iterator_to_array($value),
-            default => throw new \InvalidArgumentException('Arr::array Cannot Convert Value to Array'),
+            default => \iterator_to_array($value),
         };
-    }
-
-    /**
-     * The `iterable` pseudotype is the union of `array|Traversable`, and can be
-     * used for both parameter and return typing; however, almost all the
-     * PHP functions for working with iterable things will only accept `array`
-     * or a `Traversable` object. We commonly need one or the other, and by type
-     * hinting on `iterable`, we don't know at runtime what we are working with.
-     * This helper method takes any iterable and returns an `Iterator`.
-     * The `yield from` construct is used to convert the array into an instance
-     * of Generator, which preserves both associative and integer array keys.
-     * This also works with any class that implements Arrayable. If an object is
-     * an instance of both `Traversable` and `Arrayable`, the method returns the
-     * object like other `Traversable` objects.
-     *
-     * @template T
-     * @param Arrayable|iterable<T> $value
-     * @return Iterator<T>
-     */
-    public static function iterable($value): Iterator
-    {
-        if (\is_array($value)) {
-            return (static fn() => yield from $value)();
-        }
-
-        if ($value instanceof Iterator) {
-            return $value;
-        }
-
-        if ($value instanceof Traversable) {
-            return new IteratorIterator($value);
-        }
-
-        if ($value instanceof Arrayable) {
-            return self::iterable($value->toArray());
-        }
-
-        throw new \InvalidArgumentException('Arr::iterable Cannot Convert Value to Traversable');
     }
 
     /**
@@ -106,21 +63,14 @@ abstract class Arr
      * @param iterable<mixed>|Arrayable $value
      * @return mixed|null
      */
-    public static function first(mixed $value): mixed
+    final public static function first(iterable|Arrayable $value): mixed
     {
-        if (\is_iterable($value)) {
-            foreach ($value as $first) {
-                return $first;
-            }
-
-            return null;
-        }
-
-        if ($value instanceof Arrayable) {
-            return self::first($value->toArray());
-        }
-
-        throw new \InvalidArgumentException('Arr::first Cannot Iterate Over Value');
+        return match (true) {
+            $value === [] => null,
+            \is_array($value) => $value[\array_key_first($value)],
+            \is_iterable($value) => Iter::first($value),
+            default => self::first($value->toArray()),
+        };
     }
 
     /**
@@ -128,9 +78,9 @@ abstract class Arr
      * object that implements the ArrayAccess interface, supporting dot notation
      * to search a deeply nested array with a composite string key.
      *
-     * @param array<mixed>|ArrayAccess<mixed,mixed> $array
+     * @param array<mixed>|\ArrayAccess<mixed,mixed> $array
      */
-    public static function has(string $key, mixed $array): bool
+    final public static function has(string $key, mixed $array): bool
     {
         if (! self::accessible($array)) {
             throw new \InvalidArgumentException('Array Argument Must Be Array or ArrayAccess');
@@ -165,11 +115,11 @@ abstract class Arr
      * the default value will be returned. If the $default argument is
      * `callable`, it will be evaluated and the result returned.
      *
-     * @param array<mixed>|ArrayAccess<mixed, mixed> $array
+     * @param array<mixed>|\ArrayAccess<mixed, mixed> $array
      * @param callable|mixed $default
      * @return mixed
      */
-    public static function get(string $key, mixed $array, mixed $default = null)
+    final public static function get(string $key, mixed $array, mixed $default = null)
     {
         if (! static::accessible($array)) {
             throw new \InvalidArgumentException('Array Argument Must Be Array or ArrayAccess');
@@ -198,9 +148,9 @@ abstract class Arr
      * Returns the passed value, recursively casting instances of `Arrayable` and
      * `Traversable` into arrays.
      */
-    public static function value(mixed $value): mixed
+    final public static function value(mixed $value): mixed
     {
-        return self::arrayable($value) ? \array_map(__METHOD__, self::array($value)) : $value;
+        return self::arrayable($value) ? \array_map(__METHOD__, self::cast($value)) : $value;
     }
 
     /**
@@ -210,30 +160,18 @@ abstract class Arr
      *
      * @return array<mixed>
      */
-    public static function wrap(mixed $value): array
+    final public static function wrap(mixed $value): array
     {
-        return self::arrayable($value) ? self::array($value) : [$value];
+        return self::arrayable($value) ? self::cast($value) : [$value];
     }
 
-    /**
-     * Fill for PHP 8.1 builtin function: array_is_list()
-     *
-     * @link https://php.watch/versions/8.1/array_is_list
-     * @param array<mixed> $array
-     */
-    public static function isList(array $array): bool
-    {
-        $keys = \array_keys($array);
-        return \array_keys($keys) === $keys;
-    }
-
-    public static function convertNestedObjects(mixed $value): array
+    final public static function convertNestedObjects(mixed $value): array
     {
         try {
             $encoded = \json_encode($value, \JSON_THROW_ON_ERROR);
             $decoded = \json_decode($encoded, true, 512, \JSON_THROW_ON_ERROR);
             return self::wrap($decoded);
-        } catch (JsonException) {
+        } catch (\JsonException) {
             return [];
         }
     }

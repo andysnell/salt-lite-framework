@@ -43,13 +43,13 @@ class CacheAdapter implements Cache
     }
 
     #[\Override]
-    public function set(\Stringable|string $key, Ttl $ttl, mixed $value): bool
+    public function set(\Stringable|string $key, mixed $value, Ttl $ttl = new Ttl()): bool
     {
         return $this->cache->set(self::normalize($key), $value, self::ttl($ttl));
     }
 
     #[\Override]
-    public function setMultiple(Ttl $ttl, iterable $values): bool
+    public function setMultiple(iterable $values, Ttl $ttl = new Ttl()): bool
     {
         return $this->cache->setMultiple((static function (iterable $values): \Generator {
             foreach ($values as $key => $value) {
@@ -77,8 +77,8 @@ class CacheAdapter implements Cache
     #[\Override]
     public function remember(
         \Stringable|string $key,
-        Ttl $ttl,
         callable $callback,
+        Ttl $ttl = new Ttl(),
         bool $force_refresh = false,
     ): mixed {
         $key = self::normalize($key);

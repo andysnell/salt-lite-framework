@@ -6,11 +6,14 @@ namespace PhoneBurner\SaltLite\Framework\Container;
 
 use DI\Container as PhpDiContainer;
 use DI\ContainerBuilder;
+use PhoneBurner\SaltLite\Framework\App\AppServiceProvider;
+use PhoneBurner\SaltLite\Framework\Util\Attribute\DefaultServiceProvider;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
 #[Internal]
+#[DefaultServiceProvider(AppServiceProvider::class)]
 class PhpDiContainerAdapter implements MutableContainer
 {
     private readonly PhpDiContainer $php_di;

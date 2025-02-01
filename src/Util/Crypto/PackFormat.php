@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Util\Crypto;
 
-final class PackFormat
+final readonly class PackFormat
 {
     public const string STRING_NULL_PADDED = 'a'; // NULL-padded string, retains trailing null bytes
     public const string STRING_NULL_TRIMMED = 'Z'; // NULL-padded string, removes trailing NULL bytes.
