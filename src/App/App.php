@@ -40,9 +40,9 @@ final class App
         return self::$instance ?? throw new \RuntimeException('Application has not been bootstrapped.');
     }
 
-    public static function teardown(): void
+    public static function teardown(): null
     {
-        self::$instance = null;
+        return self::$instance = null;
     }
 
     private function __construct(
