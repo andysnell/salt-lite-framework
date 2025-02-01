@@ -9,7 +9,7 @@ use PhoneBurner\SaltLite\Framework\Http\Domain\HttpStatus;
 use PhoneBurner\SaltLite\Framework\Http\RequestHandler\ErrorRequestHandler;
 use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\GenericHttpExceptionResponse;
 use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\HttpExceptionResponse;
-use PhoneBurner\SaltLite\Framework\Routing\Match\RouteMatch;
+use PhoneBurner\SaltLite\Framework\Http\Routing\Match\RouteMatch;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
