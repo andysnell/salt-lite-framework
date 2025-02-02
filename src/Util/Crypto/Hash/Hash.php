@@ -2,35 +2,52 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\SaltLite\Framework\Domain\Hash;
+namespace PhoneBurner\SaltLite\Framework\Util\Crypto\Hash;
 
-use PhoneBurner\SaltLite\Framework\Domain\Hash\Exceptions\InvalidHash;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Encoding;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Hash\Exceptions\InvalidHash;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Util;
 use PhoneBurner\SaltLite\Framework\Util\Filesystem\FileReader;
 
-readonly class Hash implements MessageDigest
+final readonly class Hash implements MessageDigest
 {
-    final private function __construct(public HashAlgorithm $algorithm, public string $digest)
-    {
-        if (! \ctype_xdigit($this->digest) || \strlen($this->digest) !== $algorithm->bytes() * 2) {
+    public string $digest;
+
+    public function __construct(
+        string $digest,
+        public HashAlgorithm $algorithm = HashAlgorithm::XXH3,
+        Encoding $encoding = Encoding::None,
+    ) {
+        try {
+            $this->digest = Util::decode($encoding, $digest);
+        } catch (\Exception $e) {
+            throw new InvalidHash('Invalid Encoding for ' . $algorithm->name, previous: $e);
+        }
+
+        if (\strlen($this->digest) !== $algorithm->bytes()) {
             throw new InvalidHash('Invalid Length or Character Set for ' . $algorithm->name);
         }
     }
 
+    /**
+     * Create a new Hash instance from a digest string with the given algorithm and encoding.
+     */
     public static function make(
         string|\Stringable $digest,
         HashAlgorithm $algorithm = HashAlgorithm::XXH3,
-    ): static {
-        return new static($algorithm, \strtolower((string)$digest));
+        Encoding $encoding = Encoding::Hex,
+    ): self {
+        return new self((string)$digest, $algorithm, $encoding);
     }
 
     public static function string(
         string|\Stringable $content,
         HashAlgorithm $algorithm = HashAlgorithm::XXH3,
     ): self {
-        return new self($algorithm, match ($algorithm) {
-            HashAlgorithm::BLAKE2B => \bin2hex(\sodium_crypto_generichash((string)$content)),
-            default => \hash($algorithm->value, (string)$content),
-        });
+        return new self(match ($algorithm) {
+            HashAlgorithm::BLAKE2B => \sodium_crypto_generichash((string)$content),
+            default => \hash($algorithm->value, (string)$content, true),
+        }, $algorithm);
     }
 
     public static function file(
@@ -39,7 +56,7 @@ readonly class Hash implements MessageDigest
     ): self {
         return match ($algorithm) {
             HashAlgorithm::BLAKE2B => self::iterable(FileReader::make($file), $algorithm),
-            default => new self($algorithm, (string)\hash_file($algorithm->value, (string)$file)),
+            default => new self((string)\hash_file($algorithm->value, (string)$file, true), $algorithm),
         };
     }
 
@@ -63,9 +80,9 @@ readonly class Hash implements MessageDigest
     }
 
     #[\Override]
-    public function digest(): string
+    public function digest(Encoding $encoding = Encoding::Hex): string
     {
-        return $this->digest;
+        return Util::encode($encoding, $this->digest);
     }
 
     public function is(mixed $hash): bool
@@ -78,7 +95,7 @@ readonly class Hash implements MessageDigest
     #[\Override]
     public function __toString(): string
     {
-        return $this->digest;
+        return $this->digest(Encoding::Hex);
     }
 
     /**
@@ -89,7 +106,7 @@ readonly class Hash implements MessageDigest
         $context = \sodium_crypto_generichash_init();
         self::sodiumPumpUpdate($context, $pump);
 
-        return new self(HashAlgorithm::BLAKE2B, \bin2hex(\sodium_crypto_generichash_final($context)));
+        return new self(\sodium_crypto_generichash_final($context), HashAlgorithm::BLAKE2B);
     }
 
     /**
@@ -117,7 +134,7 @@ readonly class Hash implements MessageDigest
         $context = \hash_init($algorithm->value);
         self::hashPumpUpdate($context, $pump);
 
-        return new self($algorithm, \hash_final($context));
+        return new self(\hash_final($context, true), $algorithm);
     }
 
     /**

@@ -24,7 +24,7 @@ readonly class CacheKey implements \Stringable
     {
         $this->normalized = \implode('.', \array_map(static function (\Stringable|\BackedEnum|string|int $part): string {
             $part = \implode('.', \array_map(static function (string $subpart): string {
-                return Str::snake((string)\str_replace(self::RESERVED_CHARACTERS, '_', $subpart));
+                return Str::snake(\str_replace(self::RESERVED_CHARACTERS, '_', $subpart));
             }, \explode('.', \trim(NullableCast::string($part), '.'))));
             return $part !== '' ? $part : throw new \InvalidArgumentException('Cache key part cannot be empty string');
         }, $key_parts));

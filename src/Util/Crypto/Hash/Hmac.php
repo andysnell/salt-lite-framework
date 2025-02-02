@@ -2,29 +2,46 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\SaltLite\Framework\Domain\Hash;
+namespace PhoneBurner\SaltLite\Framework\Util\Crypto\Hash;
 
-use PhoneBurner\SaltLite\Framework\Domain\Hash\Exceptions\InvalidHash;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Encoding;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Hash\Exceptions\InvalidHash;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Util;
 use PhoneBurner\SaltLite\Framework\Util\Filesystem\FileReader;
 
-readonly class Hmac implements MessageDigest
+final readonly class Hmac implements MessageDigest
 {
-    final private function __construct(public HashAlgorithm $algorithm, public string $digest)
-    {
+    public string $digest;
+
+    public function __construct(
+        string $digest,
+        public HashAlgorithm $algorithm,
+        Encoding $encoding = Encoding::None,
+    ) {
         if (! $this->algorithm->cryptographic()) {
             throw new InvalidHash('Invalid Algorithm for HMAC: ' . $algorithm->name);
         }
 
-        if (! \ctype_xdigit($this->digest) || \strlen($this->digest) !== $algorithm->bytes() * 2) {
+        try {
+            $this->digest = Util::decode($encoding, $digest);
+        } catch (\Exception $e) {
+            throw new InvalidHash('Invalid Encoding for ' . $algorithm->name, previous: $e);
+        }
+
+        if (\strlen($this->digest) !== $algorithm->bytes()) {
             throw new InvalidHash('Invalid Length or Character Set for ' . $algorithm->name);
         }
     }
 
+    /**
+     * Create a new HMAC instance from a digest string with the given algorithm and encoding.
+     */
     public static function make(
         string|\Stringable $digest,
         HashAlgorithm $algorithm = HashAlgorithm::BLAKE2B,
-    ): static {
-        return new static($algorithm, \strtolower((string)$digest));
+        Encoding $encoding = Encoding::Hex,
+    ): self {
+        return new self((string)$digest, $algorithm, $encoding);
     }
 
     public static function string(
@@ -32,10 +49,10 @@ readonly class Hmac implements MessageDigest
         HmacKey $key,
         HashAlgorithm $algorithm = HashAlgorithm::BLAKE2B,
     ): self {
-        return new self($algorithm, match ($algorithm) {
-            HashAlgorithm::BLAKE2B => \bin2hex(\sodium_crypto_generichash((string)$content, $key->value)),
-            default => \hash_hmac($algorithm->value, (string)$content, $key->value),
-        });
+        return new self(match ($algorithm) {
+            HashAlgorithm::BLAKE2B => \sodium_crypto_generichash((string)$content, $key->bytes()),
+            default => \hash_hmac($algorithm->value, (string)$content, $key->bytes(), true),
+        }, $algorithm);
     }
 
     public static function file(
@@ -45,7 +62,7 @@ readonly class Hmac implements MessageDigest
     ): self {
         return match ($algorithm) {
             HashAlgorithm::BLAKE2B => self::iterable(FileReader::make($file), $key, $algorithm),
-            default => new self($algorithm, (string)\hash_hmac_file($algorithm->value, (string)$file, $key->value)),
+            default => new self((string)\hash_hmac_file($algorithm->value, (string)$file, $key->bytes(), true), $algorithm),
         };
     }
 
@@ -70,9 +87,9 @@ readonly class Hmac implements MessageDigest
     }
 
     #[\Override]
-    public function digest(): string
+    public function digest(Encoding $encoding = Encoding::Hex): string
     {
-        return $this->digest;
+        return Util::encode($encoding, $this->digest);
     }
 
     public function is(mixed $hash): bool
@@ -85,7 +102,7 @@ readonly class Hmac implements MessageDigest
     #[\Override]
     public function __toString(): string
     {
-        return $this->digest;
+        return $this->digest(Encoding::Hex);
     }
 
     /**
@@ -93,10 +110,10 @@ readonly class Hmac implements MessageDigest
      */
     private static function sodiumPump(HmacKey $key, iterable $pump): self
     {
-        $context = \sodium_crypto_generichash_init($key->value);
+        $context = \sodium_crypto_generichash_init($key->bytes());
         self::sodiumPumpUpdate($context, $pump);
 
-        return new self(HashAlgorithm::BLAKE2B, \bin2hex(\sodium_crypto_generichash_final($context)));
+        return new self(\sodium_crypto_generichash_final($context), HashAlgorithm::BLAKE2B);
     }
 
     /**
@@ -121,10 +138,10 @@ readonly class Hmac implements MessageDigest
      */
     private static function hashPump(HashAlgorithm $algorithm, HmacKey $key, iterable $pump): self
     {
-        $context = \hash_init($algorithm->value, \HASH_HMAC, $key->value);
+        $context = \hash_init($algorithm->value, \HASH_HMAC, $key->bytes());
         self::hashPumpUpdate($context, $pump);
 
-        return new self($algorithm, \hash_final($context));
+        return new self(\hash_final($context, true), $algorithm);
     }
 
     /**

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\SaltLite\Framework\Tests\Domain\Hash;
+namespace PhoneBurner\SaltLite\Framework\Tests\Util\Crypto\Hash;
 
-use PhoneBurner\SaltLite\Framework\Domain\Hash\Exceptions\InvalidHash;
-use PhoneBurner\SaltLite\Framework\Domain\Hash\HashAlgorithm;
-use PhoneBurner\SaltLite\Framework\Domain\Hash\Hmac;
-use PhoneBurner\SaltLite\Framework\Domain\Hash\HmacKey;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Hash\Exceptions\InvalidHash;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Hash\HashAlgorithm;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Hash\Hmac;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Hash\HmacKey;
 use PhoneBurner\SaltLite\Framework\Util\Filesystem\FileReader;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -27,7 +27,6 @@ final class HmacTest extends TestCase
     ): void {
         $hmac = Hmac::make($digest, $algorithm);
 
-        self::assertSame(\strtolower($digest), $hmac->digest);
         self::assertSame(\strtolower($digest), $hmac->digest());
         self::assertSame(\strtolower($digest), (string)$hmac);
         self::assertSame($algorithm, $hmac->algorithm);
@@ -53,7 +52,6 @@ final class HmacTest extends TestCase
         $key = HmacKey::make(self::HMAC_KEY);
         $hmac = Hmac::string('foo bar baz', $key, $algorithm);
 
-        self::assertSame($digest, $hmac->digest);
         self::assertSame($digest, $hmac->digest());
         self::assertSame($digest, (string)$hmac);
         self::assertSame($algorithm, $hmac->algorithm);
@@ -70,7 +68,6 @@ final class HmacTest extends TestCase
             $test_case['algorithm'],
         );
 
-        self::assertSame($test_case['digest'], $hmac->digest);
         self::assertSame($test_case['digest'], $hmac->digest());
         self::assertSame($test_case['digest'], (string)$hmac);
         self::assertSame($test_case['algorithm'], $hmac->algorithm);
@@ -87,7 +84,6 @@ final class HmacTest extends TestCase
             $test_case['algorithm'],
         );
 
-        self::assertSame($test_case['digest'], $hmac->digest);
         self::assertSame($test_case['digest'], $hmac->digest());
         self::assertSame($test_case['digest'], (string)$hmac);
         self::assertSame($test_case['algorithm'], $hmac->algorithm);
@@ -102,7 +98,6 @@ final class HmacTest extends TestCase
             FileReader::make($test_case['file']),
         ], HmacKey::make(self::HMAC_KEY), $test_case['algorithm']);
 
-        self::assertSame($test_case['digest'], $hmac->digest);
         self::assertSame($test_case['digest'], $hmac->digest());
         self::assertSame($test_case['digest'], (string)$hmac);
         self::assertSame($test_case['algorithm'], $hmac->algorithm);
@@ -114,7 +109,6 @@ final class HmacTest extends TestCase
             FileReader::make($test_case['file']),
         ], HmacKey::make(self::HMAC_KEY), $test_case['algorithm']);
 
-        self::assertSame($test_case['digest-x3'], $hmac->digest);
         self::assertSame($test_case['digest-x3'], $hmac->digest());
         self::assertSame($test_case['digest-x3'], (string)$hmac);
         self::assertSame($test_case['algorithm'], $hmac->algorithm);
@@ -200,9 +194,9 @@ final class HmacTest extends TestCase
 
     public static function providesStringTestCases(): \Generator
     {
-        yield [HashAlgorithm::BLAKE2B, '7e41fb74e95bd0d9ec92ca620b215634ed28c0359f03e0b1afb9653069aca659'];
-        yield [HashAlgorithm::SHA3_256, 'b0cc903e780822b2c847600b3376ec1c54d55349d2ac054d1ba5fb9e7a84b0c0'];
-        yield [HashAlgorithm::SHA256, '9479aabd3989b8107701ea344bf64577ed2dd1dbeccd223ced018be650ff3c7d'];
+        yield [HashAlgorithm::BLAKE2B, '93597421ac1a305165260b51a3a09d6e5f71c0453daab8af64f53c60519dd8b0'];
+        yield [HashAlgorithm::SHA3_256, 'b68ca8378e20be75fe8b403f6c97dbafb48c0c50586687dde5ab2d455845b0d7'];
+        yield [HashAlgorithm::SHA256, '55aa176a571dcfbc6d7ea83f219fbfe57ccf0ec16d379a18acef886c93b4e5c5'];
     }
 
     public static function providesFileTestCases(): \Generator
@@ -210,22 +204,22 @@ final class HmacTest extends TestCase
         yield [[
             'algorithm' => HashAlgorithm::BLAKE2B,
             'file' => UNIT_TEST_ROOT . '/Fixtures/lorem.txt',
-            'digest' => '1446cc460268abbc04c0b9d66ada1859b2848d79c63e82efd201f43540dba3c5',
-            'digest-x3' => '7c7c042d0b7cc00606eb6ca95eac9b86da2d5b211fbcbdd1b2f49e98edc231ba',
+            'digest' => 'b4c4ae4d307035d3ffa5f589aa6af3e4e0bfb4b7788fd70d0c720154ea965806',
+            'digest-x3' => 'ab4b153c360326e00fee22029868e65430511d33e1435550a4e264c174f6d755',
         ]];
 
         yield [[
             'algorithm' => HashAlgorithm::SHA3_256,
             'file' => UNIT_TEST_ROOT . '/Fixtures/lorem.txt',
-            'digest' => '40e17dfdb00c3c5836d2e608b44fac50a82d686bd6a374f6dff515060f36a4ab',
-            'digest-x3' => '9729c6f9caa0a0bc7319c62fa5dd311091c3b057ea6d1abb7f7a28d8a23e1b90',
+            'digest' => '8c475b6e7814eeafd30d7c3aeb66c87f6179c3db6f07766280c3d7480b5e8eb0',
+            'digest-x3' => '533fbbe377de703a88c94d5f2a52ca8a6e2d552d24b5bad0f3002b04952ce4fb',
         ]];
 
         yield [[
             'algorithm' => HashAlgorithm::SHA256,
             'file' => UNIT_TEST_ROOT . '/Fixtures/lorem.txt',
-            'digest' => '9018bd9e5d71332f8947fea806f52f7678aa4a0be9b360b14baa08dc8ccbed12',
-            'digest-x3' => '4fa61469f0c1dd1b58010be3f0bc80e57a025dd359bf6e43f348cb6f88324b96',
+            'digest' => '5f9bdb652714556b61c433c0cd08f0e237ade1efc315679ad2c0b84ba2eb4b08',
+            'digest-x3' => 'aa62157cbc2f7bdbd158071c2b7d92911b3332518ed6ea120fc6778a0d07c972',
         ]];
     }
 }

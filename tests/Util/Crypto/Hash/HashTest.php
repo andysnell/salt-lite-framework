@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\SaltLite\Framework\Tests\Domain\Hash;
+namespace PhoneBurner\SaltLite\Framework\Tests\Util\Crypto\Hash;
 
-use PhoneBurner\SaltLite\Framework\Domain\Hash\Exceptions\InvalidHash;
-use PhoneBurner\SaltLite\Framework\Domain\Hash\Hash;
-use PhoneBurner\SaltLite\Framework\Domain\Hash\HashAlgorithm;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Hash\Exceptions\InvalidHash;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Hash\Hash;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Hash\HashAlgorithm;
 use PhoneBurner\SaltLite\Framework\Util\Filesystem\FileReader;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -24,7 +24,6 @@ final class HashTest extends TestCase
     ): void {
         $hash = Hash::make($digest, $algorithm);
 
-        self::assertSame(\strtolower($digest), $hash->digest);
         self::assertSame(\strtolower($digest), $hash->digest());
         self::assertSame(\strtolower($digest), (string)$hash);
         self::assertSame($algorithm, $hash->algorithm);
@@ -47,7 +46,6 @@ final class HashTest extends TestCase
     {
         $hash = Hash::string($test_case['content'], $test_case['algorithm']);
 
-        self::assertSame($test_case['digest'], $hash->digest);
         self::assertSame($test_case['digest'], $hash->digest());
         self::assertSame($test_case['digest'], (string)$hash);
         self::assertSame($test_case['algorithm'], $hash->algorithm);
@@ -60,7 +58,6 @@ final class HashTest extends TestCase
     {
         $hash = Hash::file($test_case['file'], $test_case['algorithm']);
 
-        self::assertSame($test_case['digest'], $hash->digest);
         self::assertSame($test_case['digest'], $hash->digest());
         self::assertSame($test_case['digest'], (string)$hash);
         self::assertSame($test_case['algorithm'], $hash->algorithm);
@@ -76,7 +73,6 @@ final class HashTest extends TestCase
             $test_case['algorithm'],
         );
 
-        self::assertSame($test_case['digest'], $hash->digest);
         self::assertSame($test_case['digest'], $hash->digest());
         self::assertSame($test_case['digest'], (string)$hash);
         self::assertSame($test_case['algorithm'], $hash->algorithm);
@@ -91,7 +87,6 @@ final class HashTest extends TestCase
             FileReader::make($test_case['file']),
         ], $test_case['algorithm']);
 
-        self::assertSame($test_case['digest'], $hash->digest);
         self::assertSame($test_case['digest'], $hash->digest());
         self::assertSame($test_case['digest'], (string)$hash);
         self::assertSame($test_case['algorithm'], $hash->algorithm);
@@ -103,7 +98,6 @@ final class HashTest extends TestCase
             FileReader::make($test_case['file']),
         ], $test_case['algorithm']);
 
-        self::assertSame($test_case['digest-x3'], $hash->digest);
         self::assertSame($test_case['digest-x3'], $hash->digest());
         self::assertSame($test_case['digest-x3'], (string)$hash);
         self::assertSame($test_case['algorithm'], $hash->algorithm);

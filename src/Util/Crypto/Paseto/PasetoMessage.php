@@ -44,7 +44,7 @@ final readonly class PasetoMessage
 
     private static function encode(array $value): string
     {
-        return $value === [] ? '' : (string)\json_encode($value, \JSON_THROW_ON_ERROR);
+        return $value === [] ? '' : \json_encode($value, \JSON_THROW_ON_ERROR);
     }
 
     private static function decode(string $json): array

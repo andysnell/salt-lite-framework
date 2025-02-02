@@ -61,7 +61,7 @@ final class App
         $this->container = $container ?? Reflect::ghost(PhpDiContainerAdapter::class, function (PhpDiContainerAdapter $container): void {
             $container->__construct();
             foreach ($this->config->get('container.service_providers') as $provider_class) {
-                \assert(\is_a($provider_class, ServiceProvider::class, true));
+                \assert(\is_a($provider_class, ServiceProvider::class, true), $provider_class . ' is not a ' . ServiceProvider::class);
                 new $provider_class()->register($container);
             }
 

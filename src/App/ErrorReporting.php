@@ -26,6 +26,6 @@ class ErrorReporting
 
     private static function cast(array $env, string $key): bool
     {
-        return (bool)\filter_var($env[$key] ?? null, \FILTER_VALIDATE_BOOL);
+        return \filter_var($env[$key] ?? null, \FILTER_VALIDATE_BOOL);
     }
 }

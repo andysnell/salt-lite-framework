@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\SaltLite\Framework\Tests\Domain\Hash;
+namespace PhoneBurner\SaltLite\Framework\Tests\Util\Crypto\Hash;
 
-use PhoneBurner\SaltLite\Framework\Domain\Hash\HashAlgorithm;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Hash\HashAlgorithm;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

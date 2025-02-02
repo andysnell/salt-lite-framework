@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\SaltLite\Framework\Domain\Hash;
+namespace PhoneBurner\SaltLite\Framework\Util\Crypto\Hash;
 
 enum HashAlgorithm: string
 {
@@ -69,7 +69,7 @@ enum HashAlgorithm: string
     case MD5 = 'md5';
     case SHA1 = 'sha1';
 
-    private const DIGEST_SIZE_IN_BYTES = [
+    private const array DIGEST_SIZE_IN_BYTES = [
         self::BLAKE2B->name => 32,
         self::XXH3->name => 8,
         self::XXH32->name => 4,
@@ -93,7 +93,7 @@ enum HashAlgorithm: string
         self::SHA1->name => 20,
     ];
 
-    private const CRYPTOGRAPHIC = [
+    private const array CRYPTOGRAPHIC = [
         self::BLAKE2B->name => true,
         self::XXH3->name => false,
         self::XXH32->name => false,

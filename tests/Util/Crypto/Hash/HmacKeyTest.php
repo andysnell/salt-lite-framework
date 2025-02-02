@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\SaltLite\Framework\Tests\Domain\Hash;
+namespace PhoneBurner\SaltLite\Framework\Tests\Util\Crypto\Hash;
 
-use PhoneBurner\SaltLite\Framework\Domain\Hash\HmacKey;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Encoding;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Exception\CryptoRuntimeException;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Hash\HmacKey;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -18,15 +20,14 @@ final class HmacKeyTest extends TestCase
     public function make_creates_valid_key(string|\Stringable $value): void
     {
         $key = HmacKey::make($value);
-        self::assertSame(self::VALID_KEY_STRING, (string)$key);
-        self::assertSame(self::VALID_KEY_STRING, $key->value);
+        self::assertSame(self::VALID_KEY_STRING, $key->encoded(Encoding::Hex));
     }
 
     #[Test]
     #[DataProvider('providesInvalidKeyValues')]
     public function make_creates_invalid_key(string|\Stringable $value): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(CryptoRuntimeException::class);
         HmacKey::make($value);
     }
 
@@ -34,9 +35,7 @@ final class HmacKeyTest extends TestCase
     public function generate_creates_valid_key(): void
     {
         $key = HmacKey::generate();
-        self::assertSame((string)$key, $key->value);
-        self::assertMatchesRegularExpression('/^[0-9a-f]{64}$/', (string)$key);
-        self::assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $key->value);
+        self::assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $key->encoded(Encoding::Hex));
     }
 
     public static function providesValidKeyValues(): \Generator

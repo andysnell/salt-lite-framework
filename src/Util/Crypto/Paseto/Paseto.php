@@ -6,6 +6,7 @@ namespace PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto;
 
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto\Exception\PasetoCryptoException;
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Paseto\Exception\PasetoLogicException;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Util;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Cast\NonEmpty;
 use Stringable;
 
@@ -75,9 +76,9 @@ final readonly class Paseto implements Stringable
         $nonce = \sodium_crypto_generichash($message->data, \random_bytes(self::NONCE_BYTES), self::NONCE_BYTES);
         $ciphertext = \sodium_crypto_aead_xchacha20poly1305_ietf_encrypt(
             $message->data,
-            self::encode($header, $nonce, $message->footer),
+            Util::pae($header, $nonce, $message->footer),
             $nonce,
-            $key->shared(),
+            $key->shared()->bytes(),
         );
 
         return new self(PasetoVersion::V2, PasetoPurpose::LOCAL, $nonce . $ciphertext, $message->footer);
@@ -91,7 +92,7 @@ final readonly class Paseto implements Stringable
     public static function public(PasetoKey $key, PasetoMessage $message): self
     {
         $header = self::header(PasetoVersion::V4, PasetoPurpose::PUBLIC);
-        $encoded = self::encode($header, $message->data, $message->footer, $message->implicit_claims);
+        $encoded = Util::pae($header, $message->data, $message->footer, $message->implicit_claims);
         $signature = \sodium_crypto_sign_detached($encoded, $key->secret());
 
         return new self(PasetoVersion::V4, PasetoPurpose::PUBLIC, $message->data . $signature, $message->footer);
@@ -124,7 +125,7 @@ final readonly class Paseto implements Stringable
         $data = \substr($this->payload, 0, $length - \SODIUM_CRYPTO_SIGN_BYTES);
         $signature = \substr($this->payload, $length - \SODIUM_CRYPTO_SIGN_BYTES);
 
-        $encoded = self::encode($header, $data, $this->footer, $implicit);
+        $encoded = Util::pae($header, $data, $this->footer, $implicit);
         if (\sodium_crypto_sign_verify_detached(NonEmpty::string($signature), $encoded, $key->public())) {
             return new PasetoMessage($data, $this->footer, $implicit);
         }
@@ -139,9 +140,9 @@ final readonly class Paseto implements Stringable
         $nonce = \substr($this->payload, 0, self::NONCE_BYTES);
         $data = \sodium_crypto_aead_xchacha20poly1305_ietf_decrypt(
             \substr($this->payload, self::NONCE_BYTES, $length - self::NONCE_BYTES),
-            self::encode($header, $nonce, $this->footer),
+            Util::pae($header, $nonce, $this->footer),
             $nonce,
-            $key->shared(),
+            $key->shared()->bytes(),
         );
 
         if ($data !== false) {
@@ -179,22 +180,5 @@ final readonly class Paseto implements Stringable
     private static function header(string $version, string $purpose): string
     {
         return $version . '.' . $purpose . '.';
-    }
-
-    /**
-     * Authentication Padding (PAE)
-     *
-     * @link https://github.com/paseto-standard/paseto-spec/blob/master/docs/01-Protocol-Versions/Common.md#authentication-padding
-     * @return non-empty-string
-     */
-    private static function encode(string ...$parts): string
-    {
-        $accumulator = \pack('P', \count($parts) & \PHP_INT_MAX);
-        foreach ($parts as $string) {
-            $accumulator .= \pack('P', \strlen($string) & \PHP_INT_MAX);
-            $accumulator .= $string;
-        }
-
-        return NonEmpty::string($accumulator, new PasetoLogicException('Accumulator String Cannot Be Empty'));
     }
 }

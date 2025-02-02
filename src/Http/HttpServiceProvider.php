@@ -11,6 +11,7 @@ use PhoneBurner\SaltLite\Framework\App\Context;
 use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
 use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
 use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
+use PhoneBurner\SaltLite\Framework\Http\Cookie\CookieManager;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\CatchExceptionalResponses;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\LazyMiddlewareRequestHandlerFactory;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\MiddlewareRequestHandlerFactory;
@@ -29,6 +30,10 @@ use PhoneBurner\SaltLite\Framework\Http\Routing\RouteProvider;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Router;
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
+use PhoneBurner\SaltLite\Framework\Util\Clock\Clock;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\AppKey;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Symmetric\SharedKey;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\Symmetric\Symmetric;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
@@ -177,6 +182,17 @@ class HttpServiceProvider implements ServiceProvider
                 return new CacheRoutes(
                     $container->get(Configuration::class),
                     $container->get(FastRouter::class),
+                );
+            },
+        );
+
+        $container->set(
+            CookieManager::class,
+            static function (ContainerInterface $container): CookieManager {
+                return new CookieManager(
+                    new Symmetric(),
+                    SharedKey::derive($container->get(AppKey::class), 'cookie'),
+                    $container->get(Clock::class),
                 );
             },
         );

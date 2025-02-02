@@ -2,19 +2,17 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\SaltLite\Framework\Util\Crypto;
+namespace PhoneBurner\SaltLite\Framework\Util\Crypto\Symmetric;
 
-use PhoneBurner\SaltLite\Framework\App\AppServiceProvider;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\DefaultServiceProvider;
+use PhoneBurner\SaltLite\Framework\Util\Crypto\BaseKey;
 
 /**
  * Note: this class is intentionally not readonly, as this allows us to explicitly
  * zero out the key in memory when the object is destroyed.
  */
-#[DefaultServiceProvider(AppServiceProvider::class)]
-final class AppKey extends BaseKey
+final class SharedKey extends BaseKey
 {
-    public const int LENGTH = \SODIUM_CRYPTO_AUTH_BYTES; // 256-bit key
+    public const int LENGTH = \SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES;
 
     public function bytes(): string
     {

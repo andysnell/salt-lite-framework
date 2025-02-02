@@ -20,14 +20,14 @@ final class PasetoKeyTest extends TestCase
     {
         $key = PasetoKey::make($key);
 
-        $shared = $key->shared();
+        $shared = $key->shared()->bytes();
         $secret = $key->secret();
         $public = $key->public();
         $id = $key->id();
 
-        // 32 bytes * 2 for hex encoding + 8 characters for "blake2b:"
-        self::assertSame(72, \strlen($id));
-        self::assertStringStartsWith('blake2b:', $id);
+        // 32 bytes * 2 for hex encoding + 7 characters for "sha256:"
+        self::assertSame(71, \strlen($id));
+        self::assertStringStartsWith('sha256:', $id);
 
         // Make sure we aren't accidentally using the id as a key
         $binary_id = \hex2bin(\substr($key->id(), 8));
@@ -63,14 +63,14 @@ final class PasetoKeyTest extends TestCase
     {
         $key = PasetoKey::make($key);
 
-        $shared = $key->shared();
+        $shared = $key->shared()->bytes();
         $secret = $key->secret();
         $public = $key->public();
         $id = $key->id();
 
-        // 32 bytes * 2 for hex encoding + 8 characters for "blake2b:"
-        self::assertSame(72, \strlen($id));
-        self::assertStringStartsWith('blake2b:', $id);
+        // 32 bytes * 2 for hex encoding + 7 characters for "sha256:"
+        self::assertSame(71, \strlen($id));
+        self::assertStringStartsWith('sha256:', $id);
 
         // Make sure we aren't accidentally using the id as a key
         $binary_id = \hex2bin(\substr($key->id(), 8));
