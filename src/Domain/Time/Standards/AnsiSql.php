@@ -10,4 +10,8 @@ final class AnsiSql
     public const string DATE = 'Y-m-d';
     public const string TIME = 'H:i:s';
     public const string YEAR = 'Y';
+
+    public const string NULL_DATETIME = '0000-00-00 00:00:00';
+    public const string NULL_DATE = '0000-00-00';
+    public const string NULL_TIME = '00:00:00';
 }

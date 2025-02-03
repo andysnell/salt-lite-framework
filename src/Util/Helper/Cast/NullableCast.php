@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Util\Helper\Cast;
 
+use Carbon\CarbonImmutable;
+use Carbon\Exceptions\Exception as CarbonException;
+use PhoneBurner\SaltLite\Framework\Domain\Time\Standards\AnsiSql;
+
 abstract class NullableCast
 {
     public static function integer(mixed $value): int|null
@@ -42,5 +46,20 @@ abstract class NullableCast
     public static function boolean(mixed $value): bool|null
     {
         return $value !== null ? (bool)$value : null;
+    }
+
+    public static function datetime(mixed $value): CarbonImmutable|null
+    {
+        try {
+            return match (true) {
+                $value instanceof CarbonImmutable, $value === null => $value,
+                $value === AnsiSql::NULL_DATETIME, $value === '' => null,
+                $value instanceof \DateTimeInterface, \is_string($value) => CarbonImmutable::make($value),
+                \is_int($value) => CarbonImmutable::createFromTimestamp($value),
+                default => throw new \TypeError('Invalid type for datetime cast: ' . \gettype($value)),
+            };
+        } catch (CarbonException) {
+            return null;
+        }
     }
 }
