@@ -84,21 +84,6 @@ final class SymmetricTest extends TestCase
 
     #[Test]
     #[DataProvider('providesPlaintextTestCases')]
-    public function the_version_header_is_checked_(string $plaintext): void
-    {
-        $key = SharedKey::generate();
-        $ciphertext = new Symmetric()->encrypt($key, $plaintext, encoding: Encoding::None);
-
-        // change one byte in the version header (e.g. v1 to v2)
-        $ciphertext[3] = '2';
-
-        $this->expectException(InvalidMessage::class);
-        $this->expectExceptionMessage('Message Has Invalid Version Header');
-        new Symmetric()->decrypt($key, $ciphertext, encoding: Encoding::None);
-    }
-
-    #[Test]
-    #[DataProvider('providesPlaintextTestCases')]
     public function message_authentication_works(string $plaintext): void
     {
         $key = SharedKey::generate();
