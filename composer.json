@@ -69,6 +69,7 @@
     "ext-sodium": "*",
     "ext-zip": "*",
     "ext-zlib": "*",
+    "alek13/slack": "^2.3",
     "brick/varexporter": "^0.5.0",
     "crell/api-problem": "^3.7",
     "crell/attributeutils": "^1.2",
