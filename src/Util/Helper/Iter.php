@@ -46,4 +46,14 @@ abstract readonly class Iter
 
         return null;
     }
+
+    final public static function last(iterable $iter): mixed
+    {
+        $last = null;
+        foreach ($iter as $value) {
+            $last = $value;
+        }
+
+        return $last;
+    }
 }

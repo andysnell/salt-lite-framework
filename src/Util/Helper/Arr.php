@@ -52,16 +52,13 @@ abstract readonly class Arr
     }
 
     /**
-     * This function avoids having to assign the array to a variable before
-     * calling the `reset` builtin. It also avoids the problem that the return
-     * value of `reset` called on an empty array is identical to an array where
-     * the first element is `false`. If the array is empty, this method will
-     * return null. (This is now indistinguishable from an array where the first
-     * element is `null`; however, this should be significantly less impactful.)
-     * It also supports returning the first value of any `iterable`, not just arrays.
+     * Return the first value of an iterable value. If the value is an array, the
+     * internal array pointer will be not be affected by calling this function.
+     * If the value is instead an instance of \Traversable, the internal pointer
+     * is reset and exactly one iteration will occur. If the array|iterator is
+     * empty, null will be returned.
      *
      * @param iterable<mixed>|Arrayable $value
-     * @return mixed|null
      */
     final public static function first(iterable|Arrayable $value): mixed
     {
@@ -70,6 +67,24 @@ abstract readonly class Arr
             \is_array($value) => $value[\array_key_first($value)],
             \is_iterable($value) => Iter::first($value),
             default => self::first($value->toArray()),
+        };
+    }
+
+    /**
+     * Return the last element in the iterable $value or null if it is empty.
+     * If the value is an array, the internal array pointer will be not be changed
+     * by calling this function. If an instance of \Traversable, the entire iterator
+     * is consumed to find the last element.
+     *
+     * @param iterable<mixed>|Arrayable $value
+     */
+    final public static function last(iterable|Arrayable $value): mixed
+    {
+        return match (true) {
+            $value === [] => null,
+            \is_array($value) => $value[\array_key_last($value)],
+            \is_iterable($value) => Iter::last($value),
+            default => self::last($value->toArray()),
         };
     }
 
