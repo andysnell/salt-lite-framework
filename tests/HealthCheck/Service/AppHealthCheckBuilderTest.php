@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Tests\HealthCheck\Service;
 
 use Carbon\CarbonImmutable;
+use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
+use PhoneBurner\SaltLite\Framework\App\Clock\StaticClock;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\ComponentHealthCheck;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthCheck;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthStatus;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Service\AppHealthCheckBuilder;
-use PhoneBurner\SaltLite\Framework\Util\Clock\Clock;
-use PhoneBurner\SaltLite\Framework\Util\Clock\StaticClock;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;

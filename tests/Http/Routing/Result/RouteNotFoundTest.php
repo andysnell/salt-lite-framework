@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Http\Routing\Result;
+namespace PhoneBurner\SaltLite\Framework\Tests\Http\Routing\Result;
 
 use LogicException;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Result\RouteNotFound as SUT;

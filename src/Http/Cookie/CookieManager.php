@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Cookie;
 
+use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
-use PhoneBurner\SaltLite\Framework\Util\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Encoding;
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Hash\Hmac;
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Hash\HmacKey;

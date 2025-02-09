@@ -4,45 +4,54 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\EventDispatcher;
 
-use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
-use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
+use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
+use PhoneBurner\SaltLite\Framework\EventDispatcher\EventListener\LazyListener;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Reflect;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyContractsEventDispatcherInterface;
 
 /**
  * @codeCoverageIgnore
  */
 #[Internal('Override Definitions in Application Service Providers')]
-class EventDispatcherServiceProvider implements ServiceProvider
+final class EventDispatcherServiceProvider implements ServiceProvider
 {
-    #[\Override]
-    public function register(MutableContainer $container): void
+    public static function bind(): array
     {
-        $container->bind(EventDispatcherInterface::class, EventDispatcher::class);
-        $container->set(
-            EventDispatcher::class,
-            static function (ContainerInterface $container): EventDispatcher {
-                $dispatcher = new EventDispatcher();
-                foreach ($container->get(Configuration::class)->get('events.listeners') ?: [] as $event => $listeners) {
-                    foreach ($listeners as $listener) {
-                        $dispatcher->addListener($event, new LazyListener($container, $listener));
-                    }
-                }
+        return [
+            EventDispatcherInterface::class => EventDispatcher::class,
+            SymfonyEventDispatcherInterface::class => EventDispatcher::class,
+            SymfonyContractsEventDispatcherInterface::class => EventDispatcher::class,
 
-                foreach ($container->get(Configuration::class)->get('events.subscribers') ?: [] as $subscriber) {
+        ];
+    }
+
+    #[\Override]
+    public static function register(App $app): void
+    {
+        $app->set(EventDispatcher::class, static function (App $app): EventDispatcher {
+            return Reflect::ghost(EventDispatcher::class, static function (EventDispatcher $ghost) use ($app): void {
+                $ghost->__construct();
+                foreach ($app->config->get('event_dispatcher.subscribers') ?: [] as $subscriber) {
                     \assert(\is_string($subscriber) && \is_a($subscriber, EventSubscriberInterface::class, true));
                     foreach ($subscriber::getSubscribedEvents() as $event => $methods) {
-                        self::registerSubscriberListeners($container, $dispatcher, $event, $subscriber, $methods);
+                        self::registerSubscriberListeners($app->services, $ghost, $event, $subscriber, $methods);
                     }
                 }
 
-                return $dispatcher;
-            },
-        );
+                foreach ($app->config->get('event_dispatcher.listeners') ?: [] as $event => $listeners) {
+                    foreach ($listeners as $listener) {
+                        $ghost->addListener($event, new LazyListener($app->services, $listener));
+                    }
+                }
+            });
+        });
     }
 
     private static function registerSubscriberListeners(

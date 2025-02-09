@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Http\Routing\Match;
+namespace PhoneBurner\SaltLite\Framework\Tests\Http\Routing\Match;
 
 use Generator;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;

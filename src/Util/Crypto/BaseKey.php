@@ -24,6 +24,9 @@ abstract class BaseKey implements Key
      */
     protected string $value;
 
+    /**
+     * @return non-empty-string
+     */
     abstract public function bytes(): string;
 
     /**

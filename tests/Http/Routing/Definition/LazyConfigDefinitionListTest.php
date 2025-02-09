@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Http\Routing\Definition;
+namespace PhoneBurner\SaltLite\Framework\Tests\Http\Routing\Definition;
 
 use Generator;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Definition\LazyConfigDefinitionList as SUT;

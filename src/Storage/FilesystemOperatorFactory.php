@@ -9,8 +9,8 @@ use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\Local\LocalFilesystemAdapter;
-use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
-use PhoneBurner\SaltLite\Framework\Configuration\Exception\InvalidConfiguration;
+use PhoneBurner\SaltLite\Framework\App\Configuration\Configuration;
+use PhoneBurner\SaltLite\Framework\App\Exception\InvalidConfiguration;
 
 class FilesystemOperatorFactory
 {

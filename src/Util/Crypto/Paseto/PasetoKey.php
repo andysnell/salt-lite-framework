@@ -31,6 +31,14 @@ final class PasetoKey implements Key
     }
 
     /**
+     * Wrap another Key instance in a PasetoKey object without additional derivation.
+     */
+    public static function wrap(#[\SensitiveParameter] Key $key): self
+    {
+        return new self($key->bytes());
+    }
+
+    /**
      * Zero out the key in memory when the object is destroyed.
      */
     public function __destruct()

@@ -4,127 +4,76 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Container;
 
-use PhoneBurner\SaltLite\Framework\Container\Exception\OverriddenArgumentNotSet;
-use PhoneBurner\SaltLite\Framework\Container\Exception\UnableToAutoResolveParameterException;
+use PhoneBurner\SaltLite\Framework\Container\Exception\UnableToAutoResolveParameter;
+use PhoneBurner\SaltLite\Framework\Container\ParameterOverride\OverrideCollection;
+use PhoneBurner\SaltLite\Framework\Container\ParameterOverride\OverrideType;
+use PhoneBurner\SaltLite\Framework\Container\ParameterOverride\ParameterOverride;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
+use Psr\Container\ContainerInterface;
 
 #[Internal]
 class ReflectionMethodAutoResolver
 {
-    public static function usingContainer(MutableContainer $container): self
+    public function __construct(private readonly ContainerInterface $container)
     {
-        return new self($container);
     }
 
-    public function __construct(
-        private readonly MutableContainer $container,
-        private readonly array $auto_resolve_block_list = [],
-    ) {
-    }
-
-    /**
-     * @param Override|array<Override>|OverrideCollection $overrides
-     */
-    public function getArgumentsFor(\ReflectionMethod $method, Override|OverrideCollection|array $overrides = []): array
+    public function getArgumentsFor(\ReflectionMethod $method, OverrideCollection|null $overrides = null): array
     {
-        if (! $overrides instanceof OverrideCollection) {
-            $overrides = new OverrideCollection($overrides);
-        }
-
-        return \array_map(function (\ReflectionParameter $parameter) use ($overrides) {
-            return $this->resolve($parameter, $overrides);
-        }, $method->getParameters());
+        $parameters = $method->getParameters();
+        return match (true) {
+            $parameters === [] => [],
+            $overrides instanceof OverrideCollection => \array_map(
+                fn(\ReflectionParameter $parameter): mixed => $this->resolveWithOverrides($parameter, $overrides),
+                $parameters,
+            ),
+            default => \array_map($this->resolve(...), $parameters),
+        };
     }
 
-    /**
-     * @return mixed
-     * @throws UnableToAutoResolveParameterException
-     * @throws OverriddenArgumentNotSet
-     */
-    private function resolve(\ReflectionParameter $parameter, OverrideCollection $overrides)
+    private function resolve(\ReflectionParameter $parameter): mixed
     {
-        if ($overrides->hasArgumentInPosition($parameter->getPosition())) {
-            return $overrides->getArgumentInPosition($parameter->getPosition());
-        }
+        $class = self::resolveClassNameFromType($parameter->getType());
 
-        if ($overrides->hasArgumentByName($parameter->getName())) {
-            return $overrides->getArgumentByName($parameter->getName());
-        }
-
-        $type = $parameter->getType();
-        if ($type instanceof \ReflectionNamedType && ! $type->isBuiltin()) {
-            /** @var class-string $class */
-            $class = $type->getName();
-            return $this->resolveTypeHintedParameter($parameter, new \ReflectionClass($class), $overrides);
-        }
-
-        if ($parameter->isDefaultValueAvailable()) {
-            return $parameter->getDefaultValue();
-        }
-
-        $class = $parameter->getDeclaringClass();
-        $name = $class ? $class->getName() : '';
-        throw new UnableToAutoResolveParameterException(
-            'Unable to resolve value for parameter `$' . $parameter->getName() . '`' .
-            ' for class `' . $name . '`',
-        );
+        return match (true) {
+            $class === null => match ($parameter->isDefaultValueAvailable()) {
+                true => $parameter->getDefaultValue(),
+                false => throw new UnableToAutoResolveParameter($parameter),
+            },
+            $this->container->has($class) => $this->container->get($class),
+            $parameter->isDefaultValueAvailable() => $parameter->getDefaultValue(),
+            default => $this->container->get($class), // Limit overrides to first level resolution
+        };
     }
 
-    /**
-     * @template T of object
-     * @param \ReflectionClass<T> $hint
-     * @return mixed
-     */
-    private function resolveTypeHintedParameter(
-        \ReflectionParameter $parameter,
-        \ReflectionClass $hint,
-        OverrideCollection $overrides,
-    ) {
-        if ($overrides->hasArgumentByTypeHint($hint->getName())) {
-            return $overrides->getArgumentByTypeHint($hint->getName());
-        }
-
-        if ($this->container->has($hint->getName())) {
-            return $this->container->get($hint->getName());
-        }
-
-        if ($parameter->isDefaultValueAvailable()) {
-            return $parameter->getDefaultValue();
-        }
-
-        // Limit overrides to first level resolving
-        return $this->autoResolveTypeHint($hint);
-    }
-
-    /**
-     * @template T of object
-     * @param \ReflectionClass<T> $hint
-     * @return T
-     * @throws UnableToAutoResolveParameterException
-     */
-    private function autoResolveTypeHint(\ReflectionClass $hint): object
+    private function resolveWithOverrides(\ReflectionParameter $parameter, OverrideCollection $overrides): mixed
     {
-        if ($this->isClassAutoResolveBlocked($hint)) {
-            throw new UnableToAutoResolveParameterException(
-                $hint->getName() . ' can not be auto resolved from container due to block list.',
-            );
-        }
+        $position_override = $overrides->find(OverrideType::Position, $parameter->getPosition());
+        $name_override = $overrides->find(OverrideType::Name, $parameter->getName());
+        $class = self::resolveClassNameFromType($parameter->getType());
 
-        return $this->container->get($hint->getName());
+        return match (true) {
+            $position_override instanceof ParameterOverride => $position_override->value(),
+            $name_override instanceof ParameterOverride => $name_override->value(),
+            $class === null => match ($parameter->isDefaultValueAvailable()) {
+                true => $parameter->getDefaultValue(),
+                false => throw new UnableToAutoResolveParameter($parameter),
+            },
+            $overrides->has(OverrideType::Hint, $class) => $overrides->find(OverrideType::Hint, $class)?->value(),
+            $this->container->has($class) => $this->container->get($class),
+            $parameter->isDefaultValueAvailable() => $parameter->getDefaultValue(),
+            default => $this->container->get($class), // Limit overrides to first level resolution
+        };
     }
 
-    /**
-     * @template T of object
-     * @param \ReflectionClass<T> $class
-     */
-    private function isClassAutoResolveBlocked(\ReflectionClass $class): bool
+    private static function resolveClassNameFromType(\ReflectionType|null $type): string|null
     {
-        foreach ($this->auto_resolve_block_list as $block_listed) {
-            if ($class->getName() === $block_listed || $class->isSubclassOf($block_listed)) {
-                return true;
-            }
-        }
-
-        return false;
+        return match (true) {
+            ! $type instanceof \ReflectionNamedType,
+            $type->isBuiltin(), // strings, int, etc
+            ! Type::isClassString($type->getName()) => null,
+            default => $type->getName(),
+        };
     }
 }

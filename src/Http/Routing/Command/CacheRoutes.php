@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Routing\Command;
 
-use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
+use PhoneBurner\SaltLite\Framework\App\Configuration\Configuration;
 use PhoneBurner\SaltLite\Framework\Http\Routing\FastRoute\FastRouter;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -31,13 +31,13 @@ class CacheRoutes extends Command
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (! $this->config->get('routing.route_cache.enable')) {
+        if (! $this->config->get('http.routing.route_cache.enable')) {
             $output->writeln('<comment>Route caching is disabled!</comment>');
             $output->writeln('Set the SALT_ENABLE_ROUTE_CACHE environment variable to `true` enable it');
             return self::SUCCESS;
         }
 
-        $cache_file = $this->config->get('routing.route_cache.filepath');
+        $cache_file = $this->config->get('http.routing.route_cache.filepath');
         if ($input->getOption('clear') || \file_exists($cache_file)) {
             $output->write("<comment>Clearing Existing Route Cache File:</comment> ");
 

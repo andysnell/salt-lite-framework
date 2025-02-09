@@ -9,8 +9,8 @@ use PhoneBurner\SaltLite\Framework\App\AppServiceProvider;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\DefaultServiceProvider;
 
-#[DefaultServiceProvider(AppServiceProvider::class)]
 #[Contract]
+#[DefaultServiceProvider(AppServiceProvider::class)]
 class AttributeAnalyzer implements ClassAnalyzer
 {
     public function __construct(private readonly ClassAnalyzer $analyzer)

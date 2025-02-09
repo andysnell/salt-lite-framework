@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Container\Exception;
 
-class OverriddenArgumentNotSet extends \LogicException
+use Psr\Container\ContainerExceptionInterface;
+
+class OverriddenArgumentNotSet extends \LogicException implements ContainerExceptionInterface
 {
 }

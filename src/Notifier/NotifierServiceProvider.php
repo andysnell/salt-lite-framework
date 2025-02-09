@@ -6,35 +6,51 @@ namespace PhoneBurner\SaltLite\Framework\Notifier;
 
 use GuzzleHttp\Client as GuzzleClient;
 use Maknz\Slack\Client;
+use PhoneBurner\SaltLite\Framework\App\App;
+use PhoneBurner\SaltLite\Framework\App\BuildStage;
 use PhoneBurner\SaltLite\Framework\Cache\Lock\LockFactory;
-use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
-use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
-use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
+use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
+use PhoneBurner\SaltLite\Framework\Notifier\Slack\NullSlackNotificationClient;
 use PhoneBurner\SaltLite\Framework\Notifier\Slack\SlackApiNotificationClient;
 use PhoneBurner\SaltLite\Framework\Notifier\Slack\SlackNotificationClient;
-use Psr\Container\ContainerInterface;
+use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\Log\LoggerInterface;
 
-class NotifierServiceProvider implements ServiceProvider
+/**
+ * @codeCoverageIgnore
+ */
+#[Internal('Override Definitions in Application Service Providers')]
+final class NotifierServiceProvider implements DeferrableServiceProvider
 {
-    public function register(MutableContainer $container): void
+    public static function provides(): array
     {
-        $container->set(
+        return [
             SlackNotificationClient::class,
-            static function (ContainerInterface $container): SlackNotificationClient {
-                $config = $container->get(Configuration::class)->get('notifier.slack');
-                $logger = $container->get(LoggerInterface::class);
-            //                if ($container->get(BuildStage::class) !== BuildStage::Production) {
-            //                    return new NullSlackNotificationClient(
-            //                        $config['default_options']['channel'] ?? 'developers',
-            //                    );
-            //                }
+        ];
+    }
 
-                return new SlackApiNotificationClient(
-                    new Client($config['endpoint'], $config['default_options'] ?? [], new GuzzleClient()),
-                    $container->get(LockFactory::class),
-                    $logger,
-                );
+    public static function bind(): array
+    {
+        return [];
+    }
+
+    public static function register(App $app): void
+    {
+        $app->set(
+            SlackNotificationClient::class,
+            static function (App $app): SlackNotificationClient {
+                $config = $app->config->get('notifier.slack');
+                return match ($app->environment->stage) {
+                    BuildStage::Production => new SlackApiNotificationClient(
+                        new Client($config['endpoint'], $config['default_options'] ?? [], new GuzzleClient()),
+                        $app->services->get(LockFactory::class),
+                        $app->services->get(LoggerInterface::class),
+                    ),
+                    default => new NullSlackNotificationClient(
+                        $app->services->get(LoggerInterface::class),
+                        $config['default_options']['channel'] ?? 'developers',
+                    ),
+                };
             },
         );
     }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Http\Routing\Middleware;
+namespace PhoneBurner\SaltLite\Framework\Tests\Http\Routing\Middleware;
 
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;

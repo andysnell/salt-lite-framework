@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Http\Routing\RequestHandler;
+namespace PhoneBurner\SaltLite\Framework\Tests\Http\Routing\RequestHandler;
 
 use LogicException;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;

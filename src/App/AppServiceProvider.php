@@ -8,110 +8,89 @@ use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\AttributeUtils\Psr6CacheAnalyzer;
+use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
+use PhoneBurner\SaltLite\Framework\App\Clock\HighResolutionTimer;
+use PhoneBurner\SaltLite\Framework\App\Clock\SystemClock;
+use PhoneBurner\SaltLite\Framework\App\Clock\SystemHighResolutionTimer;
+use PhoneBurner\SaltLite\Framework\App\Configuration\Configuration;
 use PhoneBurner\SaltLite\Framework\App\Exception\KernelError;
 use PhoneBurner\SaltLite\Framework\Cache\CacheDriver;
 use PhoneBurner\SaltLite\Framework\Cache\CacheItemPoolFactory;
-use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
 use PhoneBurner\SaltLite\Framework\Console\CliKernel;
+use PhoneBurner\SaltLite\Framework\Container\Exception\NotResolvable;
+use PhoneBurner\SaltLite\Framework\Container\InvokingContainer;
 use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
-use PhoneBurner\SaltLite\Framework\Container\PhpDiContainerAdapter;
+use PhoneBurner\SaltLite\Framework\Container\ServiceContainer;
+use PhoneBurner\SaltLite\Framework\Container\ServiceContainerAdapter;
 use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\Http\HttpKernel;
+use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Analyzer\AttributeAnalyzer;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
-use PhoneBurner\SaltLite\Framework\Util\Clock\Clock;
-use PhoneBurner\SaltLite\Framework\Util\Clock\HighResolutionTimer;
-use PhoneBurner\SaltLite\Framework\Util\Clock\SystemClock;
-use PhoneBurner\SaltLite\Framework\Util\Clock\SystemHighResolutionTimer;
 use PhoneBurner\SaltLite\Framework\Util\Crypto\AppKey;
 use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
+
+use function PhoneBurner\SaltLite\Framework\ghost;
 
 /**
  * @codeCoverageIgnore
  */
 #[Internal('Override Definitions in Application Service Providers')]
-class AppServiceProvider implements ServiceProvider
+final class AppServiceProvider implements ServiceProvider
 {
-    #[\Override]
-    public function register(MutableContainer $container): void
+    public static function bind(): array
     {
+        return [
+            ClockInterface::class => Clock::class,
+            ClassAnalyzer::class => AttributeAnalyzer::class,
+        ];
+    }
+
+    #[\Override]
+    public static function register(App $app): void
+    {
+        // These services must be set explicitly in the container by the application
+        // after service provider registration.
+        $app->set(App::class, static fn (App $app): never => throw new NotResolvable(App::class));
+        $app->set(Environment::class, static fn (App $app): never => throw new NotResolvable(Environment::class));
+        $app->set(Configuration::class, static fn (App $app): never => throw new NotResolvable(Configuration::class));
+
         // When asked for a concrete instance or an implementation of either of
         // the two container interfaces, the container should return itself.
-        $container->set(ContainerInterface::class, $container);
-        $container->set(MutableContainer::class, $container);
-        $container->set(PhpDiContainerAdapter::class, $container);
+        $app->set(ContainerInterface::class, $app);
+        $app->set(InvokingContainer::class, $app);
+        $app->set(MutableContainer::class, $app);
+        $app->set(ServiceContainer::class, $app->services);
+        $app->set(ServiceContainerAdapter::class, $app->services);
 
-        $container->set(
-            Environment::class,
-            static function (ContainerInterface $container): never {
-                throw new \LogicException('Environment Must Be Set Explicitly in the Container');
-            },
-        );
+        $app->set(LogTrace::class, LogTrace::make(...));
+        $app->set(BuildStage::class, static fn(App $app): BuildStage => $app->environment->stage);
+        $app->set(Context::class, static fn(App $app): Context => $app->environment->context);
 
-        $container->set(
-            BuildStage::class,
-            static function (ContainerInterface $container): BuildStage {
-                return $container->get(Environment::class)->stage;
-            },
-        );
+        $app->set(Kernel::class, static fn(App $app): Kernel => $app->services->get(match ($app->context) {
+            Context::Http => HttpKernel::class,
+            Context::Cli => CliKernel::class,
+            default => throw new KernelError('Salt Context is Not Defined or Supported'),
+        }));
 
-        $container->set(
-            Context::class,
-            static function (ContainerInterface $container): Context {
-                return $container->get(Environment::class)->context;
-            },
-        );
+        $app->set(AppKey::class, static fn(App $app): AppKey => new AppKey($app->config->get('app.key') ?: throw new \LogicException(
+            'A Valid App Key Must Be Defined in Configuration',
+        )));
 
-        $container->set(
-            Kernel::class,
-            static function (ContainerInterface $container): Kernel {
-                return match ($container->get(Context::class)) {
-                    Context::Http => $container->get(HttpKernel::class),
-                    Context::Cli => $container->get(CliKernel::class),
-                    default => throw new KernelError('Salt Context is Not Defined or Supported'),
-                };
-            },
-        );
+        $app->set(Clock::class, static fn(App $app): SystemClock => new SystemClock());
+        $app->set(HighResolutionTimer::class, static fn(App $app): SystemHighResolutionTimer => new SystemHighResolutionTimer());
 
-        $container->set(
-            AppKey::class,
-            static function (ContainerInterface $container): AppKey {
-                return new AppKey(
-                    $container->get(Configuration::class)->get('app.key') ?: throw new \LogicException('App Key not defined'),
-                );
-            },
-        );
-
-        $container->bind(ClockInterface::class, Clock::class);
-        $container->set(
-            Clock::class,
-            static function (ContainerInterface $container): SystemClock {
-                return new SystemClock();
-            },
-        );
-
-        $container->set(
-            HighResolutionTimer::class,
-            static function (ContainerInterface $container): SystemHighResolutionTimer {
-                return new SystemHighResolutionTimer();
-            },
-        );
-
-        $container->bind(ClassAnalyzer::class, AttributeAnalyzer::class);
-        $container->set(
-            AttributeAnalyzer::class,
-            static function (ContainerInterface $container): AttributeAnalyzer {
-                $analyzer = new Analyzer();
-                if ($container->get(BuildStage::class) !== BuildStage::Development) {
-                    $pool = $container->get(CacheItemPoolFactory::class)->make(CacheDriver::File);
-                    $analyzer = new Psr6CacheAnalyzer($analyzer, $pool);
-                }
-
-                $analyzer = new MemoryCacheAnalyzer($analyzer);
-
-                return new AttributeAnalyzer($analyzer);
-            },
-        );
+        $app->set(AttributeAnalyzer::class, ghost(static function (MemoryCacheAnalyzer $ghost) use ($app): void {
+            $ghost->__construct(
+                new Psr6CacheAnalyzer(
+                    new Analyzer(),
+                    $app->services->get(CacheItemPoolFactory::class)->make(match ($app->environment->stage) {
+                        BuildStage::Development => CacheDriver::Memory,
+                        default => CacheDriver::File,
+                    }),
+                ),
+            );
+        }));
     }
 }

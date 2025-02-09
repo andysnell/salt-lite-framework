@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Http\Response\Exceptional;
+namespace PhoneBurner\SaltLite\Framework\Tests\Http\Response\Exceptional;
 
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpStatus;

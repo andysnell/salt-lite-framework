@@ -20,32 +20,4 @@ interface MutableContainer extends ContainerInterface
      * @param mixed $value Either the instance of the class or a Closure which creates an instance.
      */
     public function set(string $id, mixed $value): void;
-
-    /**
-     * Set the element used for the interface identifier to the container resolved
-     * instance of the concrete implementation.
-     *
-     * @template T1 of object
-     * @template T2 of T1
-     * @param class-string<T1> $interface
-     * @param class-string<T2> $implementation
-     */
-    public function bind(string $interface, string $implementation): void;
-
-    /**
-     * Create an object using the container for DI allowing for manual overrides.
-     *
-     * @template T of object
-     * @param class-string<T> $class
-     * @param Override|Override[]|OverrideCollection $overrides
-     * @return T
-     */
-    public function make(string $class, Override|OverrideCollection|array $overrides = []): object;
-
-    /**
-     * Invoke a method on an object.
-     *
-     * @param Override|Override[]|OverrideCollection $overrides
-     */
-    public function call(object $object, string $method, Override|OverrideCollection|array $overrides = []): mixed;
 }

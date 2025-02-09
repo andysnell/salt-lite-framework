@@ -9,5 +9,7 @@ use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
 #[Contract]
 interface MessageBus
 {
+    public const string DEFAULT = 'default_bus';
+
     public function dispatch(object $message): object;
 }

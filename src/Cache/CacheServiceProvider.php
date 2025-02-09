@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Cache;
 
+use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\App\BuildStage;
 use PhoneBurner\SaltLite\Framework\App\Context;
-use PhoneBurner\SaltLite\Framework\App\Environment;
 use PhoneBurner\SaltLite\Framework\Cache\Lock\LockFactory;
 use PhoneBurner\SaltLite\Framework\Cache\Lock\NamedKeyFactory;
 use PhoneBurner\SaltLite\Framework\Cache\Lock\SymfonyLockFactoryAdapter;
-use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
-use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
+use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\Cache\CacheItemPoolInterface;
-use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Psr16Cache;
@@ -23,89 +21,98 @@ use Symfony\Component\Lock\LockFactory as SymfonyLockFactory;
 use Symfony\Component\Lock\Store\InMemoryStore;
 use Symfony\Component\Lock\Store\RedisStore;
 
+use function PhoneBurner\SaltLite\Framework\ghost;
+
 /**
  * @codeCoverageIgnore
  */
 #[Internal('Override Definitions in Application Service Providers')]
-class CacheServiceProvider implements ServiceProvider
+final class CacheServiceProvider implements DeferrableServiceProvider
 {
-    #[\Override]
-    public function register(MutableContainer $container): void
+    public static function provides(): array
     {
-        $container->set(
+        return [
             AppendOnlyCache::class,
-            static function (ContainerInterface $container): AppendOnlyCacheAdapter {
-                return new AppendOnlyCacheAdapter(
-                    $container->get(CacheItemPoolFactory::class)->make(CacheDriver::File),
-                );
-            },
-        );
-
-        $container->set(
             Cache::class,
-            static function (ContainerInterface $container): CacheAdapter {
-                return new CacheAdapter($container->get(CacheInterface::class));
-            },
-        );
-
-        $container->set(
             InMemoryCache::class,
-            static function (ContainerInterface $container): InMemoryCache {
-                return new InMemoryCache(
-                    $container->get(CacheItemPoolFactory::class)->make(CacheDriver::Memory),
-                );
-            },
-        );
-
-        $container->set(
             CacheInterface::class,
-            static function (ContainerInterface $container): CacheInterface {
-                return new Psr16Cache(
-                    $container->get(CacheItemPoolFactory::class)->make(CacheDriver::Remote),
-                );
-            },
-        );
-
-        $container->set(
             CacheItemPoolInterface::class,
-            static function (ContainerInterface $container): CacheItemPoolInterface {
-                return $container->get(CacheItemPoolFactory::class)->make(CacheDriver::Remote);
-            },
-        );
-
-        $container->set(
             CacheItemPoolFactory::class,
-            static function (ContainerInterface $container): CacheItemPoolFactory {
-                $environment = $container->get(Environment::class);
-                return new CacheItemPoolFactory(
-                    $environment,
-                    $container->get(RedisManager::class),
-                    $container->get(LoggerInterface::class),
-                );
-            },
-        );
-
-        $container->set(
             NamedKeyFactory::class,
-            static function (ContainerInterface $container): NamedKeyFactory {
-                return new NamedKeyFactory();
-            },
+            LockFactory::class,
+        ];
+    }
+
+    public static function bind(): array
+    {
+        return [
+
+        ];
+    }
+
+    #[\Override]
+    public static function register(App $app): void
+    {
+        $app->set(
+            AppendOnlyCache::class,
+            ghost(static fn(AppendOnlyCacheAdapter $ghost): null => $ghost->__construct(
+                $app->get(CacheItemPoolFactory::class)->make(CacheDriver::File),
+            )),
         );
 
-        $container->set(
+        $app->set(
+            Cache::class,
+            static fn(App $app): CacheAdapter => new CacheAdapter(
+                $app->get(CacheInterface::class),
+            ),
+        );
+
+        $app->set(
+            InMemoryCache::class,
+            static fn(App $app): InMemoryCache => new InMemoryCache(
+                $app->get(CacheItemPoolFactory::class)->make(CacheDriver::Memory),
+            ),
+        );
+
+        $app->set(
+            CacheInterface::class,
+            static fn(App $app): CacheInterface => new Psr16Cache(
+                $app->get(CacheItemPoolFactory::class)->make(CacheDriver::Remote),
+            ),
+        );
+
+        $app->set(
+            CacheItemPoolInterface::class,
+            static fn(App $app): CacheItemPoolInterface => $app->get(CacheItemPoolFactory::class)->make(CacheDriver::Remote),
+        );
+
+        $app->set(
+            CacheItemPoolFactory::class,
+            static fn(App $app): CacheItemPoolFactory => new CacheItemPoolFactory(
+                $app->environment,
+                $app->get(RedisManager::class),
+                $app->get(LoggerInterface::class),
+            ),
+        );
+
+        $app->set(
+            NamedKeyFactory::class,
+            static fn(App $app): NamedKeyFactory => new NamedKeyFactory(),
+        );
+
+        $app->set(
             LockFactory::class,
-            static function (ContainerInterface $container): SymfonyLockFactoryAdapter {
-                $environment = $container->get(Environment::class);
+            static function (App $app): SymfonyLockFactoryAdapter {
                 $lock_factory = new SymfonyLockFactoryAdapter(
-                    $container->get(NamedKeyFactory::class),
-                    new SymfonyLockFactory(match ($environment->context) {
+                    $app->get(NamedKeyFactory::class),
+                    new SymfonyLockFactory(match ($app->environment->context) {
                     Context::Test => new InMemoryStore(),
-                    default => new RedisStore($container->get(\Redis::class)),
+                    default => new RedisStore($app->get(\Redis::class)),
                     }),
                 );
 
-                if ($environment->stage !== BuildStage::Production) {
-                    $lock_factory->setLogger($container->get(LoggerInterface::class));
+                if ($app->environment->stage !== BuildStage::Production) {
+                    $lock_factory->setLogger($app->get(LoggerInterface::class));
                 }
 
                 return $lock_factory;

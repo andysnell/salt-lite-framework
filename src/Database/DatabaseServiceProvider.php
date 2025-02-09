@@ -8,11 +8,9 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Tools\Console\ConnectionProvider as DoctrineConnectionProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Console\EntityManagerProvider as DoctrineEntityManagerProvider;
-use PhoneBurner\SaltLite\Framework\App\Environment;
+use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\Cache\CacheItemPoolFactory;
-use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
-use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
-use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
+use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\ConnectionFactory;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\ConnectionProvider;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\Orm\EntityManagerFactory;
@@ -20,88 +18,101 @@ use PhoneBurner\SaltLite\Framework\Database\Doctrine\Orm\EntityManagerProvider;
 use PhoneBurner\SaltLite\Framework\Database\Redis\CachingRedisManager;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
-use Psr\Container\ContainerInterface;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Reflect;
 use Psr\Log\LoggerInterface;
 
 /**
  * @codeCoverageIgnore
  */
 #[Internal('Override Definitions in Application Service Providers')]
-class DatabaseServiceProvider implements ServiceProvider
+final class DatabaseServiceProvider implements DeferrableServiceProvider
 {
-    #[\Override]
-    public function register(MutableContainer $container): void
+    public static function provides(): array
     {
-        $container->bind(RedisManager::class, CachingRedisManager::class);
-        $container->set(
+        return [
+            RedisManager::class,
+            DoctrineConnectionProvider::class,
+            DoctrineEntityManagerProvider::class,
             CachingRedisManager::class,
-            static function (ContainerInterface $container): CachingRedisManager {
-                return new CachingRedisManager($container->get(Configuration::class));
-            },
-        );
-
-        $container->set(
-            \Redis::class,
-            static function (ContainerInterface $container): \Redis {
-                return $container->get(RedisManager::class)->connect();
-            },
-        );
-
-        $container->bind(DoctrineConnectionProvider::class, ConnectionProvider::class);
-        $container->set(
             ConnectionProvider::class,
-            static function (ContainerInterface $container): ConnectionProvider {
-                return new ConnectionProvider($container);
-            },
-        );
-
-        $container->set(
             ConnectionFactory::class,
-            static function (ContainerInterface $container): ConnectionFactory {
-                $environment = $container->get(Environment::class);
-                return new ConnectionFactory(
-                    $environment,
-                    $container->get(Configuration::class),
-                    $container->get(CacheItemPoolFactory::class),
-                    $container->get(LoggerInterface::class),
-                );
-            },
-        );
-
-        $container->set(
             Connection::class,
-            static function (ContainerInterface $container): Connection {
-                return $container->get(ConnectionFactory::class)->connect();
-            },
-        );
-
-        $container->bind(DoctrineEntityManagerProvider::class, EntityManagerProvider::class);
-
-        $container->set(
             EntityManagerProvider::class,
-            static function (ContainerInterface $container): EntityManagerProvider {
-                return new EntityManagerProvider($container);
-            },
-        );
-
-        $container->set(
             EntityManagerFactory::class,
-            static function (ContainerInterface $container): EntityManagerFactory {
-                return new EntityManagerFactory(
-                    $container,
-                    $container->get(Environment::class),
-                    $container->get(Configuration::class),
-                    $container->get(DoctrineConnectionProvider::class),
-                    $container->get(CacheItemPoolFactory::class),
-                );
-            },
+            EntityManagerInterface::class,
+        ];
+    }
+
+    public static function bind(): array
+    {
+        return [
+            RedisManager::class => CachingRedisManager::class,
+            DoctrineConnectionProvider::class => ConnectionProvider::class,
+            DoctrineEntityManagerProvider::class => EntityManagerProvider::class,
+        ];
+    }
+
+    #[\Override]
+    public static function register(App $app): void
+    {
+        $app->set(
+            CachingRedisManager::class,
+            static fn(App $app): CachingRedisManager => Reflect::ghost(
+                CachingRedisManager::class,
+                static function (CachingRedisManager $ghost) use ($app): void {
+                    $ghost->__construct($app->config);
+                },
+            ),
         );
 
-        $container->set(
+        $app->set(
+            \Redis::class,
+            static fn(App $app): \Redis => $app->get(RedisManager::class)->connect(),
+        );
+
+        $app->set(
+            ConnectionProvider::class,
+            static fn(App $app): ConnectionProvider => new ConnectionProvider(
+                $app->services,
+            ),
+        );
+
+        $app->set(
+            ConnectionFactory::class,
+            static fn(App $app): ConnectionFactory => new ConnectionFactory(
+                $app->environment,
+                $app->config,
+                $app->get(CacheItemPoolFactory::class),
+                $app->get(LoggerInterface::class),
+            ),
+        );
+
+        $app->set(
+            Connection::class,
+            static fn(App $app): Connection => $app->get(ConnectionFactory::class)->connect(),
+        );
+
+        $app->set(
+            EntityManagerProvider::class,
+            static fn(App $app): EntityManagerProvider => new EntityManagerProvider(
+                $app->services,
+            ),
+        );
+
+        $app->set(
+            EntityManagerFactory::class,
+            static fn(App $app): EntityManagerFactory => new EntityManagerFactory(
+                $app->services,
+                $app->environment,
+                $app->config,
+                $app->get(DoctrineConnectionProvider::class),
+                $app->get(CacheItemPoolFactory::class),
+            ),
+        );
+
+        $app->set(
             EntityManagerInterface::class,
-            static function (ContainerInterface $container): EntityManagerInterface {
-                return $container->get(EntityManagerFactory::class)->init();
-            },
+            static fn(App $app): EntityManagerInterface => $app->get(EntityManagerFactory::class)->init(),
         );
     }
 }

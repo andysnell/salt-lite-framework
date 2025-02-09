@@ -57,3 +57,16 @@ and should not be used in application code.
 - RabbitMQ for Message Queues and Job Processing
 - Task Scheduling with Cron Expression Parsing with Symfony Scheduler
 - SMTP/API Email Sending with Symfony Mailer
+
+### Conventions
+
+- Component Namespaces like `PhoneBurner\SaltLite\Framework\Database` should represent
+a cohesive "component".
+- Each Component namespace MAY have a Service Provider class, which is responsible for
+registering related services for that component and any subcomponents with the DI container.
+Non-optional framework level service providers MUST be listed in the
+`\PhoneBurner\SaltLite\Framework\Container\ContainerFactory::FRAMEWORK_PROVIDERS` array.
+- Each Component namespace MAY have a configuration file, the name of which should be
+component in kabob-case, e.g. `database.php` or `message-bus.php` This file should 
+return an array of configuration values, with a single top-level key. That key 
+MUST be the component name in snake case, e.g. `'database'` or `'message_bus'`.

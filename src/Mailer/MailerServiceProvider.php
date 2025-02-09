@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Mailer;
 
-use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
-use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
-use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
+use PhoneBurner\SaltLite\Framework\App\App;
+use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
 use PhoneBurner\SaltLite\Framework\Domain\Email\EmailAddress;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
-use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\Mailer as SymfonyMailer;
@@ -22,41 +20,50 @@ use Symfony\Component\Messenger\MessageBusInterface;
  * @codeCoverageIgnore
  */
 #[Internal('Override Definitions in Application Service Providers')]
-class MailerServiceProvider implements ServiceProvider
+final class MailerServiceProvider implements DeferrableServiceProvider
 {
-    #[\Override]
-    public function register(MutableContainer $container): void
+    public static function provides(): array
     {
-        $container->set(
+        return [
             Mailer::class,
-            static function (MutableContainer $container): Mailer {
-                return new SymfonyMailerAdapter(
-                    $container->get(MailerInterface::class),
-                    new EmailAddress($container->get(Configuration::class)->get('mailer.default_from_address')),
-                );
-            },
-        );
-
-        $container->set(
             MailerInterface::class,
-            static function (MutableContainer $container): MailerInterface {
-                if (! $container->get(Configuration::class)->get('mailer.async')) {
-                    return new SymfonyMailer($container->get(TransportInterface::class));
-                }
+            TransportInterface::class,
+        ];
+    }
 
-                return new SymfonyMailer(
-                    $container->get(TransportInterface::class),
-                    $container->get(MessageBusInterface::class),
-                    $container->get(EventDispatcherInterface::class),
-                );
+    public static function bind(): array
+    {
+        return [];
+    }
+
+    #[\Override]
+    public static function register(App $app): void
+    {
+        $app->set(
+            Mailer::class,
+            static fn(App $app): Mailer => new SymfonyMailerAdapter(
+                $app->get(MailerInterface::class),
+                new EmailAddress($app->config->get('mailer.default_from_address')),
+            ),
+        );
+
+        $app->set(
+            MailerInterface::class,
+            static fn(App $app): MailerInterface => match ((bool)$app->config->get('mailer.async')) {
+                false => new SymfonyMailer($app->get(TransportInterface::class)),
+                true => new SymfonyMailer(
+                    $app->get(TransportInterface::class),
+                    $app->get(MessageBusInterface::class),
+                    $app->get(EventDispatcherInterface::class),
+                ),
             },
         );
 
-        $container->set(
+        $app->set(
             TransportInterface::class,
-            static function (ContainerInterface $container): TransportInterface {
-                $transport_driver = (string)$container->get(Configuration::class)->get('mailer.default_driver');
-                $transport_config = $container->get(Configuration::class)->get('mailer.drivers.' . $transport_driver) ?? [];
+            static function (App $app): TransportInterface {
+                $transport_driver = (string)$app->config->get('mailer.default_driver');
+                $transport_config = $app->config->get('mailer.drivers.' . $transport_driver) ?? [];
 
                 $dns = match (TransportDriver::tryFrom($transport_driver)) {
                     TransportDriver::SendGrid => \vsprintf('sendgrid+api://%s@default', [
@@ -75,8 +82,8 @@ class MailerServiceProvider implements ServiceProvider
 
                 return Transport::fromDsn(
                     dsn: $dns,
-                    dispatcher: $container->get(EventDispatcherInterface::class),
-                    logger: $container->get(LoggerInterface::class),
+                    dispatcher: $app->get(EventDispatcherInterface::class),
+                    logger: $app->get(LoggerInterface::class),
                 );
             },
         );

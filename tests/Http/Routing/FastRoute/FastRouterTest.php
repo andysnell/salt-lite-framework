@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Http\Routing\FastRoute;
+namespace PhoneBurner\SaltLite\Framework\Tests\Http\Routing\FastRoute;
 
 use ArrayIterator;
 use FastRoute\Dispatcher;
@@ -10,8 +10,6 @@ use FastRoute\RouteCollector;
 use Generator;
 use IteratorAggregate;
 use LogicException;
-use PhoneBurner\SaltLite\Framework\App\BuildStage;
-use PhoneBurner\SaltLite\Framework\App\Environment;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Definition\DefinitionList;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Definition\InMemoryDefinitionList;
@@ -45,11 +43,6 @@ final class FastRouterTest extends TestCase
     private ObjectProphecy $definition_list;
 
     /**
-     * @var ObjectProphecy<Environment>
-     */
-    private ObjectProphecy $environment;
-
-    /**
      * @var ObjectProphecy<FastRouteDispatcherFactory>
      */
     private ObjectProphecy $dispatcher_factory;
@@ -70,8 +63,6 @@ final class FastRouterTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        $this->environment = $this->prophesize(Environment::class);
         $this->definition_list = $this->prophesize(DefinitionList::class);
         $this->definition_list->willImplement(IteratorAggregate::class);
         $this->dispatcher_factory = $this->prophesize(FastRouteDispatcherFactory::class);
@@ -126,9 +117,6 @@ final class FastRouterTest extends TestCase
             $get_route,
         );
 
-        /** @phpstan-ignore property.notFound */
-        $this->environment->build_stage = BuildStage::Development;
-
         $sut = new SUT(
             $definition_list,
             new FastRouteDispatcherFactory(
@@ -180,9 +168,6 @@ final class FastRouterTest extends TestCase
     public function resolveForRequest_provides_callback_that_loads_routes_and_provides_to_fast_route_collector(
         array $match,
     ): void {
-        /** @phpstan-ignore property.notFound */
-        $this->environment->build_stage = BuildStage::Development;
-
         $route1 = RouteDefinition::all('/all', ['route' => 'data']);
         $route2 = RouteDefinition::get('/get', ['route' => 'data']);
 
@@ -230,9 +215,6 @@ final class FastRouterTest extends TestCase
         string $uri,
         array $match,
     ): void {
-        /** @phpstan-ignore property.notFound */
-        $this->environment->build_stage = BuildStage::Development;
-
         $dispatcher = $this->dispatcher->reveal();
 
         $this->dispatcher_factory->make(Argument::cetera())

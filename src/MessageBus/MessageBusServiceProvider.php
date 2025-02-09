@@ -4,220 +4,274 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\MessageBus;
 
-use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
+use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
+use PhoneBurner\SaltLite\Framework\Container\ObjectContainer\ImmutableObjectContainer;
 use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
-use PhoneBurner\SaltLite\Framework\Scheduler\ScheduleCollection;
+use PhoneBurner\SaltLite\Framework\Database\Doctrine\ConnectionProvider;
+use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
+use PhoneBurner\SaltLite\Framework\MessageBus\Container\MessageBusContainer;
+use PhoneBurner\SaltLite\Framework\MessageBus\Container\ReceiverContainer;
+use PhoneBurner\SaltLite\Framework\MessageBus\Container\SenderContainer;
+use PhoneBurner\SaltLite\Framework\MessageBus\EventListener\LogWorkerMessageFailedEvent;
+use PhoneBurner\SaltLite\Framework\MessageBus\Handler\InvokableMessageHandler;
+use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\AmazonSqsTransportFactory;
+use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\AmqpTransportFactory;
+use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\DoctrineTransportFactory;
+use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\RedisTransportFactory;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Reflect;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Clock\ClockInterface;
-use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
-use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpTransport;
-use Symfony\Component\Messenger\Bridge\Amqp\Transport\Connection as AmqpConnection;
-use Symfony\Component\Messenger\Bridge\Redis\Transport\Connection as RedisConnection;
-use Symfony\Component\Messenger\Bridge\Redis\Transport\RedisTransport;
 use Symfony\Component\Messenger\Command\ConsumeMessagesCommand;
+use Symfony\Component\Messenger\Command\DebugCommand;
+use Symfony\Component\Messenger\Command\StatsCommand;
+use Symfony\Component\Messenger\Command\StopWorkersCommand;
 use Symfony\Component\Messenger\EventListener\AddErrorDetailsStampListener;
 use Symfony\Component\Messenger\EventListener\DispatchPcntlSignalListener;
+use Symfony\Component\Messenger\EventListener\SendFailedMessageForRetryListener;
+use Symfony\Component\Messenger\EventListener\SendFailedMessageToFailureTransportListener;
 use Symfony\Component\Messenger\EventListener\StopWorkerOnCustomStopExceptionListener;
-use Symfony\Component\Messenger\EventListener\StopWorkerOnFailureLimitListener;
-use Symfony\Component\Messenger\EventListener\StopWorkerOnMemoryLimitListener;
-use Symfony\Component\Messenger\EventListener\StopWorkerOnMessageLimitListener;
 use Symfony\Component\Messenger\EventListener\StopWorkerOnRestartSignalListener;
-use Symfony\Component\Messenger\EventListener\StopWorkerOnTimeLimitListener;
 use Symfony\Component\Messenger\Handler\HandlersLocator;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Middleware\HandleMessageMiddleware;
 use Symfony\Component\Messenger\Middleware\SendMessageMiddleware;
+use Symfony\Component\Messenger\Retry\MultiplierRetryStrategy;
+use Symfony\Component\Messenger\Retry\RetryStrategyInterface;
 use Symfony\Component\Messenger\RoutableMessageBus;
 use Symfony\Component\Messenger\Transport\Sender\SendersLocator;
-use Symfony\Component\Messenger\Transport\Sync\SyncTransport;
-use Symfony\Component\Messenger\Transport\TransportInterface;
-use Symfony\Component\Scheduler\Generator\MessageGenerator;
-use Symfony\Component\Scheduler\Messenger\SchedulerTransport;
+use Symfony\Component\Messenger\Transport\Serialization\PhpSerializer;
 
 /**
  * @codeCoverageIgnore
  */
 #[Internal('Override Definitions in Application Service Providers')]
-class MessageBusServiceProvider implements ServiceProvider
+final class MessageBusServiceProvider implements ServiceProvider
 {
-    #[\Override]
-    public function register(MutableContainer $container): void
+    public static function bind(): array
     {
-        $container->bind(MessageBusInterface::class, SymfonyMessageBusAdapter::class);
-        $container->bind(MessageBus::class, SymfonyMessageBusAdapter::class);
-        $container->set(
+        return [
+            MessageBusInterface::class => SymfonyMessageBusAdapter::class,
+            MessageBus::class => SymfonyMessageBusAdapter::class,
+            RoutableMessageBus::class => SymfonyRoutableMessageBusAdapter::class,
+        ];
+    }
+
+    #[\Override]
+    public static function register(App $app): void
+    {
+        $app->set(
+            MessageBusContainer::class,
+            static fn(App $app): MessageBusContainer => new MessageBusContainer(\array_map(
+                static fn (array $bus): SymfonyMessageBusAdapter => Reflect::ghost(
+                    SymfonyMessageBusAdapter::class,
+                    static function (SymfonyMessageBusAdapter $ghost) use ($app, $bus): void {
+                        $ghost->__construct(\array_map(
+                            $app->services->get(...),
+                            $bus['middleware'] ?: [],
+                        ));
+                    },
+                ),
+                $app->config->get('message_bus.bus') ?: [],
+            )),
+        );
+
+        $app->set(
             SymfonyMessageBusAdapter::class,
-            static function (ContainerInterface $container): SymfonyMessageBusAdapter {
-                $config = $container->get(Configuration::class);
-                return new SymfonyMessageBusAdapter([
-                    new SendMessageMiddleware(
-                        new SendersLocator($config->get('bus.senders') ?: [], $container),
-                        $container->get(EventDispatcherInterface::class),
-                    ),
-                    new HandleMessageMiddleware(new HandlersLocator(\array_map(
-                        static fn (array $handler_classes): array => \array_map(
-                            static fn (string $handler_class): LazyMessageHandler => new LazyMessageHandler($container, $handler_class),
-                            $handler_classes,
-                        ),
-                        $config->get('bus.handlers') ?: [],
-                    ))),
-                ]);
-            },
+            static fn(App $app): SymfonyMessageBusAdapter => $app->get(MessageBusContainer::class)->default(),
         );
 
-        $container->set(
-            RoutableMessageBus::class,
-            static function (ContainerInterface $container): RoutableMessageBus {
-                return new RoutableMessageBus($container, $container->get(MessageBusInterface::class));
-            },
+        $app->set(
+            SymfonyRoutableMessageBusAdapter::class,
+            static fn(App $app): SymfonyRoutableMessageBusAdapter => new SymfonyRoutableMessageBusAdapter(
+                $app->get(MessageBusContainer::class),
+                $app->get(MessageBusContainer::class)->default(),
+            ),
         );
 
-        $container->set(
-            TransportInterface::class,
-            static function (ContainerInterface $container): TransportInterface {
-                $transport_class = $container->get(Configuration::class)->get('bus.transport') ?? SyncTransport::class;
-                return $container->get($transport_class);
-            },
+        $app->set(
+            TransportFactory::class,
+            static fn(App $app): TransportFactory => new TransportFactory(
+                $app->get(MessageBusContainer::class),
+                $app->get(ClockInterface::class),
+                $app->get(RedisTransportFactory::class),
+                $app->get(DoctrineTransportFactory::class),
+                $app->get(AmqpTransportFactory::class),
+                $app->get(AmazonSqsTransportFactory::class),
+            ),
         );
 
-        $container->set(
-            SyncTransport::class,
-            static function (ContainerInterface $container): SyncTransport {
-                return new SyncTransport($container->get(MessageBusInterface::class));
-            },
+        $app->set(
+            RedisTransportFactory::class,
+            static fn(App $app): RedisTransportFactory => new RedisTransportFactory(
+                $app->get(RedisManager::class),
+                $app->environment,
+            ),
         );
 
-        $container->set(
-            AmqpTransport::class,
-            static function (ContainerInterface $container): AmqpTransport {
-                return new AmqpTransport(AmqpConnection::fromDsn('amqp://user:password@rabbitmq:5672/%2f'));
-            },
+        $app->set(
+            DoctrineTransportFactory::class,
+            static fn(App $app): DoctrineTransportFactory => new DoctrineTransportFactory(
+                $app->get(ConnectionProvider::class),
+                new PhpSerializer(),
+            ),
         );
 
-        $container->set(
-            RedisTransport::class,
-            static function (ContainerInterface $container): RedisTransport {
-                return new RedisTransport(new RedisConnection([
-                    'group' => Str::kabob($container->get(Configuration::class)->get('app.name') ?? 'salt-lite'),
-                ], $container->get(\Redis::class)));
-            },
+        $app->set(
+            AmqpTransportFactory::class,
+            static fn(App $app): AmqpTransportFactory => new AmqpTransportFactory(),
         );
 
-        $container->set(
-            SchedulerTransport::class,
-            static function (ContainerInterface $container): SchedulerTransport {
-                return new SchedulerTransport(
-                    new MessageGenerator(
-                        $container->get(ScheduleCollection::class)->get('example'),
-                        'example',
-                        $container->get(ClockInterface::class),
-                    ),
-                );
-            },
+        $app->set(
+            AmazonSqsTransportFactory::class,
+            static fn(App $app): AmazonSqsTransportFactory => new AmazonSqsTransportFactory(),
         );
 
-        $container->set(
+        $app->set(
+            SenderContainer::class,
+            static fn(App $app): SenderContainer => new SenderContainer(\array_map(
+                $app->services->get(TransportFactory::class)->make(...),
+                $app->config->get('message_bus.senders') ?: [],
+            )),
+        );
+
+        $app->set(
+            ReceiverContainer::class,
+            static fn(App $app): ReceiverContainer => new ReceiverContainer(\array_map(
+                $app->services->get(TransportFactory::class)->make(...),
+                $app->config->get('message_bus.receivers') ?: [],
+            )),
+        );
+
+        $app->set(
+            SendMessageMiddleware::class,
+            static fn(App $app): SendMessageMiddleware => new SendMessageMiddleware(
+                new SendersLocator(
+                    $app->config->get('message_bus.routing') ?: [],
+                    $app->services->get(SenderContainer::class),
+                ),
+                $app->get(EventDispatcherInterface::class),
+            ),
+        );
+
+        $app->set(
+            HandleMessageMiddleware::class,
+            static fn(App $app): HandleMessageMiddleware => new HandleMessageMiddleware(new HandlersLocator(\array_map(
+                static fn(array $handler_classes): array => \array_map($app->services->get(...), $handler_classes),
+                $app->config->get('message_bus.handlers') ?: [],
+            ))),
+        );
+
+        $app->set(
+            DebugCommand::class,
+            static fn(App $app): DebugCommand => new DebugCommand(
+                $app->config->get('message_bus.handlers') ?: [],
+            ),
+        );
+
+        $app->set(
+            StatsCommand::class,
+            static fn(App $app): StatsCommand => new StatsCommand(
+                $app->get(ReceiverContainer::class),
+                $app->get(ReceiverContainer::class)->identifiers(),
+            ),
+        );
+
+        $app->set(
             ConsumeMessagesCommand::class,
-            static function (ContainerInterface $container): ConsumeMessagesCommand {
-                return new ConsumeMessagesCommand(
-                    $container->get(RoutableMessageBus::class),
-                    $container,
-                    $container->get(SymfonyEventDispatcher::class),
-                    $container->get(LoggerInterface::class),
-                    $container->get(Configuration::class)->get('bus.receivers') ?? [],
-                );
-            },
+            static fn(App $app): ConsumeMessagesCommand => new ConsumeMessagesCommand(
+                $app->get(RoutableMessageBus::class),
+                $app->get(ReceiverContainer::class),
+                $app->get(SymfonyEventDispatcher::class),
+                $app->get(LoggerInterface::class),
+                $app->get(ReceiverContainer::class)->identifiers(),
+            ),
         );
 
-        $container->set(
+        $app->set(
+            StopWorkersCommand::class,
+            static fn(App $app): StopWorkersCommand => new StopWorkersCommand($app->get(CacheItemPoolInterface::class)),
+        );
+
+        $app->set(
             AddErrorDetailsStampListener::class,
-            static function (ContainerInterface $container): AddErrorDetailsStampListener {
-                return new AddErrorDetailsStampListener();
-            },
+            static fn(App $app): AddErrorDetailsStampListener => new AddErrorDetailsStampListener(),
         );
 
-        $container->set(
+        $app->set(
             DispatchPcntlSignalListener::class,
-            static function (ContainerInterface $container): DispatchPcntlSignalListener {
-                return new DispatchPcntlSignalListener();
-            },
+            static fn(App $app): DispatchPcntlSignalListener => new DispatchPcntlSignalListener(),
         );
 
-//        $container->set(
-//            SendFailedMessageForRetryListener::class,
-//            static function (ContainerInterface $container): SendFailedMessageForRetryListener {
-//                return new SendFailedMessageForRetryListener();
-//            },
-//        );
-//
-//        $container->set(
-//            SendFailedMessageToFailureTransportListener::class,
-//            static function (ContainerInterface $container): SendFailedMessageToFailureTransportListener {
-//                return new SendFailedMessageToFailureTransportListener();
-//            },
-//        );
+        $app->set(
+            SendFailedMessageForRetryListener::class,
+            static fn(App $app): SendFailedMessageForRetryListener => new SendFailedMessageForRetryListener(
+                $app->get(SenderContainer::class),
+                new ImmutableObjectContainer(\array_map(
+                    static function (array $strategy): RetryStrategyInterface {
+                        if ($strategy['class'] === MultiplierRetryStrategy::class) {
+                            return new MultiplierRetryStrategy(
+                                $strategy['params']['max_retries'] ?? 3,
+                                $strategy['params']['delay'] ?? 1000,
+                                $strategy['params']['multiplier'] ?? 1,
+                                $strategy['params']['max_delay_ms'] ?? 0,
+                                $strategy['params']['jitter'] ?? 0.1,
+                            );
+                        }
 
-        $container->set(
+                        throw new \InvalidArgumentException(
+                            \sprintf('Retry Strategy "%s" Not Currently Supported', $strategy['class']),
+                        );
+                    },
+                    $app->config->get('message_bus.retry_strategies') ?: [],
+                )),
+                $app->get(LoggerInterface::class),
+                $app->get(EventDispatcherInterface::class),
+            ),
+        );
+
+        $app->set(
+            SendFailedMessageToFailureTransportListener::class,
+            static function (App $app): SendFailedMessageToFailureTransportListener {
+                return new SendFailedMessageToFailureTransportListener(
+                    new SenderContainer(\array_map(
+                        $app->services->get(TransportFactory::class)->make(...),
+                        $app->config->get('message_bus.failure_senders') ?: [],
+                    )),
+                    $app->get(LoggerInterface::class),
+                );
+            },
+        );
+        $app->set(
             StopWorkerOnCustomStopExceptionListener::class,
-            static function (ContainerInterface $container): StopWorkerOnCustomStopExceptionListener {
-                return new StopWorkerOnCustomStopExceptionListener();
-            },
+            static fn(App $app): StopWorkerOnCustomStopExceptionListener => new StopWorkerOnCustomStopExceptionListener(),
         );
 
-        $container->set(
-            StopWorkerOnFailureLimitListener::class,
-            static function (ContainerInterface $container): StopWorkerOnFailureLimitListener {
-                return new StopWorkerOnFailureLimitListener(
-                    $container->get(Configuration::class)->get('bus.worker.max_failures'),
-                    $container->get(LoggerInterface::class),
-                );
-            },
-        );
-
-        $container->set(
-            StopWorkerOnMemoryLimitListener::class,
-            static function (ContainerInterface $container): StopWorkerOnMemoryLimitListener {
-                return new StopWorkerOnMemoryLimitListener(
-                    $container->get(Configuration::class)->get('bus.worker.max_memory_usage_bytes'),
-                    $container->get(LoggerInterface::class),
-                );
-            },
-        );
-
-        $container->set(
-            StopWorkerOnMessageLimitListener::class,
-            static function (ContainerInterface $container): StopWorkerOnMessageLimitListener {
-                return new StopWorkerOnMessageLimitListener(
-                    $container->get(Configuration::class)->get('bus.worker.max_messages'),
-                    $container->get(LoggerInterface::class),
-                );
-            },
-        );
-
-        $container->set(
+        $app->set(
             StopWorkerOnRestartSignalListener::class,
-            static function (ContainerInterface $container): StopWorkerOnRestartSignalListener {
-                return new StopWorkerOnRestartSignalListener(
-                    $container->get(CacheItemPoolInterface::class),
-                    $container->get(LoggerInterface::class),
-                );
-            },
+            static fn(App $app): StopWorkerOnRestartSignalListener => new StopWorkerOnRestartSignalListener(
+                $app->get(CacheItemPoolInterface::class),
+                $app->get(LoggerInterface::class),
+            ),
         );
 
-        $container->set(
-            StopWorkerOnTimeLimitListener::class,
-            static function (ContainerInterface $container): StopWorkerOnTimeLimitListener {
-                return new StopWorkerOnTimeLimitListener(
-                    $container->get(Configuration::class)->get('bus.worker.time_limit_seconds'),
-                    $container->get(LoggerInterface::class),
-                );
-            },
+        $app->set(
+            InvokableMessageHandler::class,
+            static fn(App $app): InvokableMessageHandler => new InvokableMessageHandler(
+                $app->get(MutableContainer::class),
+                $app->get(EventDispatcherInterface::class),
+            ),
+        );
+
+        $app->set(
+            LogWorkerMessageFailedEvent::class,
+            static fn(App $app): LogWorkerMessageFailedEvent => new LogWorkerMessageFailedEvent(
+                $app->get(LoggerInterface::class),
+            ),
         );
     }
 }

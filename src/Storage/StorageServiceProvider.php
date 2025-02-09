@@ -7,35 +7,45 @@ namespace PhoneBurner\SaltLite\Framework\Storage;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\FilesystemReader;
 use League\Flysystem\FilesystemWriter;
-use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
-use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
-use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
+use PhoneBurner\SaltLite\Framework\App\App;
+use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
-use Psr\Container\ContainerInterface;
 
 /**
  * @codeCoverageIgnore
  */
 #[Internal('Override Definitions in Application Service Providers')]
-class StorageServiceProvider implements ServiceProvider
+final class StorageServiceProvider implements DeferrableServiceProvider
 {
-    #[\Override]
-    public function register(MutableContainer $container): void
+    public static function provides(): array
     {
-        $container->bind(FilesystemReader::class, FilesystemOperator::class);
-        $container->bind(FilesystemWriter::class, FilesystemOperator::class);
-        $container->set(
+        return [
+            FilesystemReader::class,
+            FilesystemWriter::class,
             FilesystemOperator::class,
-            static function (ContainerInterface $container): FilesystemOperator {
-                return $container->get(FilesystemOperatorFactory::class)->default();
-            },
+            FilesystemOperatorFactory::class,
+        ];
+    }
+
+    public static function bind(): array
+    {
+        return [
+            FilesystemReader::class => FilesystemOperator::class,
+            FilesystemWriter::class => FilesystemOperator::class,
+        ];
+    }
+
+    #[\Override]
+    public static function register(App $app): void
+    {
+        $app->set(
+            FilesystemOperator::class,
+            static fn(App $app): FilesystemOperator => $app->get(FilesystemOperatorFactory::class)->default(),
         );
 
-        $container->set(
+        $app->set(
             FilesystemOperatorFactory::class,
-            static function (ContainerInterface $container): FilesystemOperatorFactory {
-                return new FilesystemOperatorFactory($container->get(Configuration::class));
-            },
+            static fn(App $app): FilesystemOperatorFactory => new FilesystemOperatorFactory($app->config),
         );
     }
 }

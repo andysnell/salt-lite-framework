@@ -7,7 +7,7 @@ namespace PhoneBurner\SaltLite\Framework\Util\Crypto;
 interface Key
 {
     /**
-     * @return string The raw binary "key material" string
+     * @return non-empty-string The raw binary "key material" string
      */
     public function bytes(): string;
 

@@ -6,11 +6,11 @@ namespace PhoneBurner\SaltLite\Framework\Tests\HealthCheck\ComponentHealthChecks
 
 use Carbon\CarbonImmutable;
 use Doctrine\DBAL\Connection;
+use PhoneBurner\SaltLite\Framework\App\Clock\StaticClock;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks\MySqlHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\ComponentHealthCheck;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthStatus;
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
-use PhoneBurner\SaltLite\Framework\Util\Clock\StaticClock;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;

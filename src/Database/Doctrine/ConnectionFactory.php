@@ -10,11 +10,11 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Logging\Middleware;
 use Doctrine\DBAL\Tools\Console\ConnectionNotFound;
 use PhoneBurner\SaltLite\Framework\App\BuildStage;
+use PhoneBurner\SaltLite\Framework\App\Configuration\Configuration;
 use PhoneBurner\SaltLite\Framework\App\Context;
 use PhoneBurner\SaltLite\Framework\App\Environment;
 use PhoneBurner\SaltLite\Framework\Cache\CacheDriver;
 use PhoneBurner\SaltLite\Framework\Cache\CacheItemPoolFactory;
-use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
 use Psr\Log\LoggerInterface;
 
 class ConnectionFactory

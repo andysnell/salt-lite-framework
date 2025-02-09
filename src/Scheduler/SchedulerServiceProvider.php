@@ -4,95 +4,109 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Scheduler;
 
-use Crell\AttributeUtils\ClassAnalyzer;
+use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\Cache\CacheKey;
 use PhoneBurner\SaltLite\Framework\Cache\Lock\LockFactory;
 use PhoneBurner\SaltLite\Framework\Cache\Lock\SymfonyLockAdapter;
-use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
-use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
-use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
+use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
 use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
-use PhoneBurner\SaltLite\Framework\MessageBus\LazyMessageHandler;
+use PhoneBurner\SaltLite\Framework\MessageBus\Container\ReceiverContainer;
+use PhoneBurner\SaltLite\Framework\Scheduler\Command\ConsumeScheduleMessages;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Clock\ClockInterface;
-use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Cache\Adapter\ProxyAdapter;
-use Symfony\Component\Clock\Clock as SymfonyClock;
-use Symfony\Component\Scheduler\Attribute\AsSchedule;
+use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
+use Symfony\Component\Messenger\RoutableMessageBus;
 use Symfony\Component\Scheduler\Command\DebugCommand;
 use Symfony\Component\Scheduler\EventListener\DispatchSchedulerEventListener;
-use Symfony\Component\Scheduler\Schedule;
+use Symfony\Component\Scheduler\Generator\MessageGenerator;
+use Symfony\Component\Scheduler\Messenger\SchedulerTransport;
 use Symfony\Component\Scheduler\ScheduleProviderInterface;
-use Symfony\Component\Scheduler\Scheduler;
 
 /**
  * @codeCoverageIgnore
  */
 #[Internal('Override Definitions in Application Service Providers')]
-class SchedulerServiceProvider implements ServiceProvider
+final class SchedulerServiceProvider implements DeferrableServiceProvider
 {
-    #[\Override]
-    public function register(MutableContainer $container): void
+    public static function provides(): array
     {
+        return [
+            ScheduleProviderCollection::class,
+            DebugCommand::class,
+            DispatchSchedulerEventListener::class,
+        ];
+    }
 
-        $container->set(Scheduler::class, static function (ContainerInterface $container): Scheduler {
+    public static function bind(): array
+    {
+        return [];
+    }
 
-            return new Scheduler(
-                \array_map(
-                    static fn (array $handler_classes): array => \array_map(
-                        static fn (string $handler_class): LazyMessageHandler => new LazyMessageHandler($container, $handler_class),
-                        $handler_classes,
-                    ),
-                    $container->get(Configuration::class)->get('bus.handlers') ?: [],
-                ),
-                $container->get(ScheduleCollection::class)->getProvidedServices(),
-                new SymfonyClock($container->get(ClockInterface::class)),
-                $container->get(EventDispatcherInterface::class),
-            );
-        });
+    #[\Override]
+    public static function register(App $app): void
+    {
+        $app->set(ScheduleProviderCollection::class, static function (App $app): ScheduleProviderCollection {
+            $cache = $app->get(CacheItemPoolInterface::class);
 
-        $container->set(ScheduleCollection::class, static function (ContainerInterface $container): ScheduleCollection {
-            $class_analyzer = $container->get(ClassAnalyzer::class);
-            $default_attribute = new AsSchedule();
-            $schedules = [];
-
-            $cache = new ProxyAdapter($container->get(CacheItemPoolInterface::class), 'scheduler');
-
-            foreach ($container->get(Configuration::class)->get('scheduler.schedule_providers') ?: [] as $provider) {
-                \assert(\is_string($provider) && \is_a($provider, ScheduleProviderInterface::class, true));
-                $name = $class_analyzer->analyze($provider, AsSchedule::class)->name;
-                if ($name === $default_attribute->name) {
-                    $name = $provider;
-                }
-
+            $schedule_providers = [];
+            foreach ($app->config->get('scheduler.schedule_providers') ?: [] as $name => $class) {
                 $key = CacheKey::make('scheduler', $name);
-                $lock = $container->get(LockFactory::class)->make($key, Ttl::seconds(60));
-                \assert($lock instanceof SymfonyLockAdapter);
+                $lock = Type::of(SymfonyLockAdapter::class, $app->get(LockFactory::class)
+                    ->make($key, Ttl::seconds(60)))
+                    ->wrapped();
 
-                $schedule = $container->get($provider)->getSchedule();
-                \assert($schedule instanceof Schedule);
-                $schedule->lock($lock->wrapped());
-                $schedule->stateful($cache);
-                $schedules[$name] = $schedule;
+                $schedule_provider = Type::of(ScheduleProviderInterface::class, $app->get($class));
+                $schedule_provider->getSchedule()
+                    ->lock($lock)
+                    ->stateful(new ProxyAdapter($cache, (string)$key));
+
+                $schedule_providers[$name] = $schedule_provider;
             }
 
-            return new ScheduleCollection($schedules);
+            return new ScheduleProviderCollection($schedule_providers);
         });
 
-        $container->set(DebugCommand::class, static function (ContainerInterface $container): DebugCommand {
-            return new DebugCommand($container->get(ScheduleCollection::class));
-        });
+        $app->set(
+            DebugCommand::class,
+            static fn(App $app): DebugCommand => new DebugCommand(
+                $app->get(ScheduleProviderCollection::class),
+            ),
+        );
 
-        $container->set(
-            DispatchSchedulerEventListener::class,
-            static function (ContainerInterface $container): DispatchSchedulerEventListener {
-                return new DispatchSchedulerEventListener(
-                    $container,
-                    $container->get(EventDispatcherInterface::class),
+        $app->set(
+            ConsumeScheduleMessages::class,
+            static function (App $app): ConsumeScheduleMessages {
+                $clock = $app->get(ClockInterface::class);
+
+                // Add a transport instance for every configured schedule provider
+                $receiver_locator = new ReceiverContainer();
+                foreach ($app->get(ScheduleProviderCollection::class) as $name => $schedule_provider) {
+                    $receiver_locator->set('schedule_' . $name, new SchedulerTransport(
+                        new MessageGenerator($schedule_provider, $name, $clock),
+                    ));
+                }
+
+                return new ConsumeScheduleMessages(
+                    $app->get(RoutableMessageBus::class),
+                    $receiver_locator,
+                    $app->get(SymfonyEventDispatcher::class),
+                    $app->get(LoggerInterface::class),
+                    $receiver_locator->identifiers(),
                 );
             },
+        );
+
+        $app->set(
+            DispatchSchedulerEventListener::class,
+            static fn(App $app): DispatchSchedulerEventListener => new DispatchSchedulerEventListener(
+                $app->get(ScheduleProviderCollection::class),
+                $app->get(EventDispatcherInterface::class),
+            ),
         );
     }
 }

@@ -4,26 +4,35 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\App;
 
-use PhoneBurner\SaltLite\Framework\Configuration\Configuration;
-use PhoneBurner\SaltLite\Framework\Configuration\ConfigurationFactory;
-use PhoneBurner\SaltLite\Framework\Configuration\ImmutableConfiguration;
+use PhoneBurner\SaltLite\Framework\App\Configuration\Configuration;
+use PhoneBurner\SaltLite\Framework\App\Configuration\ConfigurationFactory;
+use PhoneBurner\SaltLite\Framework\Container\InvokingContainer;
 use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
-use PhoneBurner\SaltLite\Framework\Container\PhpDiContainerAdapter;
-use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
-use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Reflect;
+use PhoneBurner\SaltLite\Framework\Container\ParameterOverride\OverrideCollection;
+use PhoneBurner\SaltLite\Framework\Container\ServiceContainer;
+use PhoneBurner\SaltLite\Framework\Container\ServiceContainerFactory;
 
 use const PhoneBurner\SaltLite\Framework\APP_ROOT;
 
-final class App
+/**
+ * This is the main application class. It is a container that holds context,
+ * environment state, configuration, and services. It should be the only singleton
+ * service in the application, so that tearing it can result in complete garbage
+ * collection and reduce the possibility of memory leaks or stale/shared state.
+ *
+ * While the class is a container, it is not intended to be used as a general-purpose
+ * service container itself. The implemented container methods are really shortcuts to
+ * the underlying service container.
+ */
+final class App implements MutableContainer, InvokingContainer
 {
     private static self|null $instance = null;
 
-    public readonly MutableContainer $container;
+    public readonly Environment $environment;
+
+    public readonly ServiceContainer $services;
 
     public readonly Configuration $config;
-
-    public readonly Environment $environment;
 
     public static function bootstrap(Context $context): self
     {
@@ -45,30 +54,33 @@ final class App
         return self::$instance = null;
     }
 
-    private function __construct(
-        public readonly Context $context,
-        Environment|null $environment = null,
-        Configuration|null $config = null,
-        MutableContainer|null $container = null,
-    ) {
-        $this->environment = $environment ?? new Environment($context, APP_ROOT);
+    private function __construct(public readonly Context $context)
+    {
+        $this->environment = new Environment($context, APP_ROOT, $_SERVER, $_ENV);
+        $this->config = ConfigurationFactory::make($this);
+        $this->services = ServiceContainerFactory::make($this);
+    }
 
-        $this->config = $config ?? Reflect::proxy(
-            ImmutableConfiguration::class,
-            fn(ImmutableConfiguration $object): ImmutableConfiguration => ConfigurationFactory::make($this->environment),
-        );
+    public function has(string $id): bool
+    {
+        return $this->services->has($id);
+    }
 
-        $this->container = $container ?? Reflect::ghost(PhpDiContainerAdapter::class, function (PhpDiContainerAdapter $container): void {
-            $container->__construct();
-            foreach ($this->config->get('container.service_providers') as $provider_class) {
-                \assert(\is_a($provider_class, ServiceProvider::class, true), $provider_class . ' is not a ' . ServiceProvider::class);
-                new $provider_class()->register($container);
-            }
+    public function get(string $id): mixed
+    {
+        return $this->services->get($id);
+    }
 
-            $container->set(Configuration::class, $this->config);
-            $container->set(Environment::class, $this->environment);
-            $container->set(LogTrace::class, LogTrace::make());
-            $container->set(self::class, $this);
-        });
+    public function set(string $id, mixed $value): void
+    {
+        $this->services->set($id, $value);
+    }
+
+    public function call(
+        object|string $object,
+        string $method = '__invoke',
+        OverrideCollection|null $overrides = null,
+    ): mixed {
+        return $this->services->call($object, $method, $overrides);
     }
 }

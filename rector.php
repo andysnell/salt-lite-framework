@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Rector\CodeQuality\Rector\Identical\FlipTypeControlToUseExclusiveTypeRector;
 use Rector\Config\RectorConfig;
 use Rector\DeadCode\Rector\ClassConst\RemoveUnusedPrivateClassConstantRector;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPrivateMethodRector;
@@ -31,6 +32,7 @@ return RectorConfig::configure()
         doctrineCodeQuality: true,
     )->withSkip([
         ClosureToArrowFunctionRector::class,
+        FlipTypeControlToUseExclusiveTypeRector::class,
 
         // dead code
         RemoveUnusedPrivatePropertyRector::class => [

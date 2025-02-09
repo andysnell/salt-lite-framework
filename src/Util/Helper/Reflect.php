@@ -206,4 +206,18 @@ abstract readonly class Reflect
 
         return $proxy;
     }
+
+    /**
+     * Resolve the reflection for the case of an instance of an enum.
+     *
+     * Note that we resolve the case through \ReflectionEnum, instead of \ReflectionEnumUnitCase
+     * directly so that the return value is \ReflectionEnumBackedCase when the
+     * enum is backed.
+     *
+     * @return ($enum is \BackedEnum ? \ReflectionEnumBackedCase : \ReflectionEnumUnitCase)
+     */
+    public static function case(\UnitEnum $enum): \ReflectionEnumUnitCase
+    {
+        return new \ReflectionEnum($enum)->getCase($enum->name);
+    }
 }

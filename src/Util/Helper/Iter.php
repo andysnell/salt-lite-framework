@@ -56,4 +56,31 @@ abstract readonly class Iter
 
         return $last;
     }
+
+    /**
+     * Maps a callback on each element of an iterable, where the first parameter
+     * of the callback is the value and the second parameter is the key.
+     *
+     * @param callable(mixed, int|string): mixed $callback
+     */
+    final public static function map(callable $callback, iterable $iter): \Generator
+    {
+        foreach ($iter as $key => $value) {
+            yield $key => $callback($value, $key);
+        }
+    }
+
+    /**
+     * Maps an iterable to an array via a callback
+     *
+     * @param callable(mixed): mixed $callback
+     */
+    final public static function amap(callable $callback, iterable $iter): array
+    {
+        $result = [];
+        foreach ($iter as $key => $value) {
+            $result[$key] = $callback($value);
+        }
+        return $result;
+    }
 }

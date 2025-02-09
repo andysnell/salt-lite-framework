@@ -75,13 +75,9 @@ class LazyMiddlewareRequestHandlerFactory implements MiddlewareRequestHandlerFac
         string $middleware_class,
     ): MutableMiddlewareRequestHandler {
         $reflection = new \ReflectionClass($middleware_class);
-        if ($reflection->isInterface() || $reflection->isAbstract()) {
-            $handler->push(LazyMiddleware::make($this->container, $middleware_class));
-        }
-
-        $proxy = $reflection->newLazyProxy($this->proxy_factory);
-        \assert($proxy instanceof MiddlewareInterface);
-
-        return $handler->push($proxy);
+        return $handler->push(match ($reflection->isInstantiable()) {
+            true => $reflection->newLazyProxy($this->proxy_factory),
+            false => LazyMiddleware::make($this->container, $middleware_class),
+        });
     }
 }
