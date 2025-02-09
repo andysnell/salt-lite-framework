@@ -18,8 +18,9 @@ use PhoneBurner\SaltLite\Framework\Database\Doctrine\Orm\EntityManagerProvider;
 use PhoneBurner\SaltLite\Framework\Database\Redis\CachingRedisManager;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Reflect;
 use Psr\Log\LoggerInterface;
+
+use function PhoneBurner\SaltLite\Framework\ghost;
 
 /**
  * @codeCoverageIgnore
@@ -30,6 +31,7 @@ final class DatabaseServiceProvider implements DeferrableServiceProvider
     public static function provides(): array
     {
         return [
+            \Redis::class,
             RedisManager::class,
             DoctrineConnectionProvider::class,
             DoctrineEntityManagerProvider::class,
@@ -56,35 +58,28 @@ final class DatabaseServiceProvider implements DeferrableServiceProvider
     public static function register(App $app): void
     {
         $app->set(
-            CachingRedisManager::class,
-            static fn(App $app): CachingRedisManager => Reflect::ghost(
-                CachingRedisManager::class,
-                static function (CachingRedisManager $ghost) use ($app): void {
-                    $ghost->__construct($app->config);
-                },
-            ),
-        );
-
-        $app->set(
             \Redis::class,
             static fn(App $app): \Redis => $app->get(RedisManager::class)->connect(),
         );
 
         $app->set(
+            CachingRedisManager::class,
+            ghost(static fn(CachingRedisManager $ghost): null => $ghost->__construct($app->config)),
+        );
+
+        $app->set(
             ConnectionProvider::class,
-            static fn(App $app): ConnectionProvider => new ConnectionProvider(
-                $app->services,
-            ),
+            ghost(static fn(ConnectionProvider $ghost): null => $ghost->__construct($app)),
         );
 
         $app->set(
             ConnectionFactory::class,
-            static fn(App $app): ConnectionFactory => new ConnectionFactory(
+            ghost(static fn(ConnectionFactory $ghost): null => $ghost->__construct(
                 $app->environment,
                 $app->config,
                 $app->get(CacheItemPoolFactory::class),
                 $app->get(LoggerInterface::class),
-            ),
+            )),
         );
 
         $app->set(
@@ -94,25 +89,23 @@ final class DatabaseServiceProvider implements DeferrableServiceProvider
 
         $app->set(
             EntityManagerProvider::class,
-            static fn(App $app): EntityManagerProvider => new EntityManagerProvider(
-                $app->services,
-            ),
+            ghost(static fn(EntityManagerProvider $ghost): null => $ghost->__construct($app)),
         );
 
         $app->set(
             EntityManagerFactory::class,
-            static fn(App $app): EntityManagerFactory => new EntityManagerFactory(
+            ghost(static fn(EntityManagerFactory $ghost): null => $ghost->__construct(
                 $app->services,
                 $app->environment,
                 $app->config,
                 $app->get(DoctrineConnectionProvider::class),
                 $app->get(CacheItemPoolFactory::class),
-            ),
+            )),
         );
 
         $app->set(
             EntityManagerInterface::class,
-            static fn(App $app): EntityManagerInterface => $app->get(EntityManagerFactory::class)->init(),
+            static fn(App $app): EntityManagerInterface => $app->get(EntityManagerFactory::class)->ghost(),
         );
     }
 }

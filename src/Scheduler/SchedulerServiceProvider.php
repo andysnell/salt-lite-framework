@@ -96,7 +96,7 @@ final class SchedulerServiceProvider implements DeferrableServiceProvider
                     $receiver_locator,
                     $app->get(SymfonyEventDispatcher::class),
                     $app->get(LoggerInterface::class),
-                    $receiver_locator->identifiers(),
+                    $receiver_locator->keys(),
                 );
             },
         );

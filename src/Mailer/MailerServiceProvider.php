@@ -16,6 +16,8 @@ use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
+use function PhoneBurner\SaltLite\Framework\ghost;
+
 /**
  * @codeCoverageIgnore
  */
@@ -41,21 +43,23 @@ final class MailerServiceProvider implements DeferrableServiceProvider
     {
         $app->set(
             Mailer::class,
-            static fn(App $app): Mailer => new SymfonyMailerAdapter(
+            ghost(static fn(SymfonyMailerAdapter $ghost): null => $ghost->__construct(
                 $app->get(MailerInterface::class),
                 new EmailAddress($app->config->get('mailer.default_from_address')),
-            ),
+            )),
         );
 
         $app->set(
             MailerInterface::class,
-            static fn(App $app): MailerInterface => match ((bool)$app->config->get('mailer.async')) {
-                false => new SymfonyMailer($app->get(TransportInterface::class)),
-                true => new SymfonyMailer(
+            static fn(App $app): SymfonyMailer => match ((bool)$app->config->get('mailer.async')) {
+                true => ghost(static fn(SymfonyMailer $ghost): null => $ghost->__construct(
                     $app->get(TransportInterface::class),
                     $app->get(MessageBusInterface::class),
                     $app->get(EventDispatcherInterface::class),
-                ),
+                )),
+                false => ghost(static fn(SymfonyMailer $ghost): null => $ghost->__construct(
+                    $app->get(TransportInterface::class),
+                )),
             },
         );
 

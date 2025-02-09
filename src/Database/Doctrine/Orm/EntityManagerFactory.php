@@ -30,6 +30,8 @@ use PhoneBurner\SaltLite\Framework\Database\Doctrine\Types;
 use PhoneBurner\SaltLite\Framework\Domain\Time\TimeConstant;
 use Psr\Container\ContainerInterface;
 
+use function PhoneBurner\SaltLite\Framework\ghost;
+
 class EntityManagerFactory
 {
     public function __construct(
@@ -42,6 +44,8 @@ class EntityManagerFactory
     }
 
     /**
+     * Returns a lazy ghost of the EntityManager
+     *
      * To support namespaced annotations, we're not using the simple annotation driver
      *
      * Why are we globally ignoring parsing the "@mixin" annotations?
@@ -65,67 +69,67 @@ class EntityManagerFactory
      * @link https://github.com/briannesbitt/Carbon/issues/2525
      * @link https://github.com/doctrine/annotations/pull/293
      */
-    public function init(
+    public function ghost(
         string $name = ConnectionFactory::DEFAULT,
     ): EntityManagerInterface {
-        $this->registerCustomTypes();
+        return ghost(function (EntityManager $em) use ($name): void {
+            $this->registerCustomTypes();
 
-        $config = $this->configuration->get("database.doctrine.connections.$name.entity_manager") ?? [];
-        if ($config === []) {
-            $known_managers = \array_keys($this->configuration->get("database.doctrine.entity_managers") ?? []);
-            throw UnknownManagerException::unknownManager($name, \array_map(\strval(...), $known_managers));
-        }
+            $config = $this->configuration->get("database.doctrine.connections.$name.entity_manager") ?? [];
+            if ($config === []) {
+                $known_managers = \array_keys($this->configuration->get("database.doctrine.entity_managers") ?? []);
+                throw UnknownManagerException::unknownManager($name, \array_map(\strval(...), $known_managers));
+            }
 
-        $cache_path = $config['cache_path'] ?? (\sys_get_temp_dir() . '/doctrine/' . $name . '/');
+            $cache_path = $config['cache_path'] ?? (\sys_get_temp_dir() . '/doctrine/' . $name . '/');
 
-        $doctrine_config = new EntityManagerConfiguration();
-        $doctrine_config->setEntityListenerResolver(new EntityListenerContainerResolver($this->container));
+            $doctrine_config = new EntityManagerConfiguration();
+            $doctrine_config->setEntityListenerResolver(new EntityListenerContainerResolver($this->container));
 
-        $doctrine_config->setProxyDir($cache_path . '/proxy');
-        $doctrine_config->setProxyNamespace(\ucfirst($name) . 'DoctrineProxies');
-        $doctrine_config->setAutoGenerateProxyClasses(match ($this->environment->stage) {
-            BuildStage::Production => ProxyFactory::AUTOGENERATE_NEVER,
-            default => ProxyFactory::AUTOGENERATE_FILE_NOT_EXISTS_OR_CHANGED,
+            $doctrine_config->setProxyDir($cache_path . '/proxy');
+            $doctrine_config->setProxyNamespace(\ucfirst($name) . 'DoctrineProxies');
+            $doctrine_config->setAutoGenerateProxyClasses(match ($this->environment->stage) {
+                BuildStage::Production => ProxyFactory::AUTOGENERATE_NEVER,
+                default => ProxyFactory::AUTOGENERATE_FILE_NOT_EXISTS_OR_CHANGED,
+            });
+
+            $doctrine_config->setMetadataDriverImpl(new AttributeDriver($config['entity_paths'] ?? [], true));
+            $doctrine_config->setMetadataCache(match ($this->getCacheDriver(CacheType::Metadata, $config)) {
+                CacheDriver::File => $this->cache_factory->createFileCacheItemPool(CacheType::Metadata->value, $cache_path),
+                CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, "orm.$name.metadata."),
+                CacheDriver::None => $this->cache_factory->make(CacheDriver::None),
+                default => throw new \LogicException('Unsupported Cache Type for Doctrine ORM Metadata Cache'),
+            });
+
+            $doctrine_config->setQueryCache(match ($this->getCacheDriver(CacheType::Query, $config)) {
+                CacheDriver::File => $this->cache_factory->createFileCacheItemPool(CacheType::Query->value, $cache_path),
+                CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, "orm.$name.query."),
+                CacheDriver::None => $this->cache_factory->make(CacheDriver::None),
+                default => throw new \LogicException('Unsupported Cache Type for Doctrine ORM Query Cache'),
+            });
+
+            $doctrine_config->setResultCache(match ($this->getCacheDriver(CacheType::Result, $config)) {
+                CacheDriver::Remote => $this->cache_factory->make(CacheDriver::Remote, "orm.$name.result."),
+                CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, "orm.$name.result."),
+                CacheDriver::None => $this->cache_factory->make(CacheDriver::None),
+                default => throw new \LogicException('Unsupported Cache Type for Doctrine ORM Result Cache'),
+            });
+
+            $this->configureEntityCache($doctrine_config, $config, $name, $cache_path);
+
+            $mapped_field_types = $config['mapped_field_types'] ?? [];
+            if ($mapped_field_types) {
+                $doctrine_config->setTypedFieldMapper(new DefaultTypedFieldMapper($mapped_field_types));
+            }
+
+            $em->__construct($this->connection_provider->getConnection($name), $doctrine_config);
+
+            foreach ($config['event_subscribers'] ?? [] as $subscriber) {
+                $subscriber = $this->container->get($subscriber);
+                \assert($subscriber instanceof EventSubscriber);
+                $em->getEventManager()->addEventSubscriber($subscriber);
+            }
         });
-
-        $doctrine_config->setMetadataDriverImpl(new AttributeDriver($config['entity_paths'] ?? [], true));
-        $doctrine_config->setMetadataCache(match ($this->getCacheDriver(CacheType::Metadata, $config)) {
-            CacheDriver::File => $this->cache_factory->createFileCacheItemPool(CacheType::Metadata->value, $cache_path),
-            CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, "orm.$name.metadata."),
-            CacheDriver::None => $this->cache_factory->make(CacheDriver::None),
-            default => throw new \LogicException('Unsupported Cache Type for Doctrine ORM Metadata Cache'),
-        });
-
-        $doctrine_config->setQueryCache(match ($this->getCacheDriver(CacheType::Query, $config)) {
-            CacheDriver::File => $this->cache_factory->createFileCacheItemPool(CacheType::Query->value, $cache_path),
-            CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, "orm.$name.query."),
-            CacheDriver::None => $this->cache_factory->make(CacheDriver::None),
-            default => throw new \LogicException('Unsupported Cache Type for Doctrine ORM Query Cache'),
-        });
-
-        $doctrine_config->setResultCache(match ($this->getCacheDriver(CacheType::Result, $config)) {
-            CacheDriver::Remote => $this->cache_factory->make(CacheDriver::Remote, "orm.$name.result."),
-            CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, "orm.$name.result."),
-            CacheDriver::None => $this->cache_factory->make(CacheDriver::None),
-            default => throw new \LogicException('Unsupported Cache Type for Doctrine ORM Result Cache'),
-        });
-
-        $this->configureEntityCache($doctrine_config, $config, $name, $cache_path);
-
-        $mapped_field_types = $config['mapped_field_types'] ?? [];
-        if ($mapped_field_types) {
-            $doctrine_config->setTypedFieldMapper(new DefaultTypedFieldMapper($mapped_field_types));
-        }
-
-        $em = new EntityManager($this->connection_provider->getConnection($name), $doctrine_config);
-
-        foreach ($config['event_subscribers'] ?? [] as $subscriber) {
-            $subscriber = $this->container->get($subscriber);
-            \assert($subscriber instanceof EventSubscriber);
-            $em->getEventManager()->addEventSubscriber($subscriber);
-        }
-
-        return $em;
     }
 
     private function registerCustomTypes(): void

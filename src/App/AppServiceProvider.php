@@ -21,7 +21,7 @@ use PhoneBurner\SaltLite\Framework\Container\Exception\NotResolvable;
 use PhoneBurner\SaltLite\Framework\Container\InvokingContainer;
 use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
 use PhoneBurner\SaltLite\Framework\Container\ServiceContainer;
-use PhoneBurner\SaltLite\Framework\Container\ServiceContainerAdapter;
+use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceContainerAdapter;
 use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\Http\HttpKernel;
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
@@ -63,34 +63,42 @@ final class AppServiceProvider implements ServiceProvider
         $app->set(MutableContainer::class, $app);
         $app->set(ServiceContainer::class, $app->services);
         $app->set(ServiceContainerAdapter::class, $app->services);
-
         $app->set(LogTrace::class, LogTrace::make(...));
-        $app->set(BuildStage::class, static fn(App $app): BuildStage => $app->environment->stage);
-        $app->set(Context::class, static fn(App $app): Context => $app->environment->context);
+        $app->set(BuildStage::class, $app->environment->stage);
+        $app->set(Context::class, $app->environment->context);
+        $app->set(Clock::class, new SystemClock());
+        $app->set(HighResolutionTimer::class, new SystemHighResolutionTimer());
 
+        // Note: we use a regular closure here instead of binding the interface to
+        // a concrete implementation because we may be in a context where there
+        // is no kernel available (e.g. running tests), and this gives us a clean
+        // way to fail in that case.
         $app->set(Kernel::class, static fn(App $app): Kernel => $app->services->get(match ($app->context) {
             Context::Http => HttpKernel::class,
             Context::Cli => CliKernel::class,
             default => throw new KernelError('Salt Context is Not Defined or Supported'),
         }));
 
-        $app->set(AppKey::class, static fn(App $app): AppKey => new AppKey($app->config->get('app.key') ?: throw new \LogicException(
-            'A Valid App Key Must Be Defined in Configuration',
-        )));
+        $app->set(
+            AppKey::class,
+            static fn(App $app): AppKey => new AppKey($app->config->get('app.key') ?: throw new \LogicException(
+                'A Valid App Key Must Be Defined in Configuration',
+            )),
+        );
 
-        $app->set(Clock::class, static fn(App $app): SystemClock => new SystemClock());
-        $app->set(HighResolutionTimer::class, static fn(App $app): SystemHighResolutionTimer => new SystemHighResolutionTimer());
-
-        $app->set(AttributeAnalyzer::class, ghost(static function (MemoryCacheAnalyzer $ghost) use ($app): void {
-            $ghost->__construct(
-                new Psr6CacheAnalyzer(
-                    new Analyzer(),
-                    $app->services->get(CacheItemPoolFactory::class)->make(match ($app->environment->stage) {
-                        BuildStage::Development => CacheDriver::Memory,
-                        default => CacheDriver::File,
-                    }),
-                ),
-            );
-        }));
+        $app->set(
+            AttributeAnalyzer::class,
+            ghost(static function (MemoryCacheAnalyzer $ghost) use ($app): void {
+                $ghost->__construct(
+                    new Psr6CacheAnalyzer(
+                        new Analyzer(),
+                        $app->services->get(CacheItemPoolFactory::class)->make(match ($app->environment->stage) {
+                            BuildStage::Development => CacheDriver::Memory,
+                            default => CacheDriver::File,
+                        }),
+                    ),
+                );
+            }),
+        );
     }
 }

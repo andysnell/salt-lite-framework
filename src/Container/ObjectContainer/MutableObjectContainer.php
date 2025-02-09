@@ -6,6 +6,8 @@ namespace PhoneBurner\SaltLite\Framework\Container\ObjectContainer;
 
 use PhoneBurner\SaltLite\Framework\Container\Exception\NotFound;
 use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
+use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\HasInvokingContainerBehavior;
+use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -13,8 +15,11 @@ use Psr\Container\NotFoundExceptionInterface;
  * @template T of object
  * @implements ObjectContainer<T>
  */
+#[Contract]
 class MutableObjectContainer implements ObjectContainer, MutableContainer
 {
+    use HasInvokingContainerBehavior;
+
     /** @param array<string, T> $entries */
     public function __construct(protected array $entries = [])
     {
@@ -48,7 +53,7 @@ class MutableObjectContainer implements ObjectContainer, MutableContainer
     /**
      * @return array<string>
      */
-    public function identifiers(): array
+    public function keys(): array
     {
         return \array_keys($this->entries);
     }

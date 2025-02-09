@@ -16,6 +16,8 @@ use PhoneBurner\SaltLite\Framework\Notifier\Slack\SlackNotificationClient;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\Log\LoggerInterface;
 
+use function PhoneBurner\SaltLite\Framework\ghost;
+
 /**
  * @codeCoverageIgnore
  */
@@ -41,11 +43,11 @@ final class NotifierServiceProvider implements DeferrableServiceProvider
             static function (App $app): SlackNotificationClient {
                 $config = $app->config->get('notifier.slack');
                 return match ($app->environment->stage) {
-                    BuildStage::Production => new SlackApiNotificationClient(
+                    BuildStage::Production => ghost(static fn(SlackApiNotificationClient $ghost): null => $ghost->__construct(
                         new Client($config['endpoint'], $config['default_options'] ?? [], new GuzzleClient()),
                         $app->services->get(LockFactory::class),
                         $app->services->get(LoggerInterface::class),
-                    ),
+                    )),
                     default => new NullSlackNotificationClient(
                         $app->services->get(LoggerInterface::class),
                         $config['default_options']['channel'] ?? 'developers',

@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory;
 
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\ConnectionProvider;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Reflect;
 use Symfony\Component\Messenger\Bridge\Doctrine\Transport\Connection as DoctrineTransportConnection;
 use Symfony\Component\Messenger\Bridge\Doctrine\Transport\DoctrineTransport;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
+
+use function PhoneBurner\SaltLite\Framework\ghost;
 
 class DoctrineTransportFactory
 {
@@ -21,11 +22,12 @@ class DoctrineTransportFactory
     public function make(string $connection, array $options): DoctrineTransport
     {
         $options['auto_setup'] = false; // disable auto setup
-        return Reflect::ghost(DoctrineTransport::class, function (DoctrineTransport $ghost) use ($connection, $options): void {
-            $ghost->__construct(new DoctrineTransportConnection(
+        return ghost(fn(DoctrineTransport $ghost): null => $ghost->__construct(
+            new DoctrineTransportConnection(
                 $options,
                 $this->connection_provider->getConnection($connection),
-            ), $this->serializer);
-        });
+            ),
+            $this->serializer,
+        ));
     }
 }

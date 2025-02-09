@@ -20,7 +20,6 @@ use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\AmqpTransportFact
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\DoctrineTransportFactory;
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\RedisTransportFactory;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Reflect;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Clock\ClockInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -46,6 +45,8 @@ use Symfony\Component\Messenger\RoutableMessageBus;
 use Symfony\Component\Messenger\Transport\Sender\SendersLocator;
 use Symfony\Component\Messenger\Transport\Serialization\PhpSerializer;
 
+use function PhoneBurner\SaltLite\Framework\ghost;
+
 /**
  * @codeCoverageIgnore
  */
@@ -67,14 +68,10 @@ final class MessageBusServiceProvider implements ServiceProvider
         $app->set(
             MessageBusContainer::class,
             static fn(App $app): MessageBusContainer => new MessageBusContainer(\array_map(
-                static fn (array $bus): SymfonyMessageBusAdapter => Reflect::ghost(
-                    SymfonyMessageBusAdapter::class,
-                    static function (SymfonyMessageBusAdapter $ghost) use ($app, $bus): void {
-                        $ghost->__construct(\array_map(
-                            $app->services->get(...),
-                            $bus['middleware'] ?: [],
-                        ));
-                    },
+                static fn (array $bus): SymfonyMessageBusAdapter => ghost(
+                    static fn(SymfonyMessageBusAdapter $ghost): null => $ghost->__construct(
+                        \array_map($app->services->get(...), $bus['middleware'] ?: []),
+                    ),
                 ),
                 $app->config->get('message_bus.bus') ?: [],
             )),
@@ -177,7 +174,7 @@ final class MessageBusServiceProvider implements ServiceProvider
             StatsCommand::class,
             static fn(App $app): StatsCommand => new StatsCommand(
                 $app->get(ReceiverContainer::class),
-                $app->get(ReceiverContainer::class)->identifiers(),
+                $app->get(ReceiverContainer::class)->keys(),
             ),
         );
 
@@ -188,7 +185,7 @@ final class MessageBusServiceProvider implements ServiceProvider
                 $app->get(ReceiverContainer::class),
                 $app->get(SymfonyEventDispatcher::class),
                 $app->get(LoggerInterface::class),
-                $app->get(ReceiverContainer::class)->identifiers(),
+                $app->get(ReceiverContainer::class)->keys(),
             ),
         );
 

@@ -10,7 +10,6 @@ use PhoneBurner\SaltLite\Framework\App\Environment;
 use PhoneBurner\SaltLite\Framework\Cache\Marshaller\RemoteCacheMarshaller;
 use PhoneBurner\SaltLite\Framework\Cache\Marshaller\Serializer;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Reflect;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -22,6 +21,7 @@ use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 use Symfony\Component\Cache\Adapter\ProxyAdapter;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
 
+use function PhoneBurner\SaltLite\Framework\ghost;
 use function PhoneBurner\SaltLite\Framework\path;
 
 class CacheItemPoolFactory
@@ -55,9 +55,7 @@ class CacheItemPoolFactory
     public function make(CacheDriver $driver, string|null $namespace = null): CacheItemPoolInterface
     {
         return $namespace !== null ? new ProxyAdapter($this->make($driver), $namespace) : match ($driver) {
-            CacheDriver::Remote => $this->pool ??= Reflect::ghost(CacheItemPoolProxy::class, function (CacheItemPoolProxy $ghost): void {
-                $ghost->__construct($this->createDefaultCacheItemPool());
-            }),
+            CacheDriver::Remote => $this->pool ??= $this->createDefaultCacheItemPool(),
             CacheDriver::File => $this->file ??= $this->createFileCacheItemPool(),
             CacheDriver::Memory => $this->memory ??= new ArrayAdapter(storeSerialized: false),
             CacheDriver::None => $this->null ??= new NullAdapter(),
@@ -72,11 +70,13 @@ class CacheItemPoolFactory
             return $this->make(CacheDriver::Memory);
         }
 
-        return new PhpFilesAdapter(
-            $namespace ?: self::DEFAULT_NAMESPACE,
-            directory: $directory ?? path(self::DEFAULT_FILE_CACHE_DIRECTORY),
-            appendOnly: true,
-        );
+        return ghost(function (PhpFilesAdapter $ghost) use ($namespace, $directory): void {
+            $ghost->__construct(
+                $namespace ?: self::DEFAULT_NAMESPACE,
+                directory: $directory ?? path(self::DEFAULT_FILE_CACHE_DIRECTORY),
+                appendOnly: true,
+            );
+        });
     }
 
     /**
@@ -85,6 +85,10 @@ class CacheItemPoolFactory
      * The PhpArrayAdapter is the only adapter that can be used to warm up the cache
      * and the values are already held in memory, so we do not want to put anything
      * in front of it in production.
+     *
+     * Note: this ghosts a CacheItemPoolProxy instead of just returning
+     * proxies because we need a concrete class to make lazy, and that's going
+     * to be configuration driven.
      */
     private function createDefaultCacheItemPool(): CacheItemPoolInterface
     {
@@ -92,26 +96,28 @@ class CacheItemPoolFactory
             return $this->make(CacheDriver::Memory);
         }
 
-        $cache = new RedisAdapter(
-            redis: $this->redis_manager->connect(),
-            namespace: self::DEFAULT_NAMESPACE,
-            marshaller: match ($this->environment->stage) {
-                BuildStage::Production, BuildStage::Integration => new RemoteCacheMarshaller(Serializer::Igbinary),
-                BuildStage::Development => new RemoteCacheMarshaller(
-                    serializer: Serializer::Php,
-                    compress: false,
-                    throw_on_serialization_failure: true,
-                    logger: $this->logger,
-                ),
-            },
-        );
+        return ghost(function (CacheItemPoolProxy $ghost): void {
+            $cache = new RedisAdapter(
+                redis: $this->redis_manager->connect(),
+                namespace: self::DEFAULT_NAMESPACE,
+                marshaller: match ($this->environment->stage) {
+                    BuildStage::Production, BuildStage::Integration => new RemoteCacheMarshaller(Serializer::Igbinary),
+                    BuildStage::Development => new RemoteCacheMarshaller(
+                        serializer: Serializer::Php,
+                        compress: false,
+                        throw_on_serialization_failure: true,
+                        logger: $this->logger,
+                    ),
+                },
+            );
 
-        $cache = new ChainAdapter([new ArrayAdapter(storeSerialized: false), $cache]);
-        $static_cache_path = path(self::DEFAULT_STATIC_CACHE_FILE);
-        if (\file_exists($static_cache_path)) {
-            return new PhpArrayAdapter($static_cache_path, $cache);
-        }
+            $cache = new ChainAdapter([new ArrayAdapter(storeSerialized: false), $cache]);
+            $static_cache_path = path(self::DEFAULT_STATIC_CACHE_FILE);
+            if (\file_exists($static_cache_path)) {
+                $cache = new PhpArrayAdapter($static_cache_path, $cache);
+            }
 
-        return $cache;
+            $ghost->__construct($cache);
+        });
     }
 }

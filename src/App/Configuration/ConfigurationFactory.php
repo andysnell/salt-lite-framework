@@ -8,7 +8,8 @@ use Brick\VarExporter\VarExporter;
 use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\App\Environment;
 use PhoneBurner\SaltLite\Framework\Util\Filesystem\FileWriter;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Reflect;
+
+use function PhoneBurner\SaltLite\Framework\ghost;
 
 /**
  * Important: for the sake of serializing the configuration as a PHP array, and
@@ -25,7 +26,7 @@ class ConfigurationFactory
 
     public static function make(App $app): ImmutableConfiguration
     {
-        return Reflect::ghost(ImmutableConfiguration::class, static function (ImmutableConfiguration $proxy) use ($app): void {
+        return ghost(static function (ImmutableConfiguration $proxy) use ($app): void {
             $proxy->__construct(self::compile($app->environment));
         });
     }

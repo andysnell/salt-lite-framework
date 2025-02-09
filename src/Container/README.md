@@ -26,7 +26,7 @@ method.
 
 The first time we boot the container, we create a map of deferred services to their
 provider, and then register the provider when the service is requested. We also
-register all of the services provided by a deferred provider before a deferred service
+register all the services provided by a deferred provider before a deferred service
 is manually set on the container. This prevents accidentally overwriting a service
 definition with a deferred provider.
 

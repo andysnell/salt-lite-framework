@@ -162,8 +162,8 @@
     "ci": [
       "@lint",
       "@phpcs",
-      "@test",
       "@phpstan",
+      "@test",
       "@php vendor/bin/rector process --dry-run --clear-cache"
     ]
   },

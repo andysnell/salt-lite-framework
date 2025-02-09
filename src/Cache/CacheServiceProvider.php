@@ -45,9 +45,7 @@ final class CacheServiceProvider implements DeferrableServiceProvider
 
     public static function bind(): array
     {
-        return [
-
-        ];
+        return [];
     }
 
     #[\Override]
@@ -62,23 +60,23 @@ final class CacheServiceProvider implements DeferrableServiceProvider
 
         $app->set(
             Cache::class,
-            static fn(App $app): CacheAdapter => new CacheAdapter(
+            ghost(static fn(CacheAdapter $ghost): null => $ghost->__construct(
                 $app->get(CacheInterface::class),
-            ),
+            )),
         );
 
         $app->set(
             InMemoryCache::class,
-            static fn(App $app): InMemoryCache => new InMemoryCache(
+            ghost(static fn(InMemoryCache $ghost): null => $ghost->__construct(
                 $app->get(CacheItemPoolFactory::class)->make(CacheDriver::Memory),
-            ),
+            )),
         );
 
         $app->set(
             CacheInterface::class,
-            static fn(App $app): CacheInterface => new Psr16Cache(
+            ghost(static fn(Psr16Cache $ghost): null => $ghost->__construct(
                 $app->get(CacheItemPoolFactory::class)->make(CacheDriver::Remote),
-            ),
+            )),
         );
 
         $app->set(
@@ -88,11 +86,11 @@ final class CacheServiceProvider implements DeferrableServiceProvider
 
         $app->set(
             CacheItemPoolFactory::class,
-            static fn(App $app): CacheItemPoolFactory => new CacheItemPoolFactory(
+            ghost(static fn(CacheItemPoolFactory $ghost): null => $ghost->__construct(
                 $app->environment,
                 $app->get(RedisManager::class),
                 $app->get(LoggerInterface::class),
-            ),
+            )),
         );
 
         $app->set(
@@ -102,21 +100,19 @@ final class CacheServiceProvider implements DeferrableServiceProvider
 
         $app->set(
             LockFactory::class,
-            static function (App $app): SymfonyLockFactoryAdapter {
-                $lock_factory = new SymfonyLockFactoryAdapter(
+            ghost(static function (SymfonyLockFactoryAdapter $ghost) use ($app): void {
+                $ghost->__construct(
                     $app->get(NamedKeyFactory::class),
                     new SymfonyLockFactory(match ($app->environment->context) {
-                    Context::Test => new InMemoryStore(),
-                    default => new RedisStore($app->get(\Redis::class)),
+                        Context::Test => new InMemoryStore(),
+                        default => new RedisStore($app->get(\Redis::class)),
                     }),
                 );
 
                 if ($app->environment->stage !== BuildStage::Production) {
-                    $lock_factory->setLogger($app->get(LoggerInterface::class));
+                    $ghost->setLogger($app->get(LoggerInterface::class));
                 }
-
-                return $lock_factory;
-            },
+            }),
         );
     }
 }

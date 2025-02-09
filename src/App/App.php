@@ -10,7 +10,7 @@ use PhoneBurner\SaltLite\Framework\Container\InvokingContainer;
 use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
 use PhoneBurner\SaltLite\Framework\Container\ParameterOverride\OverrideCollection;
 use PhoneBurner\SaltLite\Framework\Container\ServiceContainer;
-use PhoneBurner\SaltLite\Framework\Container\ServiceContainerFactory;
+use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceContainerFactory;
 
 use const PhoneBurner\SaltLite\Framework\APP_ROOT;
 
@@ -24,7 +24,7 @@ use const PhoneBurner\SaltLite\Framework\APP_ROOT;
  * service container itself. The implemented container methods are really shortcuts to
  * the underlying service container.
  */
-final class App implements MutableContainer, InvokingContainer
+class App implements MutableContainer, InvokingContainer
 {
     private static self|null $instance = null;
 

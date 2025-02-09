@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Container\ObjectContainer;
 
+use PhoneBurner\SaltLite\Framework\Container\InvokingContainer;
+use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
 use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
 /**
@@ -13,7 +14,8 @@ use Psr\Container\NotFoundExceptionInterface;
  * @extends \IteratorAggregate<string, T>
  * @extends \ArrayAccess<string, T>
  */
-interface ObjectContainer extends ContainerInterface, \Countable, \IteratorAggregate, \ArrayAccess
+#[Contract]
+interface ObjectContainer extends InvokingContainer, \Countable, \IteratorAggregate, \ArrayAccess
 {
     /**
      * @return T&object
@@ -27,5 +29,5 @@ interface ObjectContainer extends ContainerInterface, \Countable, \IteratorAggre
     /**
      * @return array<string>
      */
-    public function identifiers(): array;
+    public function keys(): array;
 }
