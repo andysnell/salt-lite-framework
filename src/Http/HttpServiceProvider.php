@@ -9,7 +9,8 @@ use Laminas\HttpHandlerRunner\Emitter\SapiStreamEmitter;
 use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
-use PhoneBurner\SaltLite\Framework\Http\Cookie\CookieManager;
+use PhoneBurner\SaltLite\Framework\Http\Cookie\CookieEncrypter;
+use PhoneBurner\SaltLite\Framework\Http\Cookie\CookieJar;
 use PhoneBurner\SaltLite\Framework\Http\Cookie\Middleware\AddCookiesToResponse;
 use PhoneBurner\SaltLite\Framework\Http\Cookie\Middleware\DecryptCookiesFromRequest;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\CatchExceptionalResponses;
@@ -52,8 +53,10 @@ final class HttpServiceProvider implements DeferrableServiceProvider
     public static function provides(): array
     {
         return [
+            Router::class,
             HttpKernel::class,
             RequestFactory::class,
+            RequestHandlerFactory::class,
             EmitterInterface::class,
             MiddlewareRequestHandlerFactory::class,
             RequestHandlerInterface::class,
@@ -62,13 +65,19 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             NotFoundRequestHandler::class,
             CspViolationReportRequestHandler::class,
             ErrorRequestHandler::class,
-            Router::class,
             FastRouter::class,
             FastRouteDispatcherFactory::class,
             FastRouteResultFactory::class,
             DefinitionList::class,
             CacheRoutes::class,
-            CookieManager::class,
+            CookieEncrypter::class,
+            CookieJar::class,
+            DecryptCookiesFromRequest::class,
+            AddCookiesToResponse::class,
+            AttachRouteToRequest::class,
+            DispatchRouteMiddleware::class,
+            DispatchRouteRequestHandler::class,
+            StaticFileRequestHandler::class,
         ];
     }
 
@@ -96,6 +105,11 @@ final class HttpServiceProvider implements DeferrableServiceProvider
         $app->set(
             RequestFactory::class,
             static fn(App $app): RequestFactory => new RequestFactory(),
+        );
+
+        $app->set(
+            RequestHandlerFactory::class,
+            static fn(App $app): RequestHandlerFactory => new RequestHandlerFactory($app),
         );
 
         $app->set(
@@ -194,10 +208,17 @@ final class HttpServiceProvider implements DeferrableServiceProvider
         );
 
         $app->set(
-            CookieManager::class,
-            ghost(static fn(CookieManager $ghost): null => $ghost->__construct(
+            CookieEncrypter::class,
+            ghost(static fn(CookieEncrypter $ghost): null => $ghost->__construct(
                 new Symmetric(),
                 SharedKey::derive($app->get(AppKey::class), 'cookie'),
+            )),
+        );
+
+        $app->set(
+            CookieJar::class,
+            ghost(static fn(CookieJar $ghost): null => $ghost->__construct(
+                $app->get(CookieEncrypter::class),
                 $app->get(Clock::class),
             )),
         );
@@ -205,14 +226,14 @@ final class HttpServiceProvider implements DeferrableServiceProvider
         $app->set(
             DecryptCookiesFromRequest::class,
             static fn(App $app): DecryptCookiesFromRequest => new DecryptCookiesFromRequest(
-                $app->get(CookieManager::class),
+                $app->get(CookieJar::class),
             ),
         );
 
         $app->set(
             AddCookiesToResponse::class,
             static fn(App $app): AddCookiesToResponse => new AddCookiesToResponse(
-                $app->get(CookieManager::class),
+                $app->get(CookieJar::class),
             ),
         );
 
@@ -228,11 +249,6 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             static fn(App $app): DispatchRouteMiddleware => new DispatchRouteMiddleware(
                 $app->get(MiddlewareRequestHandlerFactory::class),
             ),
-        );
-
-        $app->set(
-            RequestHandlerFactory::class,
-            static fn(App $app): RequestHandlerFactory => new RequestHandlerFactory($app),
         );
 
         $app->set(

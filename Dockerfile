@@ -1,8 +1,9 @@
 # syntax=docker/dockerfile:1
 FROM php:8.4-cli as development
-ENV PATH "/app/vendor/bin:/home/dev/composer/bin:$PATH"
+ENV PATH "/app/bin:/app/vendor/bin:/home/dev/composer/bin:$PATH"
 ENV COMPOSER_HOME "/home/dev/composer"
 ENV SALT_BUILD_STAGE "development"
+ENV PHP_PEAR_PHP_BIN="php -d error_reporting=E_ALL&~E_DEPRECATED"
 ENV XDEBUG_MODE "off"
 
 RUN <<-EOF
@@ -30,13 +31,14 @@ RUN <<-EOF
     zip \
     zlib1g-dev
   apt-get clean
+  ln -s /usr/bin/vim.tiny /usr/bin/vim
 EOF
 
 # Install PHP Extensions
 RUN <<-EOF
   set -eux
   docker-php-ext-install -j$(nproc) bcmath exif gmp intl pcntl pdo_mysql zip
-  MAKEFLAGS="-j $(nproc)" pecl install amqp igbinary redis timezonedb xdebug-3.4.0beta1
+  MAKEFLAGS="-j $(nproc)" pecl install amqp igbinary redis timezonedb xdebug
   docker-php-ext-enable amqp igbinary redis timezonedb xdebug
   find "$(php-config --extension-dir)" -name '*.so' -type f -exec strip --strip-all {} \;
   rm -rf /tmp/pear

@@ -17,6 +17,7 @@ use PhoneBurner\SaltLite\Framework\Cache\Cache;
 use PhoneBurner\SaltLite\Framework\Cache\Lock\LockFactory;
 use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
 use PhoneBurner\SaltLite\Framework\Container\ServiceContainer;
+use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\AreaCode\AreaCode;
 use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\DomesticPhoneNumber;
 use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\E164;
@@ -67,7 +68,7 @@ class InteractiveSaltShell extends Command
         'logger' => LoggerInterface::class,
         'mailer' => MailerInterface::class,
         'message_bus' => MessageBus::class,
-        'redis' => \Redis::class,
+        'redis_manager' => RedisManager::class,
         'storage' => FilesystemOperator::class,
 
     ];

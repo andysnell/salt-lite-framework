@@ -109,6 +109,10 @@ rector-dry-run: build
 ci: build
 	@$(app) composer run-script ci
 
+.PHONY: shell
+shell: build up
+	@$(app) ./bin/salt shell
+
 .PHONY: serve-coverage
 serve-coverage:
 	@docker compose run --rm --publish 8000:80 app php -S 0.0.0.0:80 -t /app/build/phpunit

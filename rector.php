@@ -16,6 +16,8 @@ return RectorConfig::configure()
     ->withCache(__DIR__ . '/build/rector')
     ->withRootFiles()
     ->withPaths([
+        __DIR__ . '/bin',
+        __DIR__ . '/config',
         __DIR__ . '/src',
         __DIR__ . '/tests',
     ])

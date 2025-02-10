@@ -7,7 +7,7 @@ use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\App\Context;
 use PhoneBurner\SaltLite\Framework\App\Kernel;
 
-require_once __DIR__ . '/../vendor/autoload_runtime.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 App::exec(Context::Cli, static function (App $app): void {
     $app->get(Kernel::class)->run();

@@ -45,10 +45,7 @@ function stage(
 function path(string $path): string
 {
     \assert(\defined('\PhoneBurner\SaltLite\Framework\APP_ROOT'), 'APP_ROOT must be defined');
-    $path = APP_ROOT . $path;
-    \assert($path !== '');
-
-    return $path;
+    return APP_ROOT . $path;
 }
 /**
  * Use when you don't control the instantiation of the object, but have a factory
