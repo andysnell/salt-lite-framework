@@ -10,6 +10,8 @@ use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
 use PhoneBurner\SaltLite\Framework\Http\Cookie\CookieManager;
+use PhoneBurner\SaltLite\Framework\Http\Cookie\Middleware\AddCookiesToResponse;
+use PhoneBurner\SaltLite\Framework\Http\Cookie\Middleware\DecryptCookiesFromRequest;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\CatchExceptionalResponses;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\LazyMiddlewareRequestHandlerFactory;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\MiddlewareRequestHandlerFactory;
@@ -23,7 +25,11 @@ use PhoneBurner\SaltLite\Framework\Http\Routing\Definition\LazyConfigDefinitionL
 use PhoneBurner\SaltLite\Framework\Http\Routing\FastRoute\FastRouteDispatcherFactory;
 use PhoneBurner\SaltLite\Framework\Http\Routing\FastRoute\FastRouter;
 use PhoneBurner\SaltLite\Framework\Http\Routing\FastRoute\FastRouteResultFactory;
+use PhoneBurner\SaltLite\Framework\Http\Routing\Middleware\AttachRouteToRequest;
+use PhoneBurner\SaltLite\Framework\Http\Routing\Middleware\DispatchRouteMiddleware;
+use PhoneBurner\SaltLite\Framework\Http\Routing\Middleware\DispatchRouteRequestHandler;
 use PhoneBurner\SaltLite\Framework\Http\Routing\RequestHandler\NotFoundRequestHandler;
+use PhoneBurner\SaltLite\Framework\Http\Routing\RequestHandler\StaticFileRequestHandler;
 use PhoneBurner\SaltLite\Framework\Http\Routing\RouteProvider;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Router;
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
@@ -34,6 +40,8 @@ use PhoneBurner\SaltLite\Framework\Util\Crypto\Symmetric\Symmetric;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
+
+use function PhoneBurner\SaltLite\Framework\ghost;
 
 /**
  * @codeCoverageIgnore
@@ -187,11 +195,56 @@ final class HttpServiceProvider implements DeferrableServiceProvider
 
         $app->set(
             CookieManager::class,
-            static fn(App $app): CookieManager => new CookieManager(
+            ghost(static fn(CookieManager $ghost): null => $ghost->__construct(
                 new Symmetric(),
                 SharedKey::derive($app->get(AppKey::class), 'cookie'),
                 $app->get(Clock::class),
+            )),
+        );
+
+        $app->set(
+            DecryptCookiesFromRequest::class,
+            static fn(App $app): DecryptCookiesFromRequest => new DecryptCookiesFromRequest(
+                $app->get(CookieManager::class),
             ),
+        );
+
+        $app->set(
+            AddCookiesToResponse::class,
+            static fn(App $app): AddCookiesToResponse => new AddCookiesToResponse(
+                $app->get(CookieManager::class),
+            ),
+        );
+
+        $app->set(
+            AttachRouteToRequest::class,
+            static fn(App $app): AttachRouteToRequest => new AttachRouteToRequest(
+                $app->get(Router::class),
+            ),
+        );
+
+        $app->set(
+            DispatchRouteMiddleware::class,
+            static fn(App $app): DispatchRouteMiddleware => new DispatchRouteMiddleware(
+                $app->get(MiddlewareRequestHandlerFactory::class),
+            ),
+        );
+
+        $app->set(
+            RequestHandlerFactory::class,
+            static fn(App $app): RequestHandlerFactory => new RequestHandlerFactory($app),
+        );
+
+        $app->set(
+            DispatchRouteRequestHandler::class,
+            static fn(App $app): DispatchRouteRequestHandler => new DispatchRouteRequestHandler(
+                $app->get(RequestHandlerFactory::class),
+            ),
+        );
+
+        $app->set(
+            StaticFileRequestHandler::class,
+            static fn(App $app): StaticFileRequestHandler => new StaticFileRequestHandler(),
         );
     }
 }
