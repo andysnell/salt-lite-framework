@@ -1,0 +1,14 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use PhoneBurner\SaltLite\Framework\App\App;
+use PhoneBurner\SaltLite\Framework\App\Context;
+use PhoneBurner\SaltLite\Framework\App\Kernel;
+
+require_once __DIR__ . '/../vendor/autoload_runtime.php';
+
+App::exec(Context::Cli, static function (App $app): void {
+    $app->get(Kernel::class)->run();
+});

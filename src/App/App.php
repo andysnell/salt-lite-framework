@@ -54,6 +54,21 @@ class App implements MutableContainer, InvokingContainer
         return self::$instance = null;
     }
 
+    /**
+     * @template T
+     * @param callable(App): T $callback
+     * @return T
+     */
+    public static function exec(Context $context, callable $callback): mixed
+    {
+        $app = self::bootstrap($context);
+        try {
+            return $callback($app);
+        } finally {
+            $app::teardown();
+        }
+    }
+
     private function __construct(public readonly Context $context)
     {
         $this->environment = new Environment($context, APP_ROOT, $_SERVER, $_ENV);

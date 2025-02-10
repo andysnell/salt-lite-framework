@@ -10,6 +10,9 @@ parameters:
         - src
         - tests
 
+    excludePaths:
+        - src/ComposerHelper.php
+
     ignoreErrors:
         - identifier: missingType.iterableValue
         - identifier: staticMethod.alreadyNarrowedType

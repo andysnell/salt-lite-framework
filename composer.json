@@ -142,6 +142,7 @@
     "symfony/var-dumper": "^7.2.3"
   },
   "scripts": {
+    "post-autoload-dump": "PhoneBurner\\SaltLite\\Framework\\ComposerHelper::install",
     "lint": "@php vendor/bin/parallel-lint -j $(nproc) --show-deprecated --exclude vendor --exclude build .",
     "phpcbf": "@php vendor/bin/phpcbf --parallel=$(nproc) --report=full",
     "phpcs": "@php vendor/bin/phpcs --parallel=$(nproc) --report=full",
