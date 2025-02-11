@@ -39,6 +39,7 @@ final class SchedulerServiceProvider implements DeferrableServiceProvider
             ScheduleProviderCollection::class,
             DebugCommand::class,
             DispatchSchedulerEventListener::class,
+            ConsumeScheduleMessages::class,
         ];
     }
 

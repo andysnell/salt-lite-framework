@@ -66,6 +66,10 @@ class DebugEventListeners extends Command
     private static function listener(object $listener): string
     {
         return match (true) {
+            $listener instanceof \Closure => (static function (\Closure $closure): string {
+                $reflection = new \ReflectionFunction($closure);
+                return \ltrim($reflection->getClosureCalledClass()?->getName() . '::' . $reflection->getName() . '()', ':');
+            })($listener),
             ! $listener instanceof LazyListener => $listener::class,
             (bool)$listener->listener_method => $listener->listener_class . '::' . $listener->listener_method,
             default => $listener->listener_class,

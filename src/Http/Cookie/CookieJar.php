@@ -42,7 +42,7 @@ class CookieJar implements ContainerInterface, \Countable, \IteratorAggregate
         $cookies = [];
         foreach ($request->getCookieParams() as $name => $value) {
             // shortcut any value strings that are shorter than the minimum size when encrypted
-            if (\strlen((string) $value) >= CookieEncrypter::MIN_BYTES) {
+            if (\strlen((string)$value) >= CookieEncrypter::MIN_BYTES) {
                 $value = $this->cookie_encrypter->decrypt($name, $value);
             }
 

@@ -12,6 +12,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\Mailer as SymfonyMailer;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mailer\Messenger\MessageHandler;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -30,6 +31,7 @@ final class MailerServiceProvider implements DeferrableServiceProvider
             Mailer::class,
             MailerInterface::class,
             TransportInterface::class,
+            MessageHandler::class,
         ];
     }
 
@@ -61,6 +63,13 @@ final class MailerServiceProvider implements DeferrableServiceProvider
                     $app->get(TransportInterface::class),
                 )),
             },
+        );
+
+        $app->set(
+            MessageHandler::class,
+            ghost(static fn(MessageHandler $ghost): null => $ghost->__construct(
+                $app->get(TransportInterface::class),
+            )),
         );
 
         $app->set(

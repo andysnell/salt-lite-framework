@@ -36,6 +36,7 @@ use Symfony\Component\Messenger\EventListener\SendFailedMessageToFailureTranspor
 use Symfony\Component\Messenger\EventListener\StopWorkerOnCustomStopExceptionListener;
 use Symfony\Component\Messenger\EventListener\StopWorkerOnRestartSignalListener;
 use Symfony\Component\Messenger\Handler\HandlersLocator;
+use Symfony\Component\Messenger\Handler\RedispatchMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Middleware\HandleMessageMiddleware;
 use Symfony\Component\Messenger\Middleware\SendMessageMiddleware;
@@ -257,6 +258,13 @@ final class MessageBusServiceProvider implements ServiceProvider
         );
 
         $app->set(
+            LogWorkerMessageFailedEvent::class,
+            static fn(App $app): LogWorkerMessageFailedEvent => new LogWorkerMessageFailedEvent(
+                $app->get(LoggerInterface::class),
+            ),
+        );
+
+        $app->set(
             InvokableMessageHandler::class,
             static fn(App $app): InvokableMessageHandler => new InvokableMessageHandler(
                 $app->get(MutableContainer::class),
@@ -265,10 +273,10 @@ final class MessageBusServiceProvider implements ServiceProvider
         );
 
         $app->set(
-            LogWorkerMessageFailedEvent::class,
-            static fn(App $app): LogWorkerMessageFailedEvent => new LogWorkerMessageFailedEvent(
-                $app->get(LoggerInterface::class),
-            ),
+            RedispatchMessageHandler::class,
+            ghost(static fn (RedispatchMessageHandler $ghost): null => $ghost->__construct(
+                $app->get(MessageBusInterface::class),
+            )),
         );
     }
 }

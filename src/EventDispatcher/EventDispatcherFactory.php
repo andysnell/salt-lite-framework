@@ -14,27 +14,45 @@ use function PhoneBurner\SaltLite\Framework\ghost;
 
 class EventDispatcherFactory
 {
+    private static array $cache = [];
+
     public static function make(App $app): EventDispatcher
     {
-        return ghost(static function (EventDispatcher $ghost) use ($app): void {
-            $ghost->__construct();
+        try {
+            return ghost(static function (EventDispatcher $ghost) use ($app): void {
+                $ghost->__construct();
 
-            foreach ($app->config->get('event_dispatcher.subscribers') ?: [] as $subscriber) {
-                \assert(Type::isClassStringOf(EventSubscriberInterface::class, $subscriber));
-                foreach ($subscriber::getSubscribedEvents() as $event => $methods) {
-                    self::registerSubscriberListeners($app, $ghost, $event, $subscriber, $methods);
+                foreach ($app->config->get('event_dispatcher.subscribers') ?: [] as $subscriber) {
+                    \assert(Type::isClassStringOf(EventSubscriberInterface::class, $subscriber));
+                    foreach ($subscriber::getSubscribedEvents() as $event => $methods) {
+                        self::registerSubscriberListeners($app, $ghost, $event, $subscriber, $methods);
+                    }
                 }
-            }
 
-            foreach ($app->config->get('event_dispatcher.listeners') ?: [] as $event => $listeners) {
-                foreach ($listeners as $listener) {
-                    $ghost->addListener($event, self::listener($app, $listener));
+                foreach ($app->config->get('event_dispatcher.listeners') ?: [] as $event => $listeners) {
+                    foreach ($listeners as $listener) {
+                        $ghost->addListener($event, self::listener($app, $listener));
+                    }
                 }
-            }
-        });
+            });
+        } finally {
+            self::$cache = [];
+        }
     }
 
     private static function listener(
+        App $app,
+        string $listener_class,
+        string|null $listener_method = null,
+    ): callable {
+        return self::$cache[$listener_class . '.' . $listener_method] ??= self::resolve(
+            $app,
+            $listener_class,
+            $listener_method,
+        );
+    }
+
+    private static function resolve(
         App $app,
         string $listener_class,
         string|null $listener_method = null,

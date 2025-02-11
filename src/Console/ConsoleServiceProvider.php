@@ -16,6 +16,7 @@ use PhoneBurner\SaltLite\Framework\App\Context;
 use PhoneBurner\SaltLite\Framework\Console\Command\InteractiveSaltShell;
 use PhoneBurner\SaltLite\Framework\Console\EventListener\ConsoleErrorListener;
 use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
+use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory\NewInstanceServiceFactory;
 use PhoneBurner\SaltLite\Framework\EventDispatcher\Command\DebugEventListeners;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Command\CacheRoutes;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Command\ListRoutes;
@@ -55,6 +56,8 @@ final class ConsoleServiceProvider implements DeferrableServiceProvider
             CliKernel::class,
             CommandLoaderInterface::class,
             Application::class,
+            ConsoleApplicationFactory::class,
+            InteractiveSaltShell::class,
         ];
     }
 
@@ -103,5 +106,9 @@ final class ConsoleServiceProvider implements DeferrableServiceProvider
 
             return $application;
         });
+
+        $app->set(ConsoleApplicationFactory::class, new NewInstanceServiceFactory(ConsoleApplicationFactory::class));
+
+        $app->set(InteractiveSaltShell::class, new NewInstanceServiceFactory(InteractiveSaltShell::class, [$app]));
     }
 }
