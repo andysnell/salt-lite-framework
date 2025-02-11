@@ -73,8 +73,8 @@ final class Environment implements ContainerInterface
     {
         return match ($this->stage) {
             BuildStage::Production => $production,
-            BuildStage::Integration => $integration ?? $production,
-            BuildStage::Development => $development ?? $integration ?? $production,
+            BuildStage::Development => $development ?? $production,
+            BuildStage::Integration => $integration ?? $development ?? $production,
         };
     }
 

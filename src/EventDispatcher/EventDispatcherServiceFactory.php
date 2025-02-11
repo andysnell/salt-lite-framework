@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\EventDispatcher;
 
 use PhoneBurner\SaltLite\Framework\App\App;
+use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory;
 use PhoneBurner\SaltLite\Framework\EventDispatcher\EventListener\LazyListener;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -12,40 +13,40 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use function PhoneBurner\SaltLite\Framework\ghost;
 
-class EventDispatcherFactory
+class EventDispatcherServiceFactory implements ServiceFactory
 {
-    private static array $cache = [];
+    private array $cache = [];
 
-    public static function make(App $app): EventDispatcher
+    public function __invoke(App $app): EventDispatcher
     {
         try {
-            return ghost(static function (EventDispatcher $ghost) use ($app): void {
+            return ghost(function (EventDispatcher $ghost) use ($app): void {
                 $ghost->__construct();
 
                 foreach ($app->config->get('event_dispatcher.subscribers') ?: [] as $subscriber) {
                     \assert(Type::isClassStringOf(EventSubscriberInterface::class, $subscriber));
                     foreach ($subscriber::getSubscribedEvents() as $event => $methods) {
-                        self::registerSubscriberListeners($app, $ghost, $event, $subscriber, $methods);
+                        $this->registerSubscriberListeners($app, $ghost, $event, $subscriber, $methods);
                     }
                 }
 
                 foreach ($app->config->get('event_dispatcher.listeners') ?: [] as $event => $listeners) {
                     foreach ($listeners as $listener) {
-                        $ghost->addListener($event, self::listener($app, $listener));
+                        $ghost->addListener($event, $this->listener($app, $listener));
                     }
                 }
             });
         } finally {
-            self::$cache = [];
+            $this->cache = [];
         }
     }
 
-    private static function listener(
+    private function listener(
         App $app,
         string $listener_class,
         string|null $listener_method = null,
     ): callable {
-        return self::$cache[$listener_class . '.' . $listener_method] ??= self::resolve(
+        return $this->cache[$listener_class . '.' . $listener_method] ??= self::resolve(
             $app,
             $listener_class,
             $listener_method,
@@ -75,7 +76,7 @@ class EventDispatcherFactory
         return $proxy;
     }
 
-    private static function registerSubscriberListeners(
+    private function registerSubscriberListeners(
         App $app,
         EventDispatcher $dispatcher,
         string $event,
@@ -83,17 +84,17 @@ class EventDispatcherFactory
         array|string $methods,
     ): void {
         match (true) {
-            \is_string($methods) => $dispatcher->addListener($event, self::listener(
+            \is_string($methods) => $dispatcher->addListener($event, $this->listener(
                 $app,
                 $subscriber,
                 $methods,
             )),
-            \is_string($methods[0]) => $dispatcher->addListener($event, self::listener(
+            \is_string($methods[0]) => $dispatcher->addListener($event, $this->listener(
                 $app,
                 $subscriber,
                 $methods[0],
             ), $methods[1] ?? 0),
-            default => \array_walk($methods, static fn(array|string $methods): null => self::registerSubscriberListeners(
+            default => \array_walk($methods, fn(array|string $methods): null => $this->registerSubscriberListeners(
                 $app,
                 $dispatcher,
                 $event,

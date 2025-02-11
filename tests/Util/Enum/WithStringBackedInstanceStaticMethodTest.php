@@ -22,14 +22,14 @@ final class WithStringBackedInstanceStaticMethodTest extends TestCase
     }
 
     #[Test]
-    public function instance_throws_invalid_value_error(): void
+    public function instance_throws_invalid_argument_exception_on_bad_value(): void
     {
-        $this->expectException(\ValueError::class);
+        $this->expectException(\InvalidArgumentException::class);
         StoplightState::instance('invalid');
     }
 
     #[Test]
-    public function instance_throws_invalid_argument_exception(): void
+    public function instance_throws_invalid_argument_exception_on_bad_type(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         StoplightState::instance(new \stdClass());

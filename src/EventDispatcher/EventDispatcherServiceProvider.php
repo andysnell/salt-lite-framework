@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\EventDispatcher;
 
 use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory\StaticMethodServiceFactory;
 use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -31,6 +30,6 @@ final class EventDispatcherServiceProvider implements ServiceProvider
     #[\Override]
     public static function register(App $app): void
     {
-        $app->set(EventDispatcher::class, new StaticMethodServiceFactory(EventDispatcherFactory::class));
+        $app->set(EventDispatcher::class, new EventDispatcherServiceFactory());
     }
 }

@@ -24,6 +24,9 @@ enum LogLevel: string
             $value instanceof self => $value,
             $value instanceof MonologLogLevel => self::from($value->toPsrLogLevel()),
             \is_string($value) => self::from(\strtolower($value)),
+            \is_int($value) => self::tryFrom(
+                MonologLogLevel::tryFrom($value)?->toPsrLogLevel() ?? throw new \InvalidArgumentException(),
+            ),
             default => throw new \InvalidArgumentException(),
         };
     }

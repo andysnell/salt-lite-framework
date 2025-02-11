@@ -38,8 +38,8 @@
   ],
   "autoload": {
     "files": [
-      "src/functions.php",
-      "src/bootstrap.php"
+      "src/bootstrap.php",
+      "src/functions.php"
     ],
     "psr-4": {
       "PhoneBurner\\SaltLite\\Framework\\": "src/"

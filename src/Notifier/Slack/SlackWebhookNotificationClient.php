@@ -11,7 +11,7 @@ use PhoneBurner\SaltLite\Framework\Cache\Lock\LockFactory;
 use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
 use Psr\Log\LoggerInterface;
 
-class SlackApiNotificationClient implements SlackNotificationClient
+class SlackWebhookNotificationClient implements SlackNotificationClient
 {
     public function __construct(
         private readonly Client $client,

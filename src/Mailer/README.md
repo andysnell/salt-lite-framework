@@ -7,7 +7,7 @@ implementing the `\PhoneBurner\SaltLite\Framework\Mailer\Mailable` interface thr
 
 Two interfaces extend the `\PhoneBurner\SaltLite\Framework\Mailer\Mailable` interface:
 
-- `\PhoneBurner\SaltLite\Framework\Mailer\MailableNotification` - for "simple" notification type emails, where just the
+- `\PhoneBurner\SaltLite\Framework\Notifier\Email\MailableNotification` - for "simple" notification type emails, where just the
   recipient, subject, and message body are needed, using the global default "from" address as the sender.
 - `\PhoneBurner\SaltLite\Framework\Mailer\MailableMessage` - for more complex emails, where the sender, recipient,
   subject, and message body are all specified, along with additional headers like "CC", "BCC", and "Reply-To". This

@@ -11,11 +11,16 @@ trait WithUnitEnumInstanceStaticMethod
 {
     public static function instance(mixed $value): self
     {
+        return self::tryInstance($value) ?? throw new \InvalidArgumentException();
+    }
+
+    public static function tryInstance(mixed $value): self|null
+    {
         static $cases = \array_change_key_case(\array_column(self::cases(), null, 'name'), \CASE_LOWER);
         return match (true) {
-            $value instanceof self => $value,
-            \is_string($value) => $cases[\strtolower($value)] ?? throw new \UnexpectedValueException(),
-            default => throw new \InvalidArgumentException(),
+            $value instanceof self, $value === null => $value,
+            \is_string($value) => $cases[\strtolower($value)] ?? null,
+            default => null,
         };
     }
 }
