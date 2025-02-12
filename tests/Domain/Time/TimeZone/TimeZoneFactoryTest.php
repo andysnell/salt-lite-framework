@@ -37,7 +37,7 @@ final class TimeZoneFactoryTest extends TestCase
     public function collect_returns_empty_time_zone_collection(): void
     {
         $collection = TimeZoneFactory::collect();
-        self::assertCount(0, $collection);
+        self::assertEmpty($collection);
         self::assertSame($collection, TimeZoneFactory::collect());
         self::assertEquals($collection, TimeZoneCollection::make());
     }

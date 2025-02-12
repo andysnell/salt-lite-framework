@@ -58,7 +58,7 @@ final class NullArrayAccessTest extends TestCase
     /** @var NullArrayAccess<string, mixed> $sut */
         $sut = new NullArrayAccess([]);
 
-        self::assertCount(0, $sut);
+        self::assertEmpty($sut);
         self::assertSame([], $sut->toArray());
         self::assertSame([], \iterator_to_array($sut));
         foreach ($this->test as $key => $value) {
@@ -86,7 +86,7 @@ final class NullArrayAccessTest extends TestCase
             self::assertNull($sut[$key]);
             self::assertNull($sut->offsetGet($key));
         }
-        self::assertCount(0, $sut);
+        self::assertEmpty($sut);
         self::assertSame([], $sut->toArray());
     }
 }

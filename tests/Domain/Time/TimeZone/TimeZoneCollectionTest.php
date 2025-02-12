@@ -17,7 +17,7 @@ final class TimeZoneCollectionTest extends TestCase
     public function zero_time_zone_case_behavior(): void
     {
         $collection = TimeZoneCollection::make();
-        self::assertCount(0, $collection);
+        self::assertEmpty($collection);
         self::assertSame([], [...$collection]);
         self::assertSame('', (string)$collection);
         self::assertEquals($collection, \unserialize(\serialize($collection)));

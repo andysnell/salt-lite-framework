@@ -47,7 +47,7 @@ final class ImmutableObjectContainerTest extends TestCase
     public function throws_exception_when_key_not_found(): void
     {
         $container = new ImmutableObjectContainer([]);
-        self::assertCount(0, $container);
+        self::assertEmpty($container);
         self::assertSame([], $container->keys());
         self::assertSame([], [...$container]);
         self::assertFalse($container->has('a'));
