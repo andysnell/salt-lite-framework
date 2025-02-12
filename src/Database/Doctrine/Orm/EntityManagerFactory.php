@@ -76,7 +76,7 @@ class EntityManagerFactory
             $this->registerCustomTypes();
 
             $config = $this->configuration->get("database.doctrine.connections.$name.entity_manager") ?? [];
-            if ($config === []) {
+            if ($config === [] || ! \is_array($config)) {
                 $known_managers = \array_keys($this->configuration->get("database.doctrine.entity_managers") ?? []);
                 throw UnknownManagerException::unknownManager($name, \array_map(\strval(...), $known_managers));
             }

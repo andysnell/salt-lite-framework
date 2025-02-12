@@ -58,6 +58,7 @@ final class ConsoleServiceProvider implements DeferrableServiceProvider
             Application::class,
             ConsoleApplicationFactory::class,
             InteractiveSaltShell::class,
+            ConsoleErrorListener::class,
         ];
     }
 

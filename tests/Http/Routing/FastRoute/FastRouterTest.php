@@ -24,6 +24,7 @@ use PhoneBurner\SaltLite\Framework\Http\Routing\Result\RouteFound;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Result\RouteNotFound;
 use PhoneBurner\SaltLite\Framework\Http\Routing\RouterResult;
 use PhoneBurner\SaltLite\Framework\Tests\TestSupport\MockRequest;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -69,7 +70,7 @@ final class FastRouterTest extends TestCase
         $this->result_factory = $this->prophesize(FastRouteResultFactory::class);
 
         $this->sut = new SUT(
-            $this->definition_list->reveal(),
+            Type::of(DefinitionList::class, $this->definition_list->reveal()),
             $this->dispatcher_factory->reveal(),
             $this->result_factory->reveal(),
         );

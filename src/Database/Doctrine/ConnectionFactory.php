@@ -32,7 +32,7 @@ class ConnectionFactory
     public function connect(string $name = self::DEFAULT): Connection
     {
         $params = $this->configuration->get("database.doctrine.connections.$name") ?? [];
-        if ($params === []) {
+        if ($params === [] || ! \is_array($params)) {
             throw new ConnectionNotFound('Unknown Connection: ' . $name);
         }
 

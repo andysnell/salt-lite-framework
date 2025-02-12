@@ -28,6 +28,7 @@ class CachingRedisManager implements RedisManager
     private function doConnect(string $connection): Redis
     {
         $config = $this->config->get("database.redis.connections.$connection") ?? [];
+        \assert(\is_array($config));
 
         try {
             $client = new Redis();

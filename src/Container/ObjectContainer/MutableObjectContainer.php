@@ -79,7 +79,7 @@ class MutableObjectContainer implements ObjectContainer, MutableContainer
     public function offsetGet(mixed $offset): object
     {
         \is_string($offset) || throw new \InvalidArgumentException('Offset must be a string');
-        return $this->get($offset);
+        return $this->entries[$offset] ?? throw new NotFound();
     }
 
     public function offsetSet(mixed $offset, mixed $value): void

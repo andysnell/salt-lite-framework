@@ -127,7 +127,9 @@ final class HttpServiceProvider implements DeferrableServiceProvider
         $app->set(
             RequestHandlerInterface::class,
             static fn(App $app): RequestHandlerInterface => $app->get(MiddlewareRequestHandlerFactory::class)->queue(
-                $app->get($app->config->get('http.routing.fallback_request_handler') ?? NotFoundRequestHandler::class),
+                Type::of(RequestHandlerInterface::class, $app->get(
+                    $app->config->get('http.routing.fallback_request_handler') ?? NotFoundRequestHandler::class,
+                )),
                 $app->config->get('http.middleware') ?? [],
             ),
         );

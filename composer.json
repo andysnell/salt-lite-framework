@@ -34,6 +34,10 @@
     {
       "type": "github",
       "url": "https://github.com/PhoneBurnerOpenSource/link-tortilla"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/phoneburner/salt-lite-phpstan"
     }
   ],
   "autoload": {
@@ -129,18 +133,13 @@
     "jangregor/phpstan-prophecy": "^2",
     "phoneburner/coding-standard": "dev-main",
     "phoneburner/composer-replacements": "dev-main",
+    "phoneburner/salt-lite-phpstan": "dev-main",
     "php-parallel-lint/php-parallel-lint": "^1.4",
     "phpspec/prophecy": "^1.20",
     "phpspec/prophecy-phpunit": "^2.3",
-    "phpstan/extension-installer": ">=1.4.3",
-    "phpstan/phpstan": "^2.1.2",
-    "phpstan/phpstan-deprecation-rules": "^2.0.1",
-    "phpstan/phpstan-doctrine": "^2.0.1",
-    "phpstan/phpstan-phpunit": "^2.0.4",
     "phpunit/phpunit": "^11.5.6",
     "rector/rector": "^2.0.7",
     "roave/security-advisories": "dev-latest",
-    "spaze/phpstan-disallowed-calls": ">=4.2.1",
     "symfony/var-dumper": "^7.2.3"
   },
   "scripts": {

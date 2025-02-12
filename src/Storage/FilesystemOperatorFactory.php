@@ -33,7 +33,7 @@ class FilesystemOperatorFactory
     private function createFilesystemOperator(string $driver): FilesystemOperator
     {
         $config = $this->configuration->get('storage.drivers.' . $driver);
-        if (! $config) {
+        if (! $config || ! \is_array($config)) {
             throw new InvalidConfiguration("No configuration defined for driver: $driver");
         }
 

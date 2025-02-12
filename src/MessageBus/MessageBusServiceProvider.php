@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\MessageBus;
 
 use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
 use PhoneBurner\SaltLite\Framework\Container\ObjectContainer\ImmutableObjectContainer;
 use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\ConnectionProvider;
@@ -267,7 +266,7 @@ final class MessageBusServiceProvider implements ServiceProvider
         $app->set(
             InvokableMessageHandler::class,
             static fn(App $app): InvokableMessageHandler => new InvokableMessageHandler(
-                $app->get(MutableContainer::class),
+                $app,
                 $app->get(EventDispatcherInterface::class),
             ),
         );

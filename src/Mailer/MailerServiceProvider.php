@@ -77,6 +77,7 @@ final class MailerServiceProvider implements DeferrableServiceProvider
             static function (App $app): TransportInterface {
                 $transport_driver = (string)$app->config->get('mailer.default_driver');
                 $transport_config = $app->config->get('mailer.drivers.' . $transport_driver) ?? [];
+                \assert(\is_array($transport_config));
 
                 $dns = match (TransportDriver::tryFrom($transport_driver)) {
                     TransportDriver::SendGrid => \vsprintf('sendgrid+api://%s@default', [
