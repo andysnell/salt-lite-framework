@@ -24,10 +24,8 @@ readonly class Attachment
         }
 
         $this->type = match (true) {
-            $this->content !== '' && $this->inline === true => AttachmentType::EmbedFromContent,
-            $this->content !== '' && $this->inline === false => AttachmentType::AttachFromContent,
-            $this->path !== '' && $this->inline === true => AttachmentType::EmbedFromPath,
-            $this->path !== '' && $this->inline === false => AttachmentType::AttachFromPath,
+            $this->content !== '' => $this->inline ? AttachmentType::EmbedFromContent : AttachmentType::AttachFromContent,
+            $this->path !== '' => $this->inline ? AttachmentType::EmbedFromPath : AttachmentType::AttachFromPath,
             default => throw new \InvalidArgumentException('Cannot Determine Attachment Type'),
         };
     }

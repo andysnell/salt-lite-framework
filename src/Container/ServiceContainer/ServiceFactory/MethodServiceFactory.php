@@ -18,7 +18,7 @@ final readonly class MethodServiceFactory implements ServiceFactory
     ) {
     }
 
-    public function __invoke(ContainerInterface $app): object
+    public function __invoke(ContainerInterface $app, string $id): object
     {
         $object = \is_string($this->class_or_object) ? $app->get($this->class_or_object) : $this->class_or_object;
 

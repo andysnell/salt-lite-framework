@@ -79,7 +79,7 @@ final class NullArrayAccessTest extends TestCase
             self::assertSame($value, $sut->offsetGet($key));
         }
 
-        foreach ($this->test as $key => $value) {
+        foreach (\array_keys($this->test) as $key) {
             unset($sut[$key]);
             self::assertArrayNotHasKey($key, $sut);
             self::assertFalse($sut->offsetExists($key));

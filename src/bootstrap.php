@@ -18,6 +18,17 @@ $build_stage = BuildStage::instance($_SERVER['SALT_BUILD_STAGE'] ?? $_ENV['SALT_
 $_SERVER['SALT_BUILD_STAGE'] = $build_stage->value;
 $_ENV['SALT_BUILD_STAGE'] = $build_stage->value;
 
+// Define a function that will be called when an undefined class is encountered
+// during deserialization, instead of returning a __PHP_Incomplete_Class object.
+// Note that we have to define this function early, and cannot define with the
+// other functions in src/functions.php, which are loaded after this file.
+function fail_on_unserialize_undefined_class(string $class): never
+{
+    throw new \DomainException('Class not found: ' . $class);
+}
+
+\ini_set('unserialize_callback_func', 'fail_on_unserialize_undefined_class');
+
 if ($build_stage !== BuildStage::Production) {
     // Override the error reporting settings based on the environment configuration.
     ErrorReporting::override($_ENV);

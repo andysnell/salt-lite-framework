@@ -37,7 +37,7 @@ class LoggerServiceFactory implements ServiceFactory
         TestHandler::class => LineFormatter::class,
     ];
 
-    public function __invoke(App $app): LoggerInterface
+    public function __invoke(App $app, string $id): LoggerInterface
     {
         return ghost(function (Logger $logger) use ($app): void {
             $logger->__construct(

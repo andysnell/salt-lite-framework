@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use Rector\CodeQuality\Rector\ClassMethod\LocallyCalledStaticMethodToNonStaticRector;
+use Rector\CodeQuality\Rector\Expression\InlineIfToExplicitIfRector;
 use Rector\CodeQuality\Rector\Identical\FlipTypeControlToUseExclusiveTypeRector;
+use Rector\CodeQuality\Rector\If_\ExplicitBoolCompareRector;
 use Rector\Config\RectorConfig;
 use Rector\DeadCode\Rector\ClassConst\RemoveUnusedPrivateClassConstantRector;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPrivateMethodRector;
@@ -25,18 +28,27 @@ return RectorConfig::configure()
     ->withAttributesSets(all: true)
     ->withPreparedSets(
         deadCode: true,
+        codeQuality: true,
+        codingStyle: false,
         typeDeclarations: true,
         privatization: true,
+        naming: false,
         instanceOf: true,
         earlyReturn: true,
+        strictBooleans: false,
+        carbon: false,
         rectorPreset: true,
         phpunitCodeQuality: true,
         doctrineCodeQuality: true,
     )->withSkip([
         ClosureToArrowFunctionRector::class,
         FlipTypeControlToUseExclusiveTypeRector::class,
+        PreferPHPUnitThisCallRector::class,
+        InlineIfToExplicitIfRector::class,
+        LocallyCalledStaticMethodToNonStaticRector::class,
+        ExplicitBoolCompareRector::class,
 
-        // dead code
+        // intentionally dead code used for testing
         RemoveUnusedPrivatePropertyRector::class => [
             __DIR__ . '/tests/Util/Helper/Fixture/Mirror.php',
             __DIR__ . '/tests/Util/Helper/Fixture/NestingObject.php',
@@ -52,6 +64,4 @@ return RectorConfig::configure()
         RemoveUnusedPrivateMethodRector::class => [
             __DIR__ . '/tests/Util/Helper/Fixture/Mirror.php',
         ],
-
-        PreferPHPUnitThisCallRector::class,
     ]);

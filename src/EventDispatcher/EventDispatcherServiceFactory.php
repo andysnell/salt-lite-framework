@@ -17,7 +17,7 @@ class EventDispatcherServiceFactory implements ServiceFactory
 {
     private array $cache = [];
 
-    public function __invoke(App $app): EventDispatcher
+    public function __invoke(App $app, string $id): EventDispatcher
     {
         try {
             return ghost(function (EventDispatcher $ghost) use ($app): void {

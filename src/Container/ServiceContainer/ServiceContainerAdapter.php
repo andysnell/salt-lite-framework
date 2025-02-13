@@ -222,7 +222,7 @@ class ServiceContainerAdapter implements ServiceContainer
 
             // If there is a service factory defined for the $id, call it.
             if (isset($this->factories[$id])) {
-                return ($this->factories[$id])($this->app);
+                return ($this->factories[$id])($this->app, $id);
             }
 
             // Check if the class-string is something we could potentially autowire.

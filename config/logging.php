@@ -10,6 +10,8 @@ use Monolog\Handler\SlackWebhookHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\EnvironmentProcessor;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\LogTraceProcessor;
+use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\PhoneNumberProcessor;
+use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\PsrMessageInterfaceProcessor;
 use Psr\Log\LogLevel;
 
 use function PhoneBurner\SaltLite\Framework\env;
@@ -25,6 +27,8 @@ return [
         'channel' => env('SALT_PSR3_LOG_CHANNEL'),
         'processors' => [
             PsrLogMessageProcessor::class,
+            PsrMessageInterfaceProcessor::class,
+            PhoneNumberProcessor::class,
             EnvironmentProcessor::class,
             LogTraceProcessor::class,
         ],

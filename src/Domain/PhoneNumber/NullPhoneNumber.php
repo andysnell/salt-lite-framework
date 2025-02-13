@@ -9,10 +9,6 @@ namespace PhoneBurner\SaltLite\Framework\Domain\PhoneNumber;
  */
 final readonly class NullPhoneNumber implements NullablePhoneNumber, NullablePhoneNumberAware
 {
-    private function __construct()
-    {
-    }
-
     public static function make(): self
     {
         static $cache;

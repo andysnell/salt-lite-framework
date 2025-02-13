@@ -10,5 +10,8 @@ use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
 #[Contract]
 interface ServiceFactory
 {
-    public function __invoke(App $app): object;
+    /**
+     * @param class-string $id
+     */
+    public function __invoke(App $app, string $id): object;
 }

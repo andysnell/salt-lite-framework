@@ -17,7 +17,7 @@ final readonly class BindingServiceFactory implements ServiceFactory
     {
     }
 
-    public function __invoke(ContainerInterface $app): object
+    public function __invoke(ContainerInterface $app, string $id): object
     {
         return $app->get($this->entry_id);
     }

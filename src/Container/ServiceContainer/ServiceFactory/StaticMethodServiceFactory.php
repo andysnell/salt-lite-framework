@@ -18,7 +18,7 @@ final readonly class StaticMethodServiceFactory implements ServiceFactory
     ) {
     }
 
-    public function __invoke(App $app): object
+    public function __invoke(App $app, string $id): object
     {
         return $this->class::{$this->method}($app);
     }

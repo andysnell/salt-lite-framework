@@ -13,7 +13,7 @@ final readonly class CallableServiceFactory implements ServiceFactory
     {
     }
 
-    public function __invoke(App $app): object
+    public function __invoke(App $app, string $id): object
     {
         return ($this->closure)($app);
     }

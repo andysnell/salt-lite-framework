@@ -57,13 +57,20 @@ final class AppServiceProvider implements ServiceProvider
         $app->set(Configuration::class, static fn (App $app): never => throw new NotResolvable(Configuration::class));
 
         // When asked for a concrete instance or an implementation of either of
-        // the two container interfaces, the container should return itself.
+        // the two container interfaces, the container should return itself, unless
+        // specifically asking for the ServiceContainer. These are defined here,
+        // and not in the bind method, since they already exist and lazy loading
+        // would add unnecessary overhead.
         $app->set(ContainerInterface::class, $app);
         $app->set(InvokingContainer::class, $app);
         $app->set(MutableContainer::class, $app);
         $app->set(ServiceContainer::class, $app->services);
         $app->set(ServiceContainerAdapter::class, $app->services);
-        $app->set(LogTrace::class, LogTrace::make(...));
+
+        // These are the few services that should always be eagerly instantiated
+        // since they are used on every request and are less expensive to create
+        // than to wrap with a closure to defer instantiation.
+        $app->set(LogTrace::class, LogTrace::make());
         $app->set(BuildStage::class, $app->environment->stage);
         $app->set(Context::class, $app->environment->context);
         $app->set(Clock::class, new SystemClock());

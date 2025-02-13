@@ -51,7 +51,7 @@ class NamedKeyFactory
      */
     public static function deserialize(string $key): NamedKey
     {
-        $key = \base64_decode($key) ?: throw new \UnexpectedValueException('invalid base64 encoded string');
+        $key = \base64_decode($key, true) ?: throw new \UnexpectedValueException('invalid base64 encoded string');
         $key = \gzuncompress($key) ?: throw new \UnexpectedValueException('invalid zlib string');
         return \igbinary_unserialize($key);
     }

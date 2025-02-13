@@ -44,4 +44,12 @@ enum Encoding
             default => null,
         };
     }
+
+    public function isBase64Variant(): bool
+    {
+        return match ($this) {
+            self::None, self::Hex => false,
+            default => true,
+        };
+    }
 }

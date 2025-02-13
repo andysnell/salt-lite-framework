@@ -190,4 +190,23 @@ abstract readonly class Arr
             return [];
         }
     }
+
+    /**
+     * Maps a callback on each element of an iterable, where the first parameter
+     * of the callback is the value and the second parameter is the key, returning
+     * an array.
+     *
+     * @template T of array-key
+     * @param callable(mixed, T): mixed $callback
+     * @return array<T, mixed>
+     */
+    final public static function map(callable $callback, iterable $iterable): array
+    {
+        $result = [];
+        foreach ($iterable as $key => $value) {
+            $result[$key] = $callback($value, $key);
+        }
+
+        return $result;
+    }
 }
