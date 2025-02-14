@@ -53,9 +53,14 @@ abstract readonly class Psr7
         return $attribute instanceof $class ? $attribute : null;
     }
 
-    final public static function jsonBodyToArray(MessageInterface|StreamInterface $message): array
+    final public static function jsonBodyToArray(MessageInterface|StreamInterface $message): array|null
     {
-        $stream = $message instanceof MessageInterface ? $message->getBody() : $message;
-        return (array)(\json_decode((string)$stream, true, 512, \JSON_THROW_ON_ERROR) ?: []);
+        try {
+            $stream = $message instanceof MessageInterface ? $message->getBody() : $message;
+            $decoded = \json_decode((string)$stream, true, 512, \JSON_THROW_ON_ERROR);
+            return \is_array($decoded) ? $decoded : null;
+        } catch (\JsonException) {
+            return null;
+        }
     }
 }

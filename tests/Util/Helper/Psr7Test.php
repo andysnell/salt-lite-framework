@@ -72,4 +72,25 @@ final class Psr7Test extends TestCase
 
         self::assertSame($array, Psr7::jsonBodyToArray($stream));
     }
+
+    #[Test]
+    public function jsonBodyToArray_happy_sad_path_invalid(): void
+    {
+        $array = [
+            'foo' => 'bar',
+            'baz' => 42,
+        ];
+
+        $stream = Str::stream(\substr(\json_encode($array, \JSON_THROW_ON_ERROR), 0, -1));
+
+        self::assertNull(Psr7::jsonBodyToArray($stream));
+    }
+
+    #[Test]
+    public function jsonBodyToArray_happy_sad_path_not_array(): void
+    {
+        $stream = Str::stream(\substr(\json_encode('false', \JSON_THROW_ON_ERROR), 0, -1));
+
+        self::assertNull(Psr7::jsonBodyToArray($stream));
+    }
 }
