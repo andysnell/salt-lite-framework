@@ -37,6 +37,7 @@ final class EventDispatcherServiceProvider implements ServiceProvider
             LogEventWasDispatched::class,
             static fn(App $app): LogEventWasDispatched => new LogEventWasDispatched(
                 $app->get(LoggerInterface::class),
+                (bool)$app->get('config')->get('event-dispatcher.log_all_events'),
             ),
         );
     }

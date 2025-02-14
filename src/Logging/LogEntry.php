@@ -10,8 +10,8 @@ namespace PhoneBurner\SaltLite\Framework\Logging;
 readonly class LogEntry
 {
     public function __construct(
-        public LogLevel $level,
-        public \Stringable|string $message,
+        public LogLevel $level = LogLevel::Debug,
+        public \Stringable|string $message = '',
         public array $context = [],
     ) {
     }

@@ -109,6 +109,12 @@ rector-dry-run: build
 ci: build
 	@$(app) composer run-script ci
 
+.PHONY: pre-ci
+pre-ci: build
+	@$(app) composer run-script phpcbf || true
+	@$(app) composer run-script rector || true
+	@$(app) composer run-script ci
+
 .PHONY: shell
 shell: build up
 	@$(app) ./bin/salt shell

@@ -36,6 +36,7 @@ use Symfony\Component\Scheduler\EventListener\DispatchSchedulerEventListener;
 
 return [
     'event_dispatcher' => [
+        'log_all_events' => false,
         'listeners' => [
             // Message Bus Events
             SendMessageToTransportsEvent::class => [],
