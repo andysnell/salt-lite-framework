@@ -8,8 +8,10 @@ use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;
 use PhoneBurner\SaltLite\Framework\Http\RequestFactory;
 use PhoneBurner\SaltLite\Framework\Tests\Fixtures\TestRequestHandler;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Psr7;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\MessageInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 final class Psr7Test extends TestCase
@@ -42,5 +44,32 @@ final class Psr7Test extends TestCase
         ]);
 
         self::assertSame($handler, Psr7::attribute($request, RequestHandlerInterface::class));
+    }
+
+    #[Test]
+    public function jsonBodyToArray_happy_path_with_message(): void
+    {
+        $array = [
+            'foo' => 'bar',
+            'baz' => 42,
+        ];
+
+        $message = $this->createMock(MessageInterface::class);
+        $message->method('getBody')->willReturn(Str::stream(\json_encode($array, \JSON_THROW_ON_ERROR)));
+
+        self::assertSame($array, Psr7::jsonBodyToArray($message));
+    }
+
+    #[Test]
+    public function jsonBodyToArray_happy_path_with_stream(): void
+    {
+        $array = [
+            'foo' => 'bar',
+            'baz' => 42,
+        ];
+
+        $stream = Str::stream(\json_encode($array, \JSON_THROW_ON_ERROR));
+
+        self::assertSame($array, Psr7::jsonBodyToArray($stream));
     }
 }

@@ -8,6 +8,7 @@ use PhoneBurner\SaltLite\Framework\Http\Domain\ContentType;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\StreamInterface;
 
 abstract readonly class Psr7
 {
@@ -50,5 +51,11 @@ abstract readonly class Psr7
     {
         $attribute = $request->getAttribute($class);
         return $attribute instanceof $class ? $attribute : null;
+    }
+
+    final public static function jsonBodyToArray(MessageInterface|StreamInterface $message): array
+    {
+        $stream = $message instanceof MessageInterface ? $message->getBody() : $message;
+        return (array)(\json_decode((string)$stream, true, 512, \JSON_THROW_ON_ERROR) ?: []);
     }
 }
