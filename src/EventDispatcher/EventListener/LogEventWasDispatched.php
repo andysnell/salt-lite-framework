@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\EventDispatcher\EventListener;
 
+use PhoneBurner\SaltLite\Framework\EventDispatcher\LoggableEvent;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
 use Psr\Log\LoggerInterface;
 
 class LogEventWasDispatched
@@ -14,14 +16,27 @@ class LogEventWasDispatched
 
     public function __invoke(object $event): void
     {
-        try {
-            $serialized = \serialize($event);
-        } catch (\Throwable) {
-            $serialized = null;
+        if ($event instanceof LoggableEvent) {
+            $this->logger->log($event->getLogLevel(), $event->getLogMessage(), $event->getLogContext());
+            return;
         }
 
-        $this->logger->debug('Event Dispatched: ' . $event::class, [
-            'event' => $serialized,
-        ]);
+        try {
+            $message = Str::shortname($event::class);
+            $message = Str::ucwords($message);
+            if (\str_ends_with($message, ' Event')) {
+                $message = \substr($message, 0, -6);
+            }
+
+            $this->logger->debug($message, [
+                'class' => $event::class,
+                'event' => $event,
+            ]);
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to log event', [
+                'class' => $event::class,
+                'exception' => $e,
+            ]);
+        }
     }
 }

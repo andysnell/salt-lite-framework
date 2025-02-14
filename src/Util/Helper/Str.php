@@ -246,4 +246,9 @@ abstract readonly class Str
     {
         return \implode('.', self::tokenize($string));
     }
+
+    final public static function ucwords(string $string): string
+    {
+        return \implode(' ', \array_map(\ucfirst(...), self::tokenize($string)));
+    }
 }

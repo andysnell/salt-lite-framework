@@ -39,7 +39,7 @@ class LoggerServiceFactory implements ServiceFactory
 
     public function __invoke(App $app, string $id): LoggerInterface
     {
-        return ghost(function (Logger $logger) use ($app): void {
+        return new PsrLoggerAdapter(ghost(function (Logger $logger) use ($app): void {
             $logger->__construct(
                 $app->config->get('logging.channel') ?? Str::kabob($app->config->get('app.name')),
                 \array_values(\array_map(fn(array $params): HandlerInterface => $this->handler(
@@ -55,7 +55,7 @@ class LoggerServiceFactory implements ServiceFactory
             // logger instance, which should also consume any buffered log
             // entries from the default buffer logger.
             $app->services->setLogger($logger);
-        });
+        }));
     }
 
     private function handler(
