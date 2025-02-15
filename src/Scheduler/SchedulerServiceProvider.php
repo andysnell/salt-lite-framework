@@ -19,7 +19,7 @@ use Psr\Clock\ClockInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Cache\Adapter\ProxyAdapter;
-use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
 use Symfony\Component\Messenger\RoutableMessageBus;
 use Symfony\Component\Scheduler\Command\DebugCommand;
 use Symfony\Component\Scheduler\EventListener\DispatchSchedulerEventListener;
@@ -95,7 +95,7 @@ final class SchedulerServiceProvider implements DeferrableServiceProvider
                 return new ConsumeScheduleMessages(
                     $app->get(RoutableMessageBus::class),
                     $receiver_locator,
-                    $app->get(SymfonyEventDispatcher::class),
+                    $app->get(SymfonyEventDispatcherInterface::class),
                     $app->get(LoggerInterface::class),
                     $receiver_locator->keys(),
                 );

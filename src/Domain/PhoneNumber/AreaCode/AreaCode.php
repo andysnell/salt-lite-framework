@@ -8,10 +8,12 @@ use PhoneBurner\SaltLite\Framework\Domain\PhpSerializable;
 use PhoneBurner\SaltLite\Framework\Domain\Time\TimeZone\TimeZoneCollection;
 use PhoneBurner\SaltLite\Framework\Domain\Time\TimeZone\TimeZoneCollectionAware;
 use PhoneBurner\SaltLite\Framework\Domain\Time\TimeZone\TimeZoneFactory;
+use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
 
 /**
  * @implements PhpSerializable<array{npa: int<200,999>}>
  */
+#[Contract]
 final readonly class AreaCode implements
     \Stringable,
     AreaCodeAware,

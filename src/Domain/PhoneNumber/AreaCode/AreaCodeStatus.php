@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\AreaCode;
 
+use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
+
+#[Contract]
 final readonly class AreaCodeStatus
 {
     public const int INVALID = 0b00000000;

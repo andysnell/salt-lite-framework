@@ -10,6 +10,7 @@ use PhoneBurner\SaltLite\Framework\Domain\Email\EmailAddress;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Mailer\Command\MailerTestCommand;
 use Symfony\Component\Mailer\Mailer as SymfonyMailer;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Messenger\MessageHandler;
@@ -32,6 +33,7 @@ final class MailerServiceProvider implements DeferrableServiceProvider
             MailerInterface::class,
             TransportInterface::class,
             MessageHandler::class,
+            MailerTestCommand::class,
         ];
     }
 
@@ -100,6 +102,13 @@ final class MailerServiceProvider implements DeferrableServiceProvider
                     logger: $app->get(LoggerInterface::class),
                 );
             },
+        );
+
+        $app->set(
+            MailerTestCommand::class,
+            static fn(App $app): MailerTestCommand => new MailerTestCommand(
+                $app->get(TransportInterface::class),
+            ),
         );
     }
 }

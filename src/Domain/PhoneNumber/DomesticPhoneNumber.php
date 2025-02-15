@@ -7,10 +7,12 @@ namespace PhoneBurner\SaltLite\Framework\Domain\PhoneNumber;
 use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\AreaCode\AreaCode;
 use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\AreaCode\AreaCodeAware;
 use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\Exception\InvalidPhoneNumber;
+use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
 
 /**
  * Value object representing a *valid* 10-digit NANP phone number.
  */
+#[Contract]
 final readonly class DomesticPhoneNumber implements
     PhoneNumber,
     AreaCodeAware,

@@ -17,7 +17,6 @@ final class AppTest extends TestCase
     {
         $app = App::bootstrap(Context::Test);
         self::assertTrue(App::booted());
-        self::assertSame($app, App::bootstrap(Context::Test));
         self::assertSame($app, App::instance());
 
         self::assertSame('Salt-Lite Framework', $app->config->get('app.name'));

@@ -8,6 +8,7 @@ use Doctrine\DBAL\Connection;
 use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
+use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks\AmqpTransportHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks\MySqlHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks\PhpRuntimeHealthCheckService;
@@ -18,7 +19,6 @@ use PhoneBurner\SaltLite\Framework\HealthCheck\Service\AppHealthCheckBuilder;
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\Log\LoggerInterface;
-use Redis;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpTransport;
 
 use function PhoneBurner\SaltLite\Framework\ghost;
@@ -103,7 +103,7 @@ final class HealthCheckServiceProvider implements DeferrableServiceProvider
         $app->set(
             RedisHealthCheckService::class,
             ghost(static fn(RedisHealthCheckService $ghost): null => $ghost->__construct(
-                $app->get(Redis::class),
+                $app->get(RedisManager::class),
                 $app->get(LogTrace::class),
                 $app->get(LoggerInterface::class),
             )),

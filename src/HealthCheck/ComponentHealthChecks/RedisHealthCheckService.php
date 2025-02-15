@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks;
 
 use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
+use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use PhoneBurner\SaltLite\Framework\Domain\Time\StopWatch;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\ComponentHealthCheck;
@@ -19,7 +20,7 @@ class RedisHealthCheckService implements ComponentHealthCheckService
     public const string COMPONENT_NAME = 'redis';
 
     public function __construct(
-        private readonly \Redis $redis,
+        private readonly RedisManager $redis_manager,
         private readonly LogTrace $log_trace,
         private readonly LoggerInterface $logger,
     ) {
@@ -30,8 +31,9 @@ class RedisHealthCheckService implements ComponentHealthCheckService
     {
         $now = $clock->now();
         try {
+            $redis = $this->redis_manager->connect();
             $timer = StopWatch::start();
-            $connections = \count($this->redis->client('list'));
+            $connections = \count($redis->client('list'));
             $elapsed = $timer->elapsed();
 
             return [

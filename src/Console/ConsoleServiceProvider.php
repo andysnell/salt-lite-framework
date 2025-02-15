@@ -4,15 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Console;
 
-use Doctrine\DBAL\Connection;
-use Doctrine\Migrations\Configuration\Connection\ExistingConnection;
-use Doctrine\Migrations\Configuration\Migration\ConfigurationArray;
-use Doctrine\Migrations\DependencyFactory;
-use Doctrine\Migrations\Tools\Console\ConsoleRunner as MigrationConsoleRunner;
-use Doctrine\ORM\Tools\Console\ConsoleRunner as OrmConsoleRunner;
-use Doctrine\ORM\Tools\Console\EntityManagerProvider;
+use Crell\AttributeUtils\ClassAnalyzer;
 use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\App\Context;
 use PhoneBurner\SaltLite\Framework\Console\Command\InteractiveSaltShell;
 use PhoneBurner\SaltLite\Framework\Console\EventListener\ConsoleErrorListener;
 use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
@@ -56,7 +49,7 @@ final class ConsoleServiceProvider implements DeferrableServiceProvider
             CliKernel::class,
             CommandLoaderInterface::class,
             Application::class,
-            ConsoleApplicationFactory::class,
+            ConsoleApplication::class,
             InteractiveSaltShell::class,
             ConsoleErrorListener::class,
         ];
@@ -64,7 +57,9 @@ final class ConsoleServiceProvider implements DeferrableServiceProvider
 
     public static function bind(): array
     {
-        return [];
+        return [
+            Application::class => ConsoleApplication::class,
+        ];
     }
 
     #[\Override]
@@ -72,12 +67,12 @@ final class ConsoleServiceProvider implements DeferrableServiceProvider
     {
         $app->set(
             CliKernel::class,
-            static fn(App $app): CliKernel => new CliKernel($app->get(Application::class)),
+            static fn(App $app): CliKernel => new CliKernel($app->get(ConsoleApplication::class)),
         );
 
         $app->set(
             CommandLoaderInterface::class,
-            static fn(App $app): CommandLoader => new CommandLoader($app->services, [
+            static fn(App $app): CommandLoader => new CommandLoader($app->services, $app->get(ClassAnalyzer::class), [
                 ...self::FRAMEWORK_COMMANDS,
                 ...($app->config->get('console.commands') ?? []),
             ]),
@@ -88,27 +83,7 @@ final class ConsoleServiceProvider implements DeferrableServiceProvider
             static fn(App $app): ConsoleErrorListener => new ConsoleErrorListener($app->get(LoggerInterface::class)),
         );
 
-        $app->set(Application::class, static function (App $app): Application {
-            $configuration = $app->config->get('database.doctrine.connections.default.migrations') ?? [];
-
-            $dependency_factory = DependencyFactory::fromConnection(
-                new ConfigurationArray($configuration),
-                new ExistingConnection($app->get(Connection::class)),
-                $app->get(LoggerInterface::class),
-            );
-
-            $application = $app->get(ConsoleApplicationFactory::class)->make();
-            MigrationConsoleRunner::addCommands($application, $dependency_factory);
-            OrmConsoleRunner::addCommands($application, $app->get(EntityManagerProvider::class));
-
-            $application->setCommandLoader($app->get(CommandLoaderInterface::class));
-            $application->setAutoExit($app->environment->context !== Context::Http);
-            $application->setCatchExceptions($app->environment->context !== Context::Http);
-
-            return $application;
-        });
-
-        $app->set(ConsoleApplicationFactory::class, new NewInstanceServiceFactory(ConsoleApplicationFactory::class));
+        $app->set(ConsoleApplication::class, new ConsoleApplicationServiceFactory());
 
         $app->set(InteractiveSaltShell::class, new NewInstanceServiceFactory(InteractiveSaltShell::class, [$app]));
     }

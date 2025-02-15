@@ -6,6 +6,7 @@ namespace PhoneBurner\SaltLite\Framework\Tests\HealthCheck\ComponentHealthChecks
 
 use Carbon\CarbonImmutable;
 use PhoneBurner\SaltLite\Framework\App\Clock\StaticClock;
+use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks\RedisHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\ComponentHealthCheck;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthStatus;
@@ -32,7 +33,12 @@ final class RedisHealthCheckServiceTest extends TestCase
             ->with('list')
             ->willReturn(['client1', 'client2', 'client3']);
 
-        $sut = new RedisHealthCheckService($redis, $log_trace, $logger);
+        $redis_manager = $this->createMock(RedisManager::class);
+        $redis_manager->expects($this->once())
+            ->method('connect')
+            ->willReturn($redis);
+
+        $sut = new RedisHealthCheckService($redis_manager, $log_trace, $logger);
 
         $response = $sut($clock);
 
@@ -82,7 +88,12 @@ final class RedisHealthCheckServiceTest extends TestCase
             ->with('list')
             ->willThrowException($exception);
 
-        $sut = new RedisHealthCheckService($redis, $log_trace, $logger);
+        $redis_manager = $this->createMock(RedisManager::class);
+        $redis_manager->expects($this->once())
+            ->method('connect')
+            ->willReturn($redis);
+
+        $sut = new RedisHealthCheckService($redis_manager, $log_trace, $logger);
 
         $response = $sut($clock);
 

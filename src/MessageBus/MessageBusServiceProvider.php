@@ -23,7 +23,7 @@ use Psr\Cache\CacheItemPoolInterface;
 use Psr\Clock\ClockInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
 use Symfony\Component\Messenger\Command\ConsumeMessagesCommand;
 use Symfony\Component\Messenger\Command\DebugCommand;
 use Symfony\Component\Messenger\Command\StatsCommand;
@@ -180,13 +180,13 @@ final class MessageBusServiceProvider implements ServiceProvider
 
         $app->set(
             ConsumeMessagesCommand::class,
-            static fn(App $app): ConsumeMessagesCommand => new ConsumeMessagesCommand(
+            static fn(App $app): ConsumeMessagesCommand => ghost(fn(ConsumeMessagesCommand $ghost): null => $ghost->__construct(
                 $app->get(RoutableMessageBus::class),
                 $app->get(ReceiverContainer::class),
-                $app->get(SymfonyEventDispatcher::class),
+                $app->get(SymfonyEventDispatcherInterface::class),
                 $app->get(LoggerInterface::class),
                 $app->get(ReceiverContainer::class)->keys(),
-            ),
+            )),
         );
 
         $app->set(

@@ -39,6 +39,13 @@ the message bus will throw an exception if a message is dispatched without a han
 - The Message Bus has the intention of making something specific happen, without needing
 to know all the details of *how* it happens in the current context.
 
+- The mapping of events to event listeners in the Event Dispatcher is exact by
+  the event class name, and does not take inheritance into account.
+- The routing of messages to message handlers in the Message Bus is more flexible,
+  and can be configured to handle messages based on the message class and its
+  parent classes/interfaces.
+
 The two components are used together: for example, when a new SlackNotificationMessage
 is dispatched on the message bus, events will be dispatched on the event dispatcher
 when the message is received, processed, and complete/failed.
+

@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Logging;
 
 use Monolog\Level as MonologLogLevel;
+use PhoneBurner\SaltLite\Framework\Util\Enum\WithStringBackedInstanceStaticMethod;
 use Psr\Log\LogLevel as Psr3LogLevel;
 
 enum LogLevel: string
 {
+    use WithStringBackedInstanceStaticMethod;
+
     case Emergency = Psr3LogLevel::EMERGENCY;
     case Alert = Psr3LogLevel::ALERT;
     case Critical = Psr3LogLevel::CRITICAL;

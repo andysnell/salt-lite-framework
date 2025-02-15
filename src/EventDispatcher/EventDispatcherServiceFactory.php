@@ -5,25 +5,57 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\EventDispatcher;
 
 use PhoneBurner\SaltLite\Framework\App\App;
+use PhoneBurner\SaltLite\Framework\Console\EventListener\ConsoleErrorListener;
 use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory;
 use PhoneBurner\SaltLite\Framework\EventDispatcher\EventListener\LazyListener;
+use PhoneBurner\SaltLite\Framework\Logging\LogLevel;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Messenger\EventListener\AddErrorDetailsStampListener;
+use Symfony\Component\Messenger\EventListener\DispatchPcntlSignalListener;
+use Symfony\Component\Messenger\EventListener\SendFailedMessageForRetryListener;
+use Symfony\Component\Messenger\EventListener\SendFailedMessageToFailureTransportListener;
+use Symfony\Component\Messenger\EventListener\StopWorkerOnCustomStopExceptionListener;
+use Symfony\Component\Messenger\EventListener\StopWorkerOnRestartSignalListener;
+use Symfony\Component\Scheduler\EventListener\DispatchSchedulerEventListener;
 
 use function PhoneBurner\SaltLite\Framework\ghost;
 
 class EventDispatcherServiceFactory implements ServiceFactory
 {
+    private const array FRAMEWORK_SUBSCRIBERS = [
+            // Console Subscribers
+            ConsoleErrorListener::class,
+
+            // Messenger Subscribers
+            AddErrorDetailsStampListener::class,
+            DispatchPcntlSignalListener::class,
+            SendFailedMessageForRetryListener::class,
+            SendFailedMessageToFailureTransportListener::class,
+            StopWorkerOnCustomStopExceptionListener::class,
+            StopWorkerOnRestartSignalListener::class,
+
+            // Scheduler Subscribers
+            DispatchSchedulerEventListener::class,
+    ];
+
     private array $cache = [];
 
-    public function __invoke(App $app, string $id): EventDispatcher
+    public function __invoke(App $app, string $id): SymfonyEventDispatcherAdapter
     {
         try {
-            return ghost(function (EventDispatcher $ghost) use ($app): void {
+            $event_dispatcher = ghost(function (EventDispatcher $ghost) use ($app): void {
                 $ghost->__construct();
 
-                foreach ($app->config->get('event_dispatcher.subscribers') ?: [] as $subscriber) {
+                $subscribers = \array_unique([
+                    ...self::FRAMEWORK_SUBSCRIBERS,
+                    ...$app->config->get('event_dispatcher.subscribers') ?: [],
+                ]);
+
+                foreach ($subscribers as $subscriber) {
                     \assert(Type::isClassStringOf(EventSubscriberInterface::class, $subscriber));
                     foreach ($subscriber::getSubscribedEvents() as $event => $methods) {
                         $this->registerSubscriberListeners($app, $ghost, $event, $subscriber, $methods);
@@ -36,6 +68,13 @@ class EventDispatcherServiceFactory implements ServiceFactory
                     }
                 }
             });
+
+            return new SymfonyEventDispatcherAdapter(
+                $event_dispatcher,
+                $app->get(LoggerInterface::class),
+                LogLevel::tryInstance($app->config->get('event_dispatcher.event_dispatch_log_level')),
+                LogLevel::tryInstance($app->config->get('event_dispatcher.event_failure_log_level')),
+            );
         } finally {
             $this->cache = [];
         }
@@ -78,7 +117,7 @@ class EventDispatcherServiceFactory implements ServiceFactory
 
     private function registerSubscriberListeners(
         App $app,
-        EventDispatcher $dispatcher,
+        EventDispatcherInterface $dispatcher,
         string $event,
         string $subscriber,
         array|string $methods,

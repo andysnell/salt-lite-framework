@@ -5,22 +5,17 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Console;
 
 use PhoneBurner\SaltLite\Framework\App\Kernel;
-use Symfony\Component\Console\Application;
 
 class CliKernel implements Kernel
 {
-    private const string APP_NAME = "Salt-Lite Command Line Console";
-
-    public function __construct(private readonly Application $application)
+    public function __construct(private readonly ConsoleApplication $application)
     {
     }
 
     #[\Override]
-    public function run(): void
+    public function run(): never
     {
-        $this->application->setName(self::APP_NAME);
-        $this->application->setAutoExit(true);
-        $this->application->setCatchExceptions(true);
-        $this->application->run();
+        /** @phpstan-ignore disallowed.exit */
+        exit($this->application->run());
     }
 }

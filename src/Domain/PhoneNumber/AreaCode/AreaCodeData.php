@@ -7,7 +7,9 @@ namespace PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\AreaCode;
 use PhoneBurner\SaltLite\Framework\Domain\I18n\RegionCode;
 use PhoneBurner\SaltLite\Framework\Domain\I18n\SubdivisionCode;
 use PhoneBurner\SaltLite\Framework\Domain\Time\TimeZone\Tz;
+use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 
+#[Internal]
 class AreaCodeData
 {
     public const array TIME_ZONE_MAP = [

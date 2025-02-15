@@ -13,7 +13,7 @@ use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 #[AsCommand(self::NAME, self::DESCRIPTION)]
 class DebugEventListeners extends Command
@@ -22,7 +22,7 @@ class DebugEventListeners extends Command
 
     public const string DESCRIPTION = 'List the event listeners defined in "includes/events.php"';
 
-    public function __construct(private readonly EventDispatcher $event_dispatcher)
+    public function __construct(private readonly EventDispatcherInterface $event_dispatcher)
     {
         parent::__construct(self::NAME);
         $this->setAliases(['event-dispatcher:list']);

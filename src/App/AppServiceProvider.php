@@ -95,17 +95,17 @@ final class AppServiceProvider implements ServiceProvider
 
         $app->set(
             AttributeAnalyzer::class,
-            ghost(static function (MemoryCacheAnalyzer $ghost) use ($app): void {
+            static fn(App $app): AttributeAnalyzer => new AttributeAnalyzer(ghost(static function (MemoryCacheAnalyzer $ghost) use ($app): void {
                 $ghost->__construct(
                     new Psr6CacheAnalyzer(
                         new Analyzer(),
                         $app->services->get(CacheItemPoolFactory::class)->make(match ($app->environment->stage) {
-                            BuildStage::Development => CacheDriver::Memory,
+                            BuildStage::Development => CacheDriver::File,
                             default => CacheDriver::File,
                         }),
                     ),
                 );
-            }),
+            })),
         );
     }
 }

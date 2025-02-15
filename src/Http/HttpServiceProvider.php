@@ -21,6 +21,7 @@ use PhoneBurner\SaltLite\Framework\Http\RequestHandler\CspViolationReportRequest
 use PhoneBurner\SaltLite\Framework\Http\RequestHandler\ErrorRequestHandler;
 use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\TextResponseTransformerStrategy;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Command\CacheRoutes;
+use PhoneBurner\SaltLite\Framework\Http\Routing\Command\ListRoutes;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Definition\DefinitionList;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Definition\LazyConfigDefinitionList;
 use PhoneBurner\SaltLite\Framework\Http\Routing\FastRoute\FastRouteDispatcherFactory;
@@ -39,6 +40,7 @@ use PhoneBurner\SaltLite\Framework\Util\Crypto\AppKey;
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Symmetric\SharedKey;
 use PhoneBurner\SaltLite\Framework\Util\Crypto\Symmetric\Symmetric;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -69,6 +71,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             FastRouteDispatcherFactory::class,
             FastRouteResultFactory::class,
             DefinitionList::class,
+            ListRoutes::class,
             CacheRoutes::class,
             CookieEncrypter::class,
             CookieJar::class,
@@ -97,8 +100,8 @@ final class HttpServiceProvider implements DeferrableServiceProvider
                 $app->get(RequestFactory::class),
                 $app->get(RequestHandlerInterface::class),
                 $app->get(EmitterInterface::class),
-                $app->get(LoggerInterface::class),
                 $app->environment->stage,
+                $app->get(EventDispatcherInterface::class),
             ),
         );
 
@@ -199,6 +202,11 @@ final class HttpServiceProvider implements DeferrableServiceProvider
                 static fn(string $provider): RouteProvider => Type::of(RouteProvider::class, new $provider()),
                 $app->config->get('http.routing.route_providers') ?? [],
             )),
+        );
+
+        $app->set(
+            ListRoutes::class,
+            static fn(App $app): ListRoutes => new ListRoutes($app->get(DefinitionList::class)),
         );
 
         $app->set(

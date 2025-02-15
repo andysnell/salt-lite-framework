@@ -7,6 +7,7 @@ namespace PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\AreaCode;
 use PhoneBurner\SaltLite\Framework\Domain\I18n\RegionCode;
 use PhoneBurner\SaltLite\Framework\Domain\I18n\RegionName;
 use PhoneBurner\SaltLite\Framework\Domain\I18n\SubdivisionCode;
+use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
 use UnexpectedValueException;
 
 /**
@@ -14,6 +15,7 @@ use UnexpectedValueException;
  * Also uses "NANP" to indicate an area code that is associated with all the
  * NANP regions, for example, a toll-free, or unassigned number.
  */
+#[Contract]
 final readonly class AreaCodeLocation
 {
     public const string NANP = 'NANP';

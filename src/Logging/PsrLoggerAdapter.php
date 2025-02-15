@@ -21,4 +21,13 @@ class PsrLoggerAdapter extends AbstractLogger
     {
         $this->logger->log($level instanceof LogLevel ? $level->value : $level, $message, $context);
     }
+
+    public function add(LogEntry|Loggable $entry): void
+    {
+        if ($entry instanceof Loggable) {
+            $entry = $entry->getLogEntry();
+        }
+
+        $this->logger->log($entry->level, $entry->message, $entry->context);
+    }
 }

@@ -15,7 +15,6 @@ class LogWorkerMessageFailedEvent
 
     public function __invoke(WorkerMessageFailedEvent $event): void
     {
-
         $this->logger->critical('Message Handling Failure: ' . $event->getThrowable(), [
             'message' => $event->getEnvelope()->getMessage()::class,
             'exception' => $event->getThrowable(),

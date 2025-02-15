@@ -8,10 +8,12 @@ use Countable;
 use Generator;
 use IteratorAggregate;
 use PhoneBurner\SaltLite\Framework\Domain\Arrayable;
+use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
 
 /**
  * @implements IteratorAggregate<AreaCode>
  */
+#[Contract]
 final readonly class AreaCodeCollection implements
     Arrayable,
     IteratorAggregate,

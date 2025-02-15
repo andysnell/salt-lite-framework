@@ -6,11 +6,14 @@ namespace PhoneBurner\SaltLite\Framework\App;
 
 use PhoneBurner\SaltLite\Framework\App\Configuration\Configuration;
 use PhoneBurner\SaltLite\Framework\App\Configuration\ConfigurationFactory;
+use PhoneBurner\SaltLite\Framework\App\Event\ApplicationBootstrap;
+use PhoneBurner\SaltLite\Framework\App\Event\ApplicationTeardown;
 use PhoneBurner\SaltLite\Framework\Container\InvokingContainer;
 use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
 use PhoneBurner\SaltLite\Framework\Container\ParameterOverride\OverrideCollection;
 use PhoneBurner\SaltLite\Framework\Container\ServiceContainer;
 use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceContainerFactory;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
 use const PhoneBurner\SaltLite\Framework\APP_ROOT;
 
@@ -34,11 +37,6 @@ class App implements MutableContainer, InvokingContainer
 
     public readonly Configuration $config;
 
-    public static function bootstrap(Context $context): self
-    {
-        return self::$instance ??= new self($context);
-    }
-
     public static function booted(): bool
     {
         return isset(self::$instance);
@@ -49,12 +47,46 @@ class App implements MutableContainer, InvokingContainer
         return self::$instance ?? throw new \RuntimeException('Application has not been bootstrapped.');
     }
 
+    public static function bootstrap(Context $context): self
+    {
+        self::booted() && throw new \RuntimeException('Application has already been bootstrapped.');
+        self::$instance = new self($context);
+        return self::$instance->setup();
+    }
+
+    /**
+     * Handle any setup steps that require the application to be fully initialized,
+     * e.g. anything that requires the configuration or services to be available,
+     * or the path() or env() helper functions.
+     */
+    private function setup(): self
+    {
+        $this->services->get(EventDispatcherInterface::class)->dispatch(new ApplicationBootstrap($this));
+        return $this;
+    }
+
     public static function teardown(): null
     {
+        self::$instance?->cleanup();
         return self::$instance = null;
     }
 
     /**
+     * This method is called when the application is being torn down, providing
+     * a hook for any cleanup that needs to be done while we are guaranteed the
+     * application is still in a valid state.
+     */
+    private function cleanup(): void
+    {
+        $this->services->get(EventDispatcherInterface::class)->dispatch(new ApplicationTeardown($this));
+    }
+
+    /**
+     * Wrap a callback in the context of an application lifecycle instance. Note
+     * that if exit() is called within the callback, the application will still be
+     * torn down properly, because App::teardown(...) is registered as a shutdown
+     * function.
+     *
      * @template T
      * @param callable(App): T $callback
      * @return T
@@ -69,6 +101,14 @@ class App implements MutableContainer, InvokingContainer
         }
     }
 
+    /**
+     * Note: in order to avoid chicken-and-egg race conditions, especially as both
+     * the configuration and container are dependent on the instance of the App,
+     * both factories must return lazy ghost instances, even though the instances
+     * will be instantiated almost immediately.
+     *
+     * Any additional
+     */
     private function __construct(public readonly Context $context)
     {
         $this->environment = new Environment($context, APP_ROOT, $_SERVER, $_ENV);

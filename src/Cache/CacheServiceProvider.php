@@ -7,10 +7,12 @@ namespace PhoneBurner\SaltLite\Framework\Cache;
 use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\App\BuildStage;
 use PhoneBurner\SaltLite\Framework\App\Context;
+use PhoneBurner\SaltLite\Framework\App\Exception\InvalidConfiguration;
 use PhoneBurner\SaltLite\Framework\Cache\Lock\LockFactory;
 use PhoneBurner\SaltLite\Framework\Cache\Lock\NamedKeyFactory;
 use PhoneBurner\SaltLite\Framework\Cache\Lock\SymfonyLockFactoryAdapter;
 use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
+use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory\NewInstanceServiceFactory;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\Cache\CacheItemPoolInterface;
@@ -93,19 +95,25 @@ final class CacheServiceProvider implements DeferrableServiceProvider
             )),
         );
 
-        $app->set(
-            NamedKeyFactory::class,
-            static fn(App $app): NamedKeyFactory => new NamedKeyFactory(),
-        );
+        $app->set(NamedKeyFactory::class, new NewInstanceServiceFactory());
 
         $app->set(
             LockFactory::class,
             ghost(static function (SymfonyLockFactoryAdapter $ghost) use ($app): void {
+                $store_driver = $app->config->get('cache.lock.store_driver');
+                $store_driver = match (true) {
+                    $app->environment->context === Context::Test, $store_driver === InMemoryStore::class => InMemoryStore::class,
+                    $app->environment->stage === BuildStage::Production, $store_driver === RedisStore::class => RedisStore::class,
+                    default => throw new InvalidConfiguration('Invalid Cache Lock Store Driver'),
+                };
+
                 $ghost->__construct(
                     $app->get(NamedKeyFactory::class),
-                    new SymfonyLockFactory(match ($app->environment->context) {
-                        Context::Test => new InMemoryStore(),
-                        default => new RedisStore($app->get(\Redis::class)),
+                    new SymfonyLockFactory(match ($store_driver) {
+                        InMemoryStore::class => new InMemoryStore(),
+                        RedisStore::class => ghost(static fn(RedisStore $ghost): null => $ghost->__construct(
+                            $app->get(RedisManager::class)->connect(),
+                        )),
                     }),
                 );
 
