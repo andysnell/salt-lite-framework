@@ -7,6 +7,8 @@ namespace PhoneBurner\SaltLite\Framework\Container\ObjectContainer;
 use PhoneBurner\SaltLite\Framework\Container\Exception\NotFound;
 use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\HasInvokingContainerBehavior;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
+use PhoneBurner\SaltLite\Framework\Util\Exception\InvalidStringableOffset;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -59,7 +61,7 @@ final readonly class ImmutableObjectContainer implements ObjectContainer
 
     public function offsetExists(mixed $offset): bool
     {
-        return \is_string($offset) && $this->has($offset);
+        return Str::stringable($offset) && $this->has((string)$offset);
     }
 
     /**
@@ -67,7 +69,7 @@ final readonly class ImmutableObjectContainer implements ObjectContainer
      */
     public function offsetGet(mixed $offset): object
     {
-        \is_string($offset) || throw new \InvalidArgumentException('Offset must be a string');
+        Str::stringable($offset) || throw new InvalidStringableOffset($offset);
         return $this->entries[$offset] ?? throw new NotFound();
     }
 

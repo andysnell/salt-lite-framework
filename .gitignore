@@ -4,7 +4,6 @@
 /vendor/
 /html/phpunit
 /storage
-/public
 
 .env
 phpunit.xml

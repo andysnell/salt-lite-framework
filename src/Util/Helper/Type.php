@@ -47,4 +47,9 @@ abstract readonly class Type
     {
         return \is_string($value) && \is_a($value, $type, true);
     }
+
+    final public static function isStreamResource(mixed $value): bool
+    {
+        return \is_resource($value) && \get_resource_type($value) === 'stream';
+    }
 }

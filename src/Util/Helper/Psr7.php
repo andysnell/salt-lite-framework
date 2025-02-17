@@ -47,7 +47,7 @@ abstract readonly class Psr7
      * @param class-string<T> $class
      * @return T|null
      */
-    final public static function attribute(ServerRequestInterface $request, string $class): object|null
+    final public static function attribute(string $class, ServerRequestInterface $request): object|null
     {
         $attribute = $request->getAttribute($class);
         return $attribute instanceof $class ? $attribute : null;

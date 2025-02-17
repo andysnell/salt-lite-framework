@@ -36,7 +36,7 @@ class PropertyFixture
     private float|null $nullable_float_property = null; // @phpstan-ignore-line
     private bool|null $nullable_bool_property = null; // @phpstan-ignore-line
     private array|null $nullable_array_property = null; // @phpstan-ignore-line
-    // phpcs:disable SlevomatCodingStandard.TypeHints.UnionTypeHintFormat
+    // phpcs:disable SlevomatCodingStandard.TypeHints.DNFTypeHintFormat
     private ?iterable $nullable_iterable_property = null; // @phpstan-ignore-line
     // phpcs:enable
     private Iterator|null $nullable_iterator_property = null; // @phpstan-ignore-line

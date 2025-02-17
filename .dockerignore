@@ -2,6 +2,10 @@
 .idea
 .github
 build
+caddy
+public
+resources
+storage
 vendor
 docker-compose.override.yml
 phpunit.xml

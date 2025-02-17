@@ -9,16 +9,19 @@ use Laminas\HttpHandlerRunner\Emitter\SapiStreamEmitter;
 use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
+use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory\NewInstanceServiceFactory;
 use PhoneBurner\SaltLite\Framework\Http\Cookie\CookieEncrypter;
 use PhoneBurner\SaltLite\Framework\Http\Cookie\CookieJar;
-use PhoneBurner\SaltLite\Framework\Http\Cookie\Middleware\AddCookiesToResponse;
-use PhoneBurner\SaltLite\Framework\Http\Cookie\Middleware\DecryptCookiesFromRequest;
+use PhoneBurner\SaltLite\Framework\Http\Cookie\Middleware\ManageCookies;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\CatchExceptionalResponses;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\LazyMiddlewareRequestHandlerFactory;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\MiddlewareRequestHandlerFactory;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\TransformHttpExceptionResponses;
 use PhoneBurner\SaltLite\Framework\Http\RequestHandler\CspViolationReportRequestHandler;
 use PhoneBurner\SaltLite\Framework\Http\RequestHandler\ErrorRequestHandler;
+use PhoneBurner\SaltLite\Framework\Http\RequestHandler\LogoutRequestHandler;
+use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\HtmlResponseTransformerStrategy;
+use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\JsonResponseTransformerStrategy;
 use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\TextResponseTransformerStrategy;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Command\CacheRoutes;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Command\ListRoutes;
@@ -34,11 +37,12 @@ use PhoneBurner\SaltLite\Framework\Http\Routing\RequestHandler\NotFoundRequestHa
 use PhoneBurner\SaltLite\Framework\Http\Routing\RequestHandler\StaticFileRequestHandler;
 use PhoneBurner\SaltLite\Framework\Http\Routing\RouteProvider;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Router;
+use PhoneBurner\SaltLite\Framework\Http\Session\SessionHandler;
+use PhoneBurner\SaltLite\Framework\Http\Session\SessionHandlerServiceFactory;
+use PhoneBurner\SaltLite\Framework\Http\Session\SessionManager;
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
-use PhoneBurner\SaltLite\Framework\Util\Crypto\AppKey;
-use PhoneBurner\SaltLite\Framework\Util\Crypto\Symmetric\SharedKey;
-use PhoneBurner\SaltLite\Framework\Util\Crypto\Symmetric\Symmetric;
+use PhoneBurner\SaltLite\Framework\Util\Cryptography\Natrium;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -75,12 +79,17 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             CacheRoutes::class,
             CookieEncrypter::class,
             CookieJar::class,
-            DecryptCookiesFromRequest::class,
-            AddCookiesToResponse::class,
+            ManageCookies::class,
             AttachRouteToRequest::class,
             DispatchRouteMiddleware::class,
             DispatchRouteRequestHandler::class,
             StaticFileRequestHandler::class,
+            JsonResponseTransformerStrategy::class,
+            HtmlResponseTransformerStrategy::class,
+            TextResponseTransformerStrategy::class,
+            SessionHandler::class,
+            SessionManager::class,
+            LogoutRequestHandler::class,
         ];
     }
 
@@ -124,6 +133,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             MiddlewareRequestHandlerFactory::class,
             static fn(App $app): MiddlewareRequestHandlerFactory => new LazyMiddlewareRequestHandlerFactory(
                 $app->services,
+                $app->get(EventDispatcherInterface::class),
             ),
         );
 
@@ -144,6 +154,12 @@ final class HttpServiceProvider implements DeferrableServiceProvider
                 $app->config->get('http.exceptional_responses.default_transformer') ?: TextResponseTransformerStrategy::class,
             ),
         );
+
+        $app->set(JsonResponseTransformerStrategy::class, new NewInstanceServiceFactory());
+
+        $app->set(HtmlResponseTransformerStrategy::class, new NewInstanceServiceFactory());
+
+        $app->set(TextResponseTransformerStrategy::class, new NewInstanceServiceFactory());
 
         $app->set(
             CatchExceptionalResponses::class,
@@ -168,10 +184,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             ),
         );
 
-        $app->set(
-            ErrorRequestHandler::class,
-            static fn(App $app): ErrorRequestHandler => new ErrorRequestHandler(),
-        );
+        $app->set(ErrorRequestHandler::class, new NewInstanceServiceFactory());
 
         $app->set(
             FastRouter::class,
@@ -191,10 +204,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             ),
         );
 
-        $app->set(
-            FastRouteResultFactory::class,
-            static fn(App $app): FastRouteResultFactory => new FastRouteResultFactory(),
-        );
+        $app->set(FastRouteResultFactory::class, new NewInstanceServiceFactory());
 
         $app->set(
             DefinitionList::class,
@@ -220,30 +230,18 @@ final class HttpServiceProvider implements DeferrableServiceProvider
         $app->set(
             CookieEncrypter::class,
             ghost(static fn(CookieEncrypter $ghost): null => $ghost->__construct(
-                new Symmetric(),
-                SharedKey::derive($app->get(AppKey::class), 'cookie'),
+                $app->get(Natrium::class),
             )),
         );
 
+        $app->set(CookieJar::class, new NewInstanceServiceFactory());
+
         $app->set(
-            CookieJar::class,
-            ghost(static fn(CookieJar $ghost): null => $ghost->__construct(
+            ManageCookies::class,
+            static fn(App $app): ManageCookies => new ManageCookies(
+                $app->get(CookieJar::class),
                 $app->get(CookieEncrypter::class),
                 $app->get(Clock::class),
-            )),
-        );
-
-        $app->set(
-            DecryptCookiesFromRequest::class,
-            static fn(App $app): DecryptCookiesFromRequest => new DecryptCookiesFromRequest(
-                $app->get(CookieJar::class),
-            ),
-        );
-
-        $app->set(
-            AddCookiesToResponse::class,
-            static fn(App $app): AddCookiesToResponse => new AddCookiesToResponse(
-                $app->get(CookieJar::class),
             ),
         );
 
@@ -269,8 +267,26 @@ final class HttpServiceProvider implements DeferrableServiceProvider
         );
 
         $app->set(
-            StaticFileRequestHandler::class,
-            static fn(App $app): StaticFileRequestHandler => new StaticFileRequestHandler(),
+            LogoutRequestHandler::class,
+            static fn(App $app): LogoutRequestHandler => new LogoutRequestHandler(
+                $app->get(SessionManager::class),
+                $app->get(EventDispatcherInterface::class),
+                $app->config->get('http.logout_redirect_url') ?? LogoutRequestHandler::DEFAULT_REDIRECT,
+            ),
+        );
+
+        $app->set(StaticFileRequestHandler::class, new NewInstanceServiceFactory());
+
+        $app->set(SessionHandler::class, new SessionHandlerServiceFactory());
+
+        $app->set(
+            SessionManager::class,
+            static fn(App $app): SessionManager => new SessionManager(
+                $app->get(SessionHandler::class),
+                $app->config->get('http.session'),
+                $app->get(Natrium::class),
+                $app->get(LoggerInterface::class),
+            ),
         );
     }
 }

@@ -6,6 +6,8 @@ namespace PhoneBurner\SaltLite\Framework\Http;
 
 use Laminas\HttpHandlerRunner\Emitter\EmitterInterface;
 use PhoneBurner\SaltLite\Framework\App\BuildStage;
+use PhoneBurner\SaltLite\Framework\App\Event\KernelExecutionComplete;
+use PhoneBurner\SaltLite\Framework\App\Event\KernelExecutionStart;
 use PhoneBurner\SaltLite\Framework\App\Kernel;
 use PhoneBurner\SaltLite\Framework\Http\Event\EmittingHttpResponseComplete;
 use PhoneBurner\SaltLite\Framework\Http\Event\EmittingHttpResponseFailed;
@@ -32,6 +34,7 @@ class HttpKernel implements Kernel
     #[\Override]
     public function run(ServerRequestInterface|null $request = null): void
     {
+        $this->event_dispatcher->dispatch(new KernelExecutionStart($this));
         try {
             $request ??= $this->request_factory->fromGlobals();
             $this->event_dispatcher->dispatch(new HandlingHttpRequestStart($request));
@@ -51,12 +54,13 @@ class HttpKernel implements Kernel
             if ($this->stage === BuildStage::Development) {
                 throw $e;
             }
-
             // This is a very bad place to end up; some kind of failure happened
             // while trying to emit the response. We can't send a response back,
             // or even reliably echo out an error message. If we don't suppress
             // the exception here, it's possible we'll leak sensitive information.
             // Getting the "white screen of death" is the best case scenario here.
+        } finally {
+            $this->event_dispatcher->dispatch(new KernelExecutionComplete($this));
         }
     }
 }

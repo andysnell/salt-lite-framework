@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Util\Helper;
 
-use Laminas\Diactoros\Stream;
 use PhoneBurner\SaltLite\Framework\Domain\RegExp;
+use PhoneBurner\SaltLite\Framework\Http\Domain\Stream\InMemoryStream;
 use Psr\Http\Message\StreamInterface;
-use RuntimeException;
 
 abstract readonly class Str
 {
@@ -67,15 +66,7 @@ abstract readonly class Str
      */
     final public static function stream(StreamInterface|\Stringable|string $string = ''): StreamInterface
     {
-        if ($string instanceof StreamInterface) {
-            return $string;
-        }
-
-        $resource = \fopen('php://temp', 'rb+') ?: throw new RuntimeException('Could Not Create Stream');
-        \fwrite($resource, (string)$string);
-        \rewind($resource);
-
-        return new Stream($resource);
+        return $string instanceof StreamInterface ? $string : InMemoryStream::make((string)$string);
     }
 
     /**

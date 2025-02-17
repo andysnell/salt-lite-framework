@@ -71,9 +71,10 @@ class ListRoutes extends Command
             Sort Direction (<fg=yellow>"asc"</>, <fg=yellow>"desc"</>)
             EOF, self::SORT_ASC);
 
+        $values = \implode(', ', \array_map($callback, [self::ALL_METHODS, ...HttpMethod::values()]));
         $this->addOption('filter-method', null, InputOption::VALUE_REQUIRED, \sprintf(<<<'EOF'
             Filter Routes by HTTP Method (%s)
-            EOF, \implode(', ', \array_map($callback, [self::ALL_METHODS, ...HttpMethod::values()]))), self::ALL_METHODS);
+            EOF, $values), self::ALL_METHODS);
 
         $this->addOption('filter-path', null, InputOption::VALUE_REQUIRED, <<<'EOF'
             Filter Routes by Path String

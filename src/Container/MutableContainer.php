@@ -10,11 +10,11 @@ use Psr\Container\ContainerInterface;
 #[Contract]
 interface MutableContainer extends ContainerInterface
 {
-    /**
-     * Add a new element to the container.
-     *
-     * @param string $id Identifier of the entry to add.
-     * @param mixed $value Either the instance of the class or a Closure which creates an instance.
-     */
-    public function set(string $id, mixed $value): void;
+    public function has(\Stringable|string $id): bool;
+
+    public function get(\Stringable|string $id): mixed;
+
+    public function set(\Stringable|string $id, mixed $value): void;
+
+    public function unset(\Stringable|string $id): void;
 }

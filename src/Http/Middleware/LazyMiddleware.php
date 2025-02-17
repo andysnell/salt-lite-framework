@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Http\Middleware;
 
 use PhoneBurner\SaltLite\Framework\Http\Middleware\Exception\InvalidMiddlewareConfiguration;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -18,9 +19,9 @@ class LazyMiddleware implements TerminableMiddleware
     /**
      * @param class-string<MiddlewareInterface> $middleware
      */
-    private function __construct(private readonly ContainerInterface $container, private readonly string $middleware)
+    private function __construct(private readonly ContainerInterface $container, public readonly string $middleware)
     {
-        if (! \is_a($middleware, MiddlewareInterface::class, true)) {
+        if (! Type::isClassStringOf(MiddlewareInterface::class, $middleware)) {
             throw new InvalidMiddlewareConfiguration(\sprintf(ErrorMessage::INVALID_CLASS, $middleware));
         }
     }

@@ -7,7 +7,11 @@ namespace PhoneBurner\SaltLite\Framework\Container\ObjectContainer;
 use PhoneBurner\SaltLite\Framework\Container\Exception\NotFound;
 use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
 use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\HasInvokingContainerBehavior;
+use PhoneBurner\SaltLite\Framework\Domain\Arrayable;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
+use PhoneBurner\SaltLite\Framework\Util\Collections\Map\HasMutableContainerArrayableBehavior;
+use PhoneBurner\SaltLite\Framework\Util\Collections\Map\HasMutableContainerArrayAccessBehavior;
+use PhoneBurner\SaltLite\Framework\Util\Collections\MapCollection;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -16,9 +20,11 @@ use Psr\Container\NotFoundExceptionInterface;
  * @implements ObjectContainer<T>
  */
 #[Contract]
-class MutableObjectContainer implements ObjectContainer, MutableContainer
+class MutableObjectContainer implements ObjectContainer, MutableContainer, Arrayable
 {
     use HasInvokingContainerBehavior;
+    use HasMutableContainerArrayAccessBehavior;
+    use HasMutableContainerArrayableBehavior;
 
     /** @param array<string, T> $entries */
     public function __construct(protected array $entries = [])
@@ -30,67 +36,42 @@ class MutableObjectContainer implements ObjectContainer, MutableContainer
      * @throws NotFoundExceptionInterface No entry was found for **this** identifier.
      * @throws ContainerExceptionInterface Error while retrieving the entry.
      */
-    public function get(string $id): object
+    public function get(\Stringable|string $id): object
     {
-        return $this->entries[$id] ?? throw new NotFound();
+        return $this->entries[(string)$id] ?? throw new NotFound();
     }
 
-    public function set(string $id, mixed $value): void
+    public function set(\Stringable|string $id, mixed $value): void
     {
-        $this->entries[$id] = $value;
+        $this->entries[(string)$id] = $value;
     }
 
-    public function unset(string $id): void
+    public function unset(\Stringable|string $id): void
     {
-        unset($this->entries[$id]);
+        unset($this->entries[(string)$id]);
     }
 
-    public function has(string $id): bool
+    public function has(\Stringable|string $id): bool
     {
-        return isset($this->entries[$id]);
-    }
-
-    /**
-     * @return array<string>
-     */
-    public function keys(): array
-    {
-        return \array_keys($this->entries);
-    }
-
-    public function getIterator(): \Generator
-    {
-        yield from $this->entries;
-    }
-
-    public function count(): int
-    {
-        return \count($this->entries);
-    }
-
-    public function offsetExists(mixed $offset): bool
-    {
-        return \is_string($offset) && $this->has($offset);
+        return isset($this->entries[(string)$id]);
     }
 
     /**
-     * @return T&object
+     * @param array<string, T>|MapCollection<T> $map
      */
-    public function offsetGet(mixed $offset): object
+    public function replace(array|MapCollection $map): static
     {
-        \is_string($offset) || throw new \InvalidArgumentException('Offset must be a string');
-        return $this->entries[$offset] ?? throw new NotFound();
+        $this->entries = $map instanceof MapCollection ? $map->toArray() : $map;
+        return $this;
     }
 
-    public function offsetSet(mixed $offset, mixed $value): void
+    public function clear(): void
     {
-        \is_string($offset) || throw new \InvalidArgumentException('Offset must be a string');
-        $this->set($offset, $value);
+        $this->entries = [];
     }
 
-    public function offsetUnset(mixed $offset): void
+    public function toArray(): array
     {
-        \is_string($offset) || throw new \InvalidArgumentException('Offset must be a string');
-        unset($this->entries[$offset]);
+        return $this->entries;
     }
 }

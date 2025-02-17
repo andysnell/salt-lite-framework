@@ -13,7 +13,7 @@ use PhoneBurner\SaltLite\Framework\Tests\Util\Helper\Fixture\NestedObject;
 use PhoneBurner\SaltLite\Framework\Tests\Util\Helper\Fixture\NestingObject;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Arr;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
-use PhoneBurner\SaltLite\Framework\Util\NullArrayAccess;
+use PhoneBurner\SaltLite\Framework\Util\NullableArrayAccess;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -37,7 +37,7 @@ final class ArrTest extends TestCase
         yield [true, []];
         yield [true, [1, 2, 3]];
         yield [true, ['foo' => 1, 'bar' => 2, 'baz' => 3]];
-        yield [true, new NullArrayAccess(['foo' => 1, 'bar' => 2, 'baz' => 3])];
+        yield [true, new NullableArrayAccess(['foo' => 1, 'bar' => 2, 'baz' => 3])];
         yield [true, self::makeArrayAccess([1, 2, 3, 4])];
 
         $not_arrays = [true, false, null, 123, 'hello world', static fn(): array => [1, 2, 3], new stdClass()];

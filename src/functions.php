@@ -47,6 +47,7 @@ function path(string $path): string
     \assert(\defined('\PhoneBurner\SaltLite\Framework\APP_ROOT'), 'APP_ROOT must be defined');
     return APP_ROOT . $path;
 }
+
 /**
  * Use when you don't control the instantiation of the object, but have a factory
  * that can return an instance of the object, e.g. where you would normally not
@@ -85,22 +86,18 @@ function proxy(callable $factory): object
     );
 }
 
-
 /**
  * Use when you control the instantiation of the object, e.g. where you would
  * normally use "new" to create an instance, passing in the object's dependencies.
  *
  * @see Reflect::ghost() for a more complete implementation
  * @template T of object
- * @param callable(T): void $initializer
+ * @param \Closure(T): void $initializer
  * @return T&object
  */
-function ghost(callable $initializer): object
+function ghost(\Closure $initializer): object
 {
     // we need to make sure that the initializer is a \Closure that takes a single argument
-    // using first class callable syntax to should return the same instance if the
-    // original initializer is already a \Closure and static.
-    $initializer = $initializer(...);
     $initializer_reflection = new \ReflectionFunction($initializer);
     \assert($initializer_reflection->getNumberOfParameters() === 1);
 
@@ -109,4 +106,9 @@ function ghost(callable $initializer): object
     \assert(\class_exists($class));
 
     return new \ReflectionClass($class)->newLazyGhost($initializer);
+}
+
+function null_if_false(mixed $value): mixed
+{
+    return $value === false ? null : $value;
 }

@@ -21,6 +21,7 @@ use Monolog\Logger;
 use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Exception\InvalidHandlerConfiguration;
+use PhoneBurner\SaltLite\Framework\Util\Filesystem\FileMode;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
 use Psr\Log\LoggerInterface;
 
@@ -42,12 +43,23 @@ class LoggerServiceFactory implements ServiceFactory
         return new PsrLoggerAdapter(ghost(function (Logger $logger) use ($app): void {
             $logger->__construct(
                 $app->config->get('logging.channel') ?? Str::kabob($app->config->get('app.name')),
-                \array_values(\array_map(fn(array $params): HandlerInterface => $this->handler(
-                    $params['handler_class'],
-                    $params['handler_options'] ?? [],
-                    $params['formatter_class'] ?? null,
-                    $params['formatter_options'] ?? [],
-                ), $app->config->get('logging.handlers') ?? [])),
+                \array_values(\array_map(function (array|LoggingHandlerConfigStruct $params): HandlerInterface {
+                    if ($params instanceof LoggingHandlerConfigStruct) {
+                        return $this->handler(
+                            $params->handler_class,
+                            $params->handler_options ?? [],
+                            $params->formatter_class,
+                            $params->formatter_options ?? [],
+                        );
+                    }
+
+                    return $this->handler(
+                        $params['handler_class'],
+                        $params['handler_options'] ?? [],
+                        $params['formatter_class'] ?? null,
+                        $params['formatter_options'] ?? [],
+                    );
+                }, $app->config->get('logging.handlers') ?? [])),
                 \array_map($app->services->get(...), $app->config->get('logging.processors') ?? []),
             );
 
@@ -66,7 +78,7 @@ class LoggerServiceFactory implements ServiceFactory
     ): HandlerInterface {
 
         // Standardize the level and bubble options
-        $handler_options['level'] = LogLevel::cast($handler_options['level'] ?? LogLevel::Info)->toMonlogLogLevel();
+        $handler_options['level'] = LogLevel::instance($handler_options['level'] ?? LogLevel::Info)->toMonlogLogLevel();
         $handler_options['bubble'] = (bool)($handler_options['bubble'] ?? true);
 
         $handler = match ($handler_class) {
@@ -89,9 +101,9 @@ class LoggerServiceFactory implements ServiceFactory
                 $handler_options['stream'] ?? throw new InvalidHandlerConfiguration('Missing Stream Handler Stream/Path'),
                 $handler_options['level'],
                 $handler_options['bubble'],
-                $handler_options['file_permission'],
-                $handler_options['use_locking'],
-                $handler_options['file_open_mode'] ?? 'a',
+                $handler_options['file_permission'] ?? null,
+                $handler_options['use_locking'] ?? false,
+                $handler_options['file_open_mode'] ?? FileMode::WriteOnlyCreateNewOrAppendExisting->value,
             ),
             SlackWebhookHandler::class => new SlackWebhookHandler(
                 $handler_options['webhook_url'] ?? throw new InvalidHandlerConfiguration('Missing Slack Webhook URL'),
@@ -137,6 +149,12 @@ class LoggerServiceFactory implements ServiceFactory
             LogglyFormatter::class => new LogglyFormatter(
                 $formatter_options['batch_mode'] ?? JsonFormatter::BATCH_MODE_NEWLINES,
                 $formatter_options['append_new_line'] ?? false,
+            ),
+            JsonFormatter::class => new JsonFormatter(
+                $formatter_options['batch_mode'] ?? JsonFormatter::BATCH_MODE_NEWLINES,
+                $formatter_options['append_new_line'] ?? true,
+                $formatter_options['ignore_empty_context_and_extra'] ?? false,
+                $formatter_options['include_stacktraces'] ?? false,
             ),
             default => throw new \UnexpectedValueException("Unsupported Formatter Class: $handler_class"),
         };

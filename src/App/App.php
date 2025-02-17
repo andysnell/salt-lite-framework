@@ -116,19 +116,24 @@ class App implements MutableContainer, InvokingContainer
         $this->services = ServiceContainerFactory::make($this);
     }
 
-    public function has(string $id): bool
+    public function has(\Stringable|string $id): bool
     {
         return $this->services->has($id);
     }
 
-    public function get(string $id): mixed
+    public function get(\Stringable|string $id): mixed
     {
         return $this->services->get($id);
     }
 
-    public function set(string $id, mixed $value): void
+    public function set(\Stringable|string $id, mixed $value): void
     {
         $this->services->set($id, $value);
+    }
+
+    public function unset(\Stringable|string $id): void
+    {
+        $this->services->unset($id);
     }
 
     public function call(

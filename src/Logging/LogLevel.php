@@ -21,7 +21,7 @@ enum LogLevel: string
     case Info = Psr3LogLevel::INFO;
     case Debug = Psr3LogLevel::DEBUG;
 
-    public static function cast(mixed $value): self
+    public static function instance(mixed $value): self
     {
         return match (true) {
             $value instanceof self => $value,

@@ -24,7 +24,7 @@ final class LogTraceTest extends TestCase
         self::assertTrue($log_trace->equals($log_trace));
         self::assertTrue($uuid->equals($log_trace));
         self::assertSame($uuid->getBytes(), $log_trace->getBytes());
-        self::assertSame($uuid->getFields(), $log_trace->getFields());
+        self::assertEquals($uuid->getFields(), $log_trace->getFields());
         self::assertEquals($uuid->getHex(), $log_trace->getHex());
         self::assertEquals($uuid->getInteger(), $log_trace->getInteger());
         self::assertSame($uuid->toString(), $log_trace->toString());

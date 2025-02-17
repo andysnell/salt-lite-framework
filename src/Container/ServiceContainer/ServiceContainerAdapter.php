@@ -80,22 +80,25 @@ class ServiceContainerAdapter implements ServiceContainer
      *  4) The $id string is a valid class-string for a class that we could potentially
      *     autowire, i.e., it is not an interface, trait, or abstract class.
      */
-    public function has(string $id, bool $strict = false): bool
+    public function has(\Stringable|string $id, bool $strict = false): bool
     {
+        $id = (string)$id;
         return isset($this->resolved[$id])
             || isset($this->factories[$id])
             || isset($this->deferred[$id])
             || ($strict === false && \class_exists($id) && new \ReflectionClass($id)->isInstantiable());
     }
 
-    public function get(string $id): object
+    public function get(\Stringable|string $id): object
     {
+        $id = (string)$id;
         \assert(Type::isClassString($id));
         return $this->resolved[$id] ??= $this->resolve($id);
     }
 
-    public function set(string $id, mixed $value): void
+    public function set(\Stringable|string $id, mixed $value): void
     {
+        $id = (string)$id;
         \assert(Type::isClassString($id));
 
         if (! \is_object($value)) {
@@ -117,6 +120,12 @@ class ServiceContainerAdapter implements ServiceContainer
             $value instanceof \Closure => $this->factories[$id] = new CallableServiceFactory($value),
             default => $this->resolved[$id] = $value,
         };
+    }
+
+    public function unset(\Stringable|string $id): void
+    {
+        $id = (string)$id;
+        unset($this->resolved[$id], $this->factories[$id]);
     }
 
     /**
@@ -250,7 +259,7 @@ class ServiceContainerAdapter implements ServiceContainer
                 'resolving' => $this->resolving,
                 'outer_id' => $this->outer_id,
             ]);
-            throw $e instanceof ContainerExceptionInterface ? $e : new ResolutionFailure(previous: $e);
+            throw $e instanceof ContainerExceptionInterface ? $e : new ResolutionFailure('Cannot Resolve:' . $id, previous: $e);
         } finally {
             // Unset the tracking variables once we're done resolving an entry
             unset($this->resolving[$id]);

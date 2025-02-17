@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Tests\Util;
 
 use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
-use PhoneBurner\SaltLite\Framework\Util\NullArrayAccess;
+use PhoneBurner\SaltLite\Framework\Util\NullableArrayAccess;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -37,7 +37,7 @@ final class NullArrayAccessTest extends TestCase
     #[Test]
     public function offsetGet_gets_the_expected_value(): void
     {
-        $sut = new NullArrayAccess($this->test);
+        $sut = new NullableArrayAccess($this->test);
 
         self::assertCount(11, $sut);
         self::assertSame($this->test, $sut->toArray());
@@ -55,8 +55,8 @@ final class NullArrayAccessTest extends TestCase
     #[Test]
     public function offsetSet_and_offsetUnset_manipulate_the_expected_value(): void
     {
-    /** @var NullArrayAccess<string, mixed> $sut */
-        $sut = new NullArrayAccess([]);
+    /** @var NullableArrayAccess<string, mixed> $sut */
+        $sut = new NullableArrayAccess([]);
 
         self::assertEmpty($sut);
         self::assertSame([], $sut->toArray());

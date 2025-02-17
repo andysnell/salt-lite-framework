@@ -25,7 +25,7 @@ class BufferLogger implements LoggerInterface, \Countable
 
     public function log($level, \Stringable|string $message, array $context = []): void
     {
-        $this->entries[] = new LogEntry(LogLevel::cast($level), $message, $context);
+        $this->entries[] = new LogEntry(LogLevel::instance($level), $message, $context);
     }
 
     /**

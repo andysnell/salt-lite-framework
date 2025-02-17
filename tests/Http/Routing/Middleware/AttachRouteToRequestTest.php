@@ -124,7 +124,6 @@ final class AttachRouteToRequestTest extends TestCase
         self::assertSame($response->allowed_methods, [HttpMethod::Get, HttpMethod::Post]);
     }
 
-
     #[Test]
     public function process_attaches_route_when_match_is_found(): void
     {

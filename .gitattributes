@@ -38,3 +38,7 @@
 /resources/                 export-ignore
 /settings.ini               export-ignore
 /tests/                     export-ignore
+/caddy/                     export-ignore
+/public/                    export-ignore
+/resources/                 export-ignore
+/storage/                   export-ignore

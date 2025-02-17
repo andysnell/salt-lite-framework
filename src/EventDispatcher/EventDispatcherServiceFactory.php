@@ -72,8 +72,8 @@ class EventDispatcherServiceFactory implements ServiceFactory
             return new SymfonyEventDispatcherAdapter(
                 $event_dispatcher,
                 $app->get(LoggerInterface::class),
-                LogLevel::tryInstance($app->config->get('event_dispatcher.event_dispatch_log_level')),
-                LogLevel::tryInstance($app->config->get('event_dispatcher.event_failure_log_level')),
+                LogLevel::cast($app->config->get('event_dispatcher.event_dispatch_log_level')),
+                LogLevel::cast($app->config->get('event_dispatcher.event_failure_log_level')),
             );
         } finally {
             $this->cache = [];

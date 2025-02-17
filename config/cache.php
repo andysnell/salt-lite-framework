@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use PhoneBurner\SaltLite\Framework\Cache\CacheDriver;
-use PhoneBurner\SaltLite\Framework\Cache\Marshaller\Serializer;
+use PhoneBurner\SaltLite\Framework\Util\Serialization\Serializer;
 use Symfony\Component\Lock\Store\InMemoryStore;
 
 use function PhoneBurner\SaltLite\Framework\env;
@@ -11,7 +11,7 @@ use function PhoneBurner\SaltLite\Framework\env;
 return [
     'cache' => [
         'lock' => [
-            'storage_driver' => InMemoryStore::class,
+            'store_driver' => InMemoryStore::class,
         ],
         'drivers' => [
             CacheDriver::Remote->value => [

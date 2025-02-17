@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Util\Filesystem;
 
+use League\Flysystem\UnableToCreateDirectory;
+use League\Flysystem\UnableToWriteFile;
+use PhoneBurner\SaltLite\Framework\Util\Iterator\StreamIterator;
+use Psr\Http\Message\StreamInterface;
+
 /**
  * Atomic file writing utility
  *
@@ -19,11 +24,28 @@ namespace PhoneBurner\SaltLite\Framework\Util\Filesystem;
  */
 class FileWriter
 {
+    public const int CHUNK_BYTES = 8192;
+
+    /**
+     * Note: technically, this method could be used to read file contents from a
+     * PSR-7 StreamInterface, since those are stringable, however, it would read
+     * all the contents into memory in doing so, making the dedicated
+     *
+     * @param \Stringable|string $filename Typedef includes \SplFileInfo via \Stringable
+     */
     public static function string(\Stringable|string $filename, \Stringable|string $contents): bool
     {
-        $temp_file = $filename . '.' . \bin2hex(\random_bytes(8));
+        $filename = self::normalizeFilename($filename);
+        self::checkFilePermissions($filename);
+        self::checkDirectoryPermissions($filename);
+        $temp_file = self::createTempFilename($filename);
         return \file_put_contents($temp_file, (string)$contents)
-            && \rename($temp_file, (string)$filename);
+            && \rename($temp_file, $filename);
+    }
+
+    public static function stream(\Stringable|string $filename, StreamInterface $stream): bool
+    {
+        return self::iterable($filename, new StreamIterator($stream));
     }
 
     /**
@@ -31,9 +53,75 @@ class FileWriter
      */
     public static function iterable(\Stringable|string $filename, iterable $pump): bool
     {
-        $temp_file = $filename . '.' . \bin2hex(\random_bytes(8));
-        return self::pump(new \SplFileObject($temp_file, 'w+b'), $pump)
-            && \rename($temp_file, (string)$filename);
+        $filename = self::normalizeFilename($filename);
+        self::checkFilePermissions($filename);
+        self::checkDirectoryPermissions($filename);
+        $temp_file = self::createTempFilename($filename);
+        return self::pump(new \SplFileObject($temp_file, FileMode::ReadWriteCreateNewOrTruncateExisting->value), $pump)
+            && \rename($temp_file, $filename);
+    }
+
+    /**
+     * Note, if we are passed an instance of \SplFileInfo as the $filename,
+     * we need to explicitly call `getPathname()` instead of just casting it
+     * to a string in order to account for how \SplFileObject instances return
+     * the current line from the file.
+     */
+    private static function normalizeFilename(\Stringable|string $filename): string
+    {
+        return match (true) {
+            \is_string($filename) => $filename,
+            $filename instanceof \SplFileInfo => $filename->getPathname(),
+            default => (string)$filename,
+        };
+    }
+
+    private static function createTempFilename(string $filename): string
+    {
+        return $filename . '.' . \bin2hex(\random_bytes(8));
+    }
+
+    /**
+     * If the file doesn't exist, no problem. Otherwise, we need to check that
+     * the "filename" is both a regular file and writable.
+     */
+    private static function checkFilePermissions(string $filename): true
+    {
+        return match (true) {
+            ! \file_exists($filename) => true,
+            \is_writable($filename) => \is_file($filename) ?: throw UnableToWriteFile::atLocation(
+                $filename,
+                'The location exists and is writable, but is not a regular file.',
+            ),
+            default => throw UnableToWriteFile::atLocation(
+                $filename,
+                'The file already exists, but it is not writable.',
+            ),
+        };
+    }
+
+    /**
+     * If the directory file would be written to does not exist, this will try
+     * to recursively create parent directories.
+     */
+    private static function checkDirectoryPermissions(string $filename): true
+    {
+        $directory = \dirname($filename);
+        return match (true) {
+            \is_writable($directory) => \is_dir($directory) ?: throw UnableToCreateDirectory::atLocation(
+                $directory,
+                'The location already exists, but is not a directory.',
+            ),
+            \file_exists($directory) => throw UnableToCreateDirectory::atLocation(
+                $directory,
+                'The directory already exists, but it is not writable.',
+            ),
+            \mkdir($directory, recursive: true), \is_dir($directory) => true,
+            default => throw UnableToCreateDirectory::atLocation(
+                $directory,
+                'The directory does not exist, but could not be created.',
+            ),
+        };
     }
 
     /**

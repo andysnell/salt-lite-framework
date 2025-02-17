@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Formatter\LogglyFormatter;
 use Monolog\Handler\LogglyHandler;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Handler\SlackWebhookHandler;
+use Monolog\Handler\StreamHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
+use PhoneBurner\SaltLite\Framework\Logging\LoggingHandlerConfigStruct;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\EnvironmentProcessor;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\LogTraceProcessor;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\PhoneNumberProcessor;
@@ -36,40 +39,46 @@ return [
         // @see \PhoneBurner\SaltLite\Framework\Logging\LoggerServiceFactory
         'handlers' => stage(
             [
-                [
-                    'handler_class' => LogglyHandler::class,
-                    'handler_options' => [
+                new LoggingHandlerConfigStruct(
+                    handler_class: LogglyHandler::class,
+                    handler_options: [
                         'token' => env('SALT_LOGGLY_TOKEN'),
                         'level' => env('SALT_PSR3_LOG_LEVEL', LogLevel::INFO),
                         'bubble' => true,
                     ],
-                    'formatter_class' => LogglyFormatter::class,
-                    'formatter_options' => [],
-                ],
-                [
-                    'handler_class' => SlackWebhookHandler::class,
-                    'handler_options' => [
+                    formatter_class: LogglyFormatter::class,
+                ),
+                new LoggingHandlerConfigStruct(
+                    handler_class: SlackWebhookHandler::class,
+                    handler_options: [
                         'webhook_url' => env('SALT_SLACK_WEBHOOK_URL'),
                         'channel' => env('SALT_SLACK_DEFAULT_CHANNEL'),
                         'level' => LogLevel::CRITICAL,
                         'bubble' => true,
                     ],
-                    'formatter_class' => LineFormatter::class,
-                    'formatter_options' => [],
-                ],
+                    formatter_class: LogglyFormatter::class,
+                ),
             ],
             [
-                [
-                    'handler_class' => RotatingFileHandler::class,
-                    'handler_options' => [
+                new LoggingHandlerConfigStruct(
+                    handler_class: StreamHandler::class,
+                    handler_options: [
+                        'stream' => \sys_get_temp_dir() . '/salt-lite/salt-lite.log',
+                        'level' => env('SALT_PSR3_LOG_LEVEL', LogLevel::DEBUG),
+                        'bubble' => true,
+                    ],
+                    formatter_class: JsonFormatter::class,
+                ),
+                new LoggingHandlerConfigStruct(
+                    handler_class: RotatingFileHandler::class,
+                    handler_options: [
                         'filename' => path('/storage/logs/salt-lite.log'),
                         'max_files' => 7,
                         'level' => env('SALT_PSR3_LOG_LEVEL', LogLevel::DEBUG),
                         'bubble' => true,
                     ],
-                    'formatter_class' => LineFormatter::class,
-                    'formatter_options' => [],
-                ],
+                    formatter_class: JsonFormatter::class,
+                ),
             ],
         ),
     ],

@@ -10,7 +10,7 @@ use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\HttpExceptionRespon
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
 use Psr\Http\Message\ServerRequestInterface;
 
-class JsonResponseTransformerStrategy implements HttpExceptionResponseTransformerStrategy
+final class JsonResponseTransformerStrategy implements HttpExceptionResponseTransformerStrategy
 {
     public function transform(
         HttpExceptionResponse $exception,

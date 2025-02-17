@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Domain\Time;
 
+use PhoneBurner\SaltLite\Framework\Util\Helper\Math;
+
 final readonly class Ttl
 {
     public const int DEFAULT_SECONDS = 5 * TimeConstant::SECONDS_IN_MINUTE;
@@ -66,5 +68,30 @@ final readonly class Ttl
     {
         static $min;
         return $min ??= new self(0);
+    }
+
+    public function inSeconds(): int
+    {
+        return (int)$this->seconds;
+    }
+
+    public function inMinutes(): int
+    {
+        return Math::floor($this->inSeconds() / TimeConstant::SECONDS_IN_MINUTE);
+    }
+
+    public function inHours(): int
+    {
+        return Math::floor($this->inSeconds() / TimeConstant::SECONDS_IN_HOUR);
+    }
+
+    public function __serialize(): array
+    {
+        return [$this->seconds];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        [$this->seconds] = $data;
     }
 }

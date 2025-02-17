@@ -6,12 +6,9 @@ declare(strict_types=1);
 use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\App\Context;
 use PhoneBurner\SaltLite\Framework\App\Kernel;
-use PhoneBurner\SaltLite\Framework\Console\CliKernel;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
 App::exec(Context::Cli, static function (App $app): void {
-    $app->get(CliKernel::class)->run();
+    $app->get(Kernel::class)->run();
 });
-
-//exit($exit_code);

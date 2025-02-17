@@ -23,5 +23,13 @@ interface ServiceContainer extends MutableContainer, InvokingContainer, LoggerAw
      *  4) The $id string is a valid class-string for a class that we could potentially
      *     autowire, i.e., it is not an interface, trait, or abstract class.
      */
-    public function has(string $id, bool $strict = false): bool;
+    public function has(\Stringable|string $id, bool $strict = false): bool;
+
+    /**
+     * Add a new element to the container.
+     *
+     * @param \Stringable|string $id Identifier of the entry to add.
+     * @param mixed $value Either the instance of the class or a Closure which creates an instance.
+     */
+    public function set(\Stringable|string $id, mixed $value): void;
 }

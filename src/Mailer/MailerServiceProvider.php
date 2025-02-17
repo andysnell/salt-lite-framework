@@ -7,14 +7,13 @@ namespace PhoneBurner\SaltLite\Framework\Mailer;
 use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
 use PhoneBurner\SaltLite\Framework\Domain\Email\EmailAddress;
+use PhoneBurner\SaltLite\Framework\Mailer\Transport\TransportServiceFactory;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\Command\MailerTestCommand;
 use Symfony\Component\Mailer\Mailer as SymfonyMailer;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Messenger\MessageHandler;
-use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -74,35 +73,7 @@ final class MailerServiceProvider implements DeferrableServiceProvider
             )),
         );
 
-        $app->set(
-            TransportInterface::class,
-            static function (App $app): TransportInterface {
-                $transport_driver = (string)$app->config->get('mailer.default_driver');
-                $transport_config = $app->config->get('mailer.drivers.' . $transport_driver) ?? [];
-                \assert(\is_array($transport_config));
-
-                $dns = match (TransportDriver::tryFrom($transport_driver)) {
-                    TransportDriver::SendGrid => \vsprintf('sendgrid+api://%s@default', [
-                        $transport_config['api_key'] ?? throw new \RuntimeException('Missing SendGrid API key'),
-                    ]),
-                    TransportDriver::Smtp => \vsprintf('smtp://%s:%s@%s:%s%s', [
-                        $transport_config['user'] ?? throw new \RuntimeException('Missing SMTP Credentials'),
-                        \urlencode($transport_config['pass'] ?? throw new \RuntimeException('Missing SMTP Credentials')),
-                        $transport_config['host'] ?? throw new \RuntimeException('Missing SMTP Credentials'),
-                        $transport_config['port'] ?? throw new \RuntimeException('Missing SMTP Credentials'),
-                        $transport_config['encryption'] ? '' : '?auto_tls=false',
-                    ]),
-                    TransportDriver::None => 'null://default',
-                    default => throw new \RuntimeException("Unknown mailer transport driver: {$transport_driver}"),
-                };
-
-                return Transport::fromDsn(
-                    dsn: $dns,
-                    dispatcher: $app->get(EventDispatcherInterface::class),
-                    logger: $app->get(LoggerInterface::class),
-                );
-            },
-        );
+        $app->set(TransportInterface::class, new TransportServiceFactory());
 
         $app->set(
             MailerTestCommand::class,

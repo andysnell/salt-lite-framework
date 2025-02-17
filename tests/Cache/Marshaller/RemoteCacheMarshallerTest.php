@@ -6,10 +6,11 @@ namespace PhoneBurner\SaltLite\Framework\Tests\Cache\Marshaller;
 
 use PhoneBurner\SaltLite\Framework\Cache\Exception\CacheMarshallingError;
 use PhoneBurner\SaltLite\Framework\Cache\Marshaller\RemoteCacheMarshaller;
-use PhoneBurner\SaltLite\Framework\Cache\Marshaller\Serializer;
 use PhoneBurner\SaltLite\Framework\Tests\Util\Helper\Fixture\LazyObject;
 use PhoneBurner\SaltLite\Framework\Tests\Util\Helper\Fixture\Mirror;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
+use PhoneBurner\SaltLite\Framework\Util\Serialization\Marshaller;
+use PhoneBurner\SaltLite\Framework\Util\Serialization\Serializer;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\WithoutErrorHandler;
@@ -283,7 +284,7 @@ final class RemoteCacheMarshallerTest extends TestCase
     private static function assertMatchesSerializerHeader(Serializer $serializer, mixed $value): void
     {
         match ($serializer) {
-            Serializer::Igbinary => self::assertTrue(\str_starts_with((string)$value, RemoteCacheMarshaller::IGBINARY_HEADER)),
+            Serializer::Igbinary => self::assertTrue(\str_starts_with((string)$value, Marshaller::IGBINARY_HEADER)),
             Serializer::Php => self::assertSame(1, \strpos((string)$value, ':')),
         };
     }

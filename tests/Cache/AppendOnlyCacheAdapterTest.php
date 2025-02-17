@@ -6,7 +6,7 @@ namespace PhoneBurner\SaltLite\Framework\Tests\Cache;
 
 use PhoneBurner\SaltLite\Framework\Cache\AppendOnlyCacheAdapter;
 use PhoneBurner\SaltLite\Framework\Cache\Lock\NamedKey;
-use PhoneBurner\SaltLite\Framework\Util\Crypto\Hash\Hash;
+use PhoneBurner\SaltLite\Framework\Util\Cryptography\Hash\Hash;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;

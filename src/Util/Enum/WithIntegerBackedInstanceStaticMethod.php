@@ -11,10 +11,10 @@ trait WithIntegerBackedInstanceStaticMethod
 {
     public static function instance(mixed $value): self
     {
-        return self::tryInstance($value) ?? throw new \InvalidArgumentException();
+        return self::cast($value) ?? throw new \InvalidArgumentException();
     }
 
-    public static function tryInstance(mixed $value): self|null
+    public static function cast(mixed $value): self|null
     {
         return match (true) {
             $value instanceof self, $value === null => $value,

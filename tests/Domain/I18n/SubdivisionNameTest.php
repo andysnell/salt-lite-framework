@@ -52,7 +52,6 @@ final class SubdivisionNameTest extends TestCase
         self::assertSame('Ohio', SubdivisionName::display('US-OH'));
     }
 
-
     #[Test]
     public function display_handles_invalid_case(): void
     {

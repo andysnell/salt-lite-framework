@@ -8,6 +8,7 @@ use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\AttributeUtils\Psr6CacheAnalyzer;
+use PhoneBurner\SaltLite\Framework\App\Analyzer\AttributeAnalyzer;
 use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\App\Clock\HighResolutionTimer;
 use PhoneBurner\SaltLite\Framework\App\Clock\SystemClock;
@@ -25,9 +26,9 @@ use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceContainerAd
 use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\Http\HttpKernel;
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Analyzer\AttributeAnalyzer;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
-use PhoneBurner\SaltLite\Framework\Util\Crypto\AppKey;
+use PhoneBurner\SaltLite\Framework\Util\Cryptography\Natrium;
+use PhoneBurner\SaltLite\Framework\Util\Cryptography\Symmetric\SharedKey;
 use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
 
@@ -86,12 +87,9 @@ final class AppServiceProvider implements ServiceProvider
             default => throw new KernelError('Salt Context is Not Defined or Supported'),
         }));
 
-        $app->set(
-            AppKey::class,
-            static fn(App $app): AppKey => new AppKey($app->config->get('app.key') ?: throw new \LogicException(
-                'A Valid App Key Must Be Defined in Configuration',
-            )),
-        );
+        $app->set(Natrium::class, static function (App $app): Natrium {
+            return new Natrium(SharedKey::import($app->config->get('app.key')));
+        });
 
         $app->set(
             AttributeAnalyzer::class,
@@ -100,7 +98,7 @@ final class AppServiceProvider implements ServiceProvider
                     new Psr6CacheAnalyzer(
                         new Analyzer(),
                         $app->services->get(CacheItemPoolFactory::class)->make(match ($app->environment->stage) {
-                            BuildStage::Development => CacheDriver::File,
+                        //                            BuildStage::Development => CacheDriver::Memory,
                             default => CacheDriver::File,
                         }),
                     ),

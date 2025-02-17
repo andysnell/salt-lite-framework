@@ -13,7 +13,7 @@ use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class TextResponseTransformerStrategy implements HttpExceptionResponseTransformerStrategy
+final class TextResponseTransformerStrategy implements HttpExceptionResponseTransformerStrategy
 {
     public function transform(
         ResponseInterface $exception,

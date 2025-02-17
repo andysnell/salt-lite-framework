@@ -41,7 +41,6 @@ final class EvaluateWrappedResponseFactoriesTest extends TestCase
         $this->assertSame($response, $sut->process($request, $handler));
     }
 
-
     #[Test]
     public function process_ignores_other_responses(): void
     {

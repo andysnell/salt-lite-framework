@@ -21,7 +21,7 @@ final class Psr7Test extends TestCase
     {
         $request = new RequestFactory()->server(HttpMethod::Get, 'http://example.com');
 
-        self::assertNull(Psr7::attribute($request, RequestHandlerInterface::class));
+        self::assertNull(Psr7::attribute(RequestHandlerInterface::class, $request));
     }
 
     #[Test]
@@ -31,9 +31,8 @@ final class Psr7Test extends TestCase
             RequestHandlerInterface::class => new \stdClass(),
         ]);
 
-        self::assertNull(Psr7::attribute($request, RequestHandlerInterface::class));
+        self::assertNull(Psr7::attribute(RequestHandlerInterface::class, $request));
     }
-
 
     #[Test]
     public function attribute_returns_instance_on_happy_path(): void
@@ -43,7 +42,7 @@ final class Psr7Test extends TestCase
             RequestHandlerInterface::class => $handler,
         ]);
 
-        self::assertSame($handler, Psr7::attribute($request, RequestHandlerInterface::class));
+        self::assertSame($handler, Psr7::attribute(RequestHandlerInterface::class, $request));
     }
 
     #[Test]

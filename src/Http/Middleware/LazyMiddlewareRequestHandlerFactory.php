@@ -6,6 +6,7 @@ namespace PhoneBurner\SaltLite\Framework\Http\Middleware;
 
 use PhoneBurner\SaltLite\Framework\Http\Middleware\Exception\InvalidMiddlewareConfiguration;
 use Psr\Container\ContainerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
@@ -15,12 +16,14 @@ use Psr\Http\Server\RequestHandlerInterface;
  * the PSR-11 container. If the container happens to be a `\PhoneBurner\SaltLite\Framework\Container\LazyContainer`, then
  * the middleware will be resolved lazily.
  */
-class LazyMiddlewareRequestHandlerFactory implements MiddlewareRequestHandlerFactory
+final readonly class LazyMiddlewareRequestHandlerFactory implements MiddlewareRequestHandlerFactory
 {
-    private readonly \Closure $proxy_factory;
+    private \Closure $proxy_factory;
 
-    public function __construct(private readonly ContainerInterface $container)
-    {
+    public function __construct(
+        private ContainerInterface $container,
+        private EventDispatcherInterface $event_dispatcher,
+    ) {
         // Note that since the Lazy Proxy factory cannot return a lazy object,
         // we need to call the `initializeLazyObject` method on the reflector of
         // the object to return the initialized object. If the object is not lazy,
@@ -35,7 +38,7 @@ class LazyMiddlewareRequestHandlerFactory implements MiddlewareRequestHandlerFac
         RequestHandlerInterface $fallback_handler,
         iterable $middleware_chain = [],
     ): MiddlewareQueue {
-        $middleware_handler = MiddlewareQueue::make($fallback_handler);
+        $middleware_handler = MiddlewareQueue::make($fallback_handler, $this->event_dispatcher);
         foreach ($middleware_chain as $middleware) {
             $this->resolve($middleware_handler, $middleware);
         }
@@ -48,7 +51,7 @@ class LazyMiddlewareRequestHandlerFactory implements MiddlewareRequestHandlerFac
         RequestHandlerInterface $fallback_handler,
         iterable $middleware_chain = [],
     ): MiddlewareStack {
-        $middleware_handler = MiddlewareStack::make($fallback_handler);
+        $middleware_handler = MiddlewareStack::make($fallback_handler, $this->event_dispatcher);
         foreach ($middleware_chain as $middleware) {
             $this->resolve($middleware_handler, $middleware);
         }
@@ -56,7 +59,7 @@ class LazyMiddlewareRequestHandlerFactory implements MiddlewareRequestHandlerFac
         return $middleware_handler;
     }
 
-    protected function resolve(
+    private function resolve(
         MutableMiddlewareRequestHandler $handler,
         MiddlewareInterface|string $middleware,
     ): MutableMiddlewareRequestHandler {
@@ -70,7 +73,7 @@ class LazyMiddlewareRequestHandlerFactory implements MiddlewareRequestHandlerFac
     /**
      * @param class-string<MiddlewareInterface> $middleware_class
      */
-    protected function pushMiddlewareClass(
+    private function pushMiddlewareClass(
         MutableMiddlewareRequestHandler $handler,
         string $middleware_class,
     ): MutableMiddlewareRequestHandler {

@@ -7,19 +7,21 @@ namespace PhoneBurner\SaltLite\Framework\Http\Cookie;
 use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\App\Clock\SystemClock;
 use PhoneBurner\SaltLite\Framework\Domain\Time\TimeConstant;
+use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
 use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Math;
 use Psr\Http\Message\ResponseInterface;
 
 readonly class Cookie
 {
-    private const string RESERVED_CHARS_LIST = "=,; \t\r\n\v\f";
-    private const array RESERVED_CHARS_FROM = ['=', ',', ';', ' ', "\t", "\r", "\n", "\v", "\f"];
-    private const array RESERVED_CHARS_TO = ['%3D', '%2C', '%3B', '%20', '%09', '%0D', '%0A', '%0B', '%0C'];
+    public const string RESERVED_CHARS_LIST = "=,; \t\r\n\v\f";
+    public const array RESERVED_CHARS_FROM = ['=', ',', ';', ' ', "\t", "\r", "\n", "\v", "\f"];
+    public const array RESERVED_CHARS_TO = ['%3D', '%2C', '%3B', '%20', '%09', '%0D', '%0A', '%0B', '%0C'];
 
     public function __construct(
         public string $name,
-        public string $value,
-        public \DateTimeInterface|null $expires = null,
+        public \Stringable|string $value,
+        public \DateTimeInterface|Ttl|null $ttl = null,
         public string $path = '/',
         public string $domain = '',
         public bool $secure = true,
@@ -27,6 +29,7 @@ readonly class Cookie
         public SameSite|null $same_site = SameSite::Lax,
         public bool $partitioned = false,
         public bool $raw = false,
+        public bool $encrypt = false,
     ) {
         if ($name === '') {
             throw new \InvalidArgumentException('Cookie name cannot be empty');
@@ -49,9 +52,14 @@ readonly class Cookie
         return new self($name, '', null, $path, $domain);
     }
 
-    public function withValue(string $value): self
+    public function withValue(\Stringable|string $value): self
     {
-        return new self($this->name, $value, $this->expires, $this->path, $this->domain, $this->secure, $this->http_only, $this->same_site, $this->partitioned, $this->raw);
+        return new self($this->name, $value, $this->ttl, $this->path, $this->domain, $this->secure, $this->http_only, $this->same_site, $this->partitioned, $this->raw);
+    }
+
+    public function value(): string
+    {
+        return (string)$this->value;
     }
 
     /**
@@ -68,43 +76,31 @@ readonly class Cookie
 
     public function toString(Clock $clock = new SystemClock()): string
     {
-        $cookie = $this->raw ? $this->name : \str_replace(self::RESERVED_CHARS_FROM, self::RESERVED_CHARS_TO, $this->name);
-        $cookie .= '=' . match (true) {
-            $this->value === '' => \vsprintf('deleted; Expires=%s; Max-Age=0', [
-                \gmdate(\DATE_RFC7231, $clock->now()->getTimestamp() - TimeConstant::MIN_SECONDS_IN_YEAR),
-            ]),
-            $this->expires instanceof \DateTimeInterface => \vsprintf('%s; Expires=%s; Max-Age=%d', [
-                $this->raw ? $this->value : \rawurlencode($this->value),
-                \gmdate(\DATE_RFC7231, $this->expires->getTimestamp()),
-                \max(0, $this->expires->getTimestamp() - $clock->now()->getTimestamp()),
-            ]),
-            default => $this->raw ? $this->value : \rawurlencode($this->value),
-        };
-
-        if ($this->path) {
-            $cookie .= '; Path=' . $this->path;
-        }
-
-        if ($this->domain) {
-            $cookie .= '; Domain=' . $this->domain;
-        }
-
-        if ($this->secure) {
-            $cookie .= '; Secure';
-        }
-
-        if ($this->http_only) {
-            $cookie .= '; HttpOnly';
-        }
-
-        if ($this->same_site) {
-            $cookie .= '; SameSite=' . $this->same_site->name;
-        }
-
-        if ($this->partitioned) {
-            $cookie .= '; Partitioned';
-        }
-
-        return $cookie;
+        $value = (string)$this->value;
+        $name = $this->raw ? $this->name : \str_replace(self::RESERVED_CHARS_FROM, self::RESERVED_CHARS_TO, $this->name);
+        return $name . '=' . \implode('; ', \array_filter([
+            'value' => match (true) {
+                $value === '' => 'deleted',
+                $this->raw => $value,
+                default => \rawurlencode($value),
+            },
+            'max-age' => match (true) {
+                $value === '' => 'Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0',
+                $this->ttl instanceof Ttl => \vsprintf('Max-Age=%d', [
+                    \min($this->ttl->inSeconds(), TimeConstant::SECONDS_IN_DAY * 400),
+                ]),
+                $this->ttl instanceof \DateTimeInterface => \vsprintf('Max-Age=%d', [
+                    // Clamp the difference of the expires and current timestamps to between -1 and 400 days.
+                    Math::iclamp($this->ttl->getTimestamp() - $clock->now()->getTimestamp(), -1, TimeConstant::SECONDS_IN_DAY * 400),
+                ]),
+                $this->ttl === null => null,
+            },
+            'path' => $this->path ? \sprintf('Path=%s', $this->path) : null,
+            'domain' => $this->domain ? \sprintf('Domain=%s', $this->domain) : null,
+            'secure' => $this->secure ? 'Secure' : null,
+            'http_only' => $this->http_only ? 'HttpOnly' : null,
+            'same_site' => $this->same_site ? \sprintf('SameSite=%s', $this->same_site->name) : null,
+            'partitioned' => $this->partitioned ? 'Partitioned' : null,
+        ]));
     }
 }

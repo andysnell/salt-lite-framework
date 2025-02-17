@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Cache\Lock;
 
 use PhoneBurner\SaltLite\Framework\Cache\CacheKey;
-use PhoneBurner\SaltLite\Framework\Cache\Marshaller\RemoteCacheMarshaller;
+use PhoneBurner\SaltLite\Framework\Domain\Memory\Bytes;
+use PhoneBurner\SaltLite\Framework\Util\Encoding;
+use PhoneBurner\SaltLite\Framework\Util\Serialization\Marshaller;
 
 class NamedKeyFactory
 {
@@ -41,9 +43,12 @@ class NamedKeyFactory
      */
     public static function serialize(NamedKey $key): string
     {
-        $key = \igbinary_serialize($key) ?? throw new \UnexpectedValueException('igbinary_serialize failure');
-        $key = \gzcompress($key, RemoteCacheMarshaller::COMPRESSION_LEVEL) ?: throw new \UnexpectedValueException('gzcompress failure');
-        return \base64_encode($key);
+        return Marshaller::serialize(
+            value: $key,
+            encoding: Encoding::Base64,
+            use_compression: true,
+            compression_threshold_bytes: new Bytes(0),
+        );
     }
 
     /**
@@ -51,8 +56,6 @@ class NamedKeyFactory
      */
     public static function deserialize(string $key): NamedKey
     {
-        $key = \base64_decode($key, true) ?: throw new \UnexpectedValueException('invalid base64 encoded string');
-        $key = \gzuncompress($key) ?: throw new \UnexpectedValueException('invalid zlib string');
-        return \igbinary_unserialize($key);
+        return Marshaller::deserialize(value: $key, encoding: Encoding::Base64);
     }
 }

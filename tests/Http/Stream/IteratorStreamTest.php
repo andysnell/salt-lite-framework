@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Tests\Http\Stream;
 
-use PhoneBurner\SaltLite\Framework\Http\Stream\IteratorStream;
+use PhoneBurner\SaltLite\Framework\Http\Domain\Stream\IteratorStream;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

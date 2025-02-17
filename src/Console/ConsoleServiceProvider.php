@@ -6,6 +6,7 @@ namespace PhoneBurner\SaltLite\Framework\Console;
 
 use Crell\AttributeUtils\ClassAnalyzer;
 use PhoneBurner\SaltLite\Framework\App\App;
+use PhoneBurner\SaltLite\Framework\App\Command\DebugAppKeys;
 use PhoneBurner\SaltLite\Framework\Console\Command\InteractiveSaltShell;
 use PhoneBurner\SaltLite\Framework\Console\EventListener\ConsoleErrorListener;
 use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
@@ -18,6 +19,7 @@ use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\CommandLoader\CommandLoaderInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Mailer\Command\MailerTestCommand;
 use Symfony\Component\Messenger\Command\ConsumeMessagesCommand;
 use Symfony\Component\Messenger\Command\StatsCommand;
@@ -34,6 +36,7 @@ final class ConsoleServiceProvider implements DeferrableServiceProvider
         InteractiveSaltShell::class,
         ListRoutes::class,
         CacheRoutes::class,
+        DebugAppKeys::class,
         DebugEventListeners::class,
         ConsumeMessagesCommand::class,
         ConsumeScheduleMessages::class,
@@ -67,7 +70,10 @@ final class ConsoleServiceProvider implements DeferrableServiceProvider
     {
         $app->set(
             CliKernel::class,
-            static fn(App $app): CliKernel => new CliKernel($app->get(ConsoleApplication::class)),
+            static fn(App $app): CliKernel => new CliKernel(
+                $app->get(ConsoleApplication::class),
+                $app->get(EventDispatcherInterface::class),
+            ),
         );
 
         $app->set(

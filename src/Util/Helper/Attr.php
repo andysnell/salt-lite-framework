@@ -44,11 +44,7 @@ abstract readonly class Attr
         string|null $attribute_name = null,
         bool $use_instanceof = false,
     ): object|null {
-        return (self::findAttributeReflections(
-            $class_or_reflection,
-            $attribute_name,
-            $use_instanceof,
-        )[0] ?? null)?->newInstance();
+        return self::find($class_or_reflection, $attribute_name, $use_instanceof)[0] ?? null;
     }
 
     /**

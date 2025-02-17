@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Logging;
 
+use PhoneBurner\SaltLite\Framework\Domain\Uuid\OrderedUuid;
 use PhoneBurner\SaltLite\Framework\Domain\Uuid\UuidWrapper;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Uuid;
 use Ramsey\Uuid\UuidInterface;
@@ -12,7 +13,7 @@ readonly final class LogTrace implements UuidInterface
 {
     use UuidWrapper;
 
-    public function __construct(public UuidInterface $uuid)
+    public function __construct(public UuidInterface $uuid = new OrderedUuid())
     {
     }
 
@@ -30,7 +31,7 @@ readonly final class LogTrace implements UuidInterface
      */
     public static function make(): self
     {
-        return new self(Uuid::ordered());
+        return new self();
     }
 
     /**

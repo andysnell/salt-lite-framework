@@ -23,6 +23,17 @@ use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\DomesticPhoneNumber;
 use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\E164;
 use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
 use PhoneBurner\SaltLite\Framework\MessageBus\MessageBus;
+use PhoneBurner\SaltLite\Framework\Util\Cryptography\Asymmetric\Asymmetric;
+use PhoneBurner\SaltLite\Framework\Util\Cryptography\Asymmetric\EncryptionKeyPair;
+use PhoneBurner\SaltLite\Framework\Util\Cryptography\Asymmetric\SignatureKeyPair;
+use PhoneBurner\SaltLite\Framework\Util\Cryptography\Hash\HashAlgorithm;
+use PhoneBurner\SaltLite\Framework\Util\Cryptography\Hash\Hmac;
+use PhoneBurner\SaltLite\Framework\Util\Cryptography\Natrium;
+use PhoneBurner\SaltLite\Framework\Util\Cryptography\String\Ciphertext;
+use PhoneBurner\SaltLite\Framework\Util\Cryptography\String\ConstantTimeEncoding;
+use PhoneBurner\SaltLite\Framework\Util\Cryptography\Symmetric\SharedKey;
+use PhoneBurner\SaltLite\Framework\Util\Cryptography\Symmetric\Symmetric;
+use PhoneBurner\SaltLite\Framework\Util\Encoding;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Arr;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Cast\NullableCast;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Enum;
@@ -66,6 +77,7 @@ class InteractiveSaltShell extends Command
         'event_dispatcher' => EventDispatcherInterface::class,
         'lock_factory' => LockFactory::class,
         'logger' => LoggerInterface::class,
+        'natrium' => Natrium::class,
         'mailer' => MailerInterface::class,
         'message_bus' => MessageBus::class,
         'redis_manager' => RedisManager::class,
@@ -73,6 +85,11 @@ class InteractiveSaltShell extends Command
 
     ];
 
+    /**
+     * Note, if a service has the same basename as a PHP function, the aliasing
+     * will override that function name. E.g. `Hash::class` is problematic because it
+     * conflicts with the built-in `hash()` function.
+     */
     public const array DEFAULT_IMPORTS = [
         AreaCode::class,
         Arr::class,
@@ -90,6 +107,17 @@ class InteractiveSaltShell extends Command
         Psr7::class,
         Type::class,
         NullableCast::class,
+        SharedKey::class,
+        Ciphertext::class,
+        EncryptionKeyPair::class,
+        SignatureKeyPair::class,
+        Natrium::class,
+        ConstantTimeEncoding::class,
+        Encoding::class,
+        HashAlgorithm::class,
+        Hmac::class,
+        Symmetric::class,
+        Asymmetric::class,
     ];
 
     private const array DEFAULT_CONFIG = [

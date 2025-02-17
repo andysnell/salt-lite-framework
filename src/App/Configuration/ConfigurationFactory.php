@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\App\Configuration;
 
-use Brick\VarExporter\VarExporter;
 use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\App\Environment;
-use PhoneBurner\SaltLite\Framework\Util\Filesystem\FileWriter;
+use PhoneBurner\SaltLite\Framework\Util\Serialization\VarExport;
 
 use function PhoneBurner\SaltLite\Framework\ghost;
 
@@ -15,12 +14,11 @@ use function PhoneBurner\SaltLite\Framework\ghost;
  * Important: for the sake of serializing the configuration as a PHP array, and
  * leveraging the performance we can get out of opcache keeping that static array
  * in memory, the values of the configuration MUST be limited to scalar types,
- * null, arrays, and PHP enum cases (since those are just fancy class constants
- * under the hood).
+ * null, PHP enum cases (since those are just fancy class constants
+ *  under the hood), simple struct-like classes implementing arrays, and .
  */
 class ConfigurationFactory
 {
-    private const int EXPORT_OPTIONS = VarExporter::ADD_RETURN | VarExporter::TRAILING_COMMA_IN_ARRAY;
     private const string CONFIG_PATH = '/config';
     private const string CACHE_FILE = '/storage/bootstrap/config.cache.php';
 
@@ -61,9 +59,7 @@ class ConfigurationFactory
             }
         }
 
-        if ($cache_enabled) {
-            FileWriter::string($cache_file, '<?php ' . VarExporter::export($config, self::EXPORT_OPTIONS));
-        }
+        VarExport::toFile($cache_file, $config, 'Configuration Cache');
 
         return $config;
     }

@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM php:8.4-cli as development
+FROM php:8.4-fpm as development
 ENV PATH "/app/bin:/app/vendor/bin:/home/dev/composer/bin:$PATH"
 ENV COMPOSER_HOME "/home/dev/composer"
 ENV SALT_BUILD_STAGE "development"
@@ -37,7 +37,7 @@ EOF
 # Install PHP Extensions
 RUN <<-EOF
   set -eux
-  docker-php-ext-install -j$(nproc) bcmath exif gmp intl pcntl pdo_mysql zip
+  docker-php-ext-install -j$(nproc) bcmath exif gmp intl opcache pcntl pdo_mysql zip
   MAKEFLAGS="-j $(nproc)" pecl install amqp igbinary redis timezonedb xdebug
   docker-php-ext-enable amqp igbinary redis timezonedb xdebug
   find "$(php-config --extension-dir)" -name '*.so' -type f -exec strip --strip-all {} \;
