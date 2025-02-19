@@ -41,7 +41,7 @@ final class NotifierServiceProvider implements DeferrableServiceProvider
         $app->set(
             SlackNotificationClient::class,
             static function (App $app): SlackNotificationClient {
-                $config = $app->config->get('notifier.slack');
+                $config = $app->config->get('notifier.slack_webhooks');
                 return match ($app->environment->stage) {
                     BuildStage::Production => ghost(static fn(SlackWebhookNotificationClient $ghost): null => $ghost->__construct(
                         new Client($config['endpoint'], $config['default_options'] ?? [], new GuzzleClient()),
