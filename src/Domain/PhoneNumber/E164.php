@@ -23,7 +23,7 @@ final readonly class E164 implements
 
     private string $phone_number;
 
-    private function __construct(string $phone_number)
+    public function __construct(string $phone_number)
     {
         $this->phone_number = self::filter($phone_number)
             ?? throw new InvalidPhoneNumber('Invalid E164 Phone Number');
