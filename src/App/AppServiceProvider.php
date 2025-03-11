@@ -98,7 +98,7 @@ final class AppServiceProvider implements ServiceProvider
                     new Psr6CacheAnalyzer(
                         new Analyzer(),
                         $app->services->get(CacheItemPoolFactory::class)->make(match ($app->environment->stage) {
-                        //                            BuildStage::Development => CacheDriver::Memory,
+                            BuildStage::Development => CacheDriver::Memory,
                             default => CacheDriver::File,
                         }),
                     ),
