@@ -21,6 +21,7 @@ use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\Log\LoggerInterface;
 
 use function PhoneBurner\SaltLite\Framework\ghost;
+use function PhoneBurner\SaltLite\Framework\proxy;
 
 /**
  * @codeCoverageIgnore
@@ -64,19 +65,18 @@ final class DatabaseServiceProvider implements DeferrableServiceProvider
 
         $app->set(
             CachingRedisManager::class,
-            ghost(static fn(CachingRedisManager $ghost): null => $ghost->__construct($app->config)),
+            ghost(static fn(CachingRedisManager $ghost): null => $ghost->__construct(
+                $app->config->get('database.redis'),
+            )),
         );
 
-        $app->set(
-            ConnectionProvider::class,
-            ghost(static fn(ConnectionProvider $ghost): null => $ghost->__construct($app)),
-        );
+        $app->set(ConnectionProvider::class, new ConnectionProvider($app));
 
         $app->set(
             ConnectionFactory::class,
             ghost(static fn(ConnectionFactory $ghost): null => $ghost->__construct(
                 $app->environment,
-                $app->config,
+                $app->config->get('database.doctrine'),
                 $app->get(CacheItemPoolFactory::class),
                 $app->get(LoggerInterface::class),
             )),
@@ -84,25 +84,27 @@ final class DatabaseServiceProvider implements DeferrableServiceProvider
 
         $app->set(
             Connection::class,
-            static fn(App $app): Connection => $app->get(ConnectionFactory::class)->connect(),
+            proxy(static fn(Connection $proxy): Connection => $app->get(ConnectionFactory::class)->connect()),
         );
 
-        $app->set(
-            EntityManagerProvider::class,
-            ghost(static fn(EntityManagerProvider $ghost): null => $ghost->__construct($app)),
-        );
+        $app->set(EntityManagerProvider::class, new EntityManagerProvider($app));
 
         $app->set(
             EntityManagerFactory::class,
             ghost(static fn(EntityManagerFactory $ghost): null => $ghost->__construct(
                 $app->services,
                 $app->environment,
-                $app->config,
+                $app->config->get('database.doctrine'),
                 $app->get(DoctrineConnectionProvider::class),
                 $app->get(CacheItemPoolFactory::class),
             )),
         );
 
+        /**
+         * The EntityManager is a heavy object, so we'll defer its creation until it's needed.
+         * Because we can't create a ghost or proxy for an interface, we'll handle that
+         * within the EntityManagerFactory itself.
+         */
         $app->set(
             EntityManagerInterface::class,
             static fn(App $app): EntityManagerInterface => $app->get(EntityManagerFactory::class)->ghost(),

@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Monolog\Formatter\JsonFormatter;
-use Monolog\Formatter\LineFormatter;
 use Monolog\Formatter\LogglyFormatter;
 use Monolog\Handler\LogglyHandler;
 use Monolog\Handler\RotatingFileHandler;

@@ -13,23 +13,16 @@ use PhoneBurner\SaltLite\Framework\Util\Helper\Cast\NonEmptyOrNull;
  */
 abstract readonly class ApiKeyConfigStruct implements ConfigStruct
 {
+    use ConfigStructArrayAccess;
+    use ConfigStructSerialization;
+
     /**
      * @var non-empty-string|null
      */
     public string|null $api_key;
 
-    public function __construct(string|null $api_key)
+    public function __construct(#[\SensitiveParameter] string|null $api_key)
     {
         $this->api_key = NonEmptyOrNull::string($api_key);
-    }
-
-    public function __serialize(): array
-    {
-        return [$this->api_key];
-    }
-
-    public function __unserialize(array $data): void
-    {
-        $this->__construct($data[0] ?? null);
     }
 }

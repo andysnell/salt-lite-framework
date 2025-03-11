@@ -2,22 +2,24 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\SaltLite\Framework\Logging;
+namespace PhoneBurner\SaltLite\Framework\Database\Config;
 
 use PhoneBurner\SaltLite\Framework\App\Configuration\ConfigStruct;
 use PhoneBurner\SaltLite\Framework\App\Configuration\Struct\ConfigStructArrayAccess;
 use PhoneBurner\SaltLite\Framework\App\Configuration\Struct\ConfigStructSerialization;
 
-readonly class LoggingHandlerConfigStruct implements ConfigStruct
+final readonly class AmpqConfigStruct implements ConfigStruct
 {
     use ConfigStructArrayAccess;
     use ConfigStructSerialization;
 
+    /**
+     * @param array<string, AmpqConnectionConfigStruct> $connections
+     */
     public function __construct(
-        public string $handler_class,
-        public array|null $handler_options,
-        public string|null $formatter_class = null,
-        public array|null $formatter_options = [],
+        public array $connections = [],
+        public string $default_connection = 'default',
     ) {
+        \assert($connections === [] || \array_key_exists($default_connection, $connections));
     }
 }

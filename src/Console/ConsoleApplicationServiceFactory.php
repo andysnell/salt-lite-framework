@@ -14,6 +14,9 @@ use Doctrine\ORM\Tools\Console\EntityManagerProvider;
 use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\App\Context;
 use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory;
+use PhoneBurner\SaltLite\Framework\Database\Config\DoctrineConfigStruct;
+use PhoneBurner\SaltLite\Framework\Database\Config\DoctrineConnectionConfigStruct;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\CommandLoader\CommandLoaderInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface as SymfonyDispatcherInterface;
@@ -26,7 +29,9 @@ class ConsoleApplicationServiceFactory implements ServiceFactory
 
     public function __invoke(App $app, string $id): ConsoleApplication
     {
-        $configuration = $app->config->get('database.doctrine.connections.default.migrations') ?? [];
+        $doctrine_config = Type::of(DoctrineConfigStruct::class, $app->config->get('database.doctrine'));
+        $default_connection = $doctrine_config->connections[$doctrine_config->default_connection];
+        \assert($default_connection instanceof DoctrineConnectionConfigStruct);
 
         $application = new ConsoleApplication();
         $application->setName(self::APP_NAME);
@@ -38,7 +43,10 @@ class ConsoleApplicationServiceFactory implements ServiceFactory
 
         OrmConsoleRunner::addCommands($application, $app->get(EntityManagerProvider::class));
         MigrationConsoleRunner::addCommands($application, DependencyFactory::fromConnection(
-            new ConfigurationArray($configuration),
+            new ConfigurationArray([
+                'table_storage' => $default_connection->migrations->table_storage,
+                'migrations_paths' => $default_connection->migrations->migrations_paths,
+            ]),
             ghost(fn(ExistingConnection $ghost): null => $ghost->__construct($app->get(Connection::class))),
             $app->get(LoggerInterface::class),
         ));

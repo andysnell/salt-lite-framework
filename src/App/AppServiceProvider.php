@@ -13,6 +13,7 @@ use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\App\Clock\HighResolutionTimer;
 use PhoneBurner\SaltLite\Framework\App\Clock\SystemClock;
 use PhoneBurner\SaltLite\Framework\App\Clock\SystemHighResolutionTimer;
+use PhoneBurner\SaltLite\Framework\App\Config\AppConfigStruct;
 use PhoneBurner\SaltLite\Framework\App\Configuration\Configuration;
 use PhoneBurner\SaltLite\Framework\App\Exception\KernelError;
 use PhoneBurner\SaltLite\Framework\Cache\CacheDriver;
@@ -28,7 +29,7 @@ use PhoneBurner\SaltLite\Framework\Http\HttpKernel;
 use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
 use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use PhoneBurner\SaltLite\Framework\Util\Cryptography\Natrium;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\Symmetric\SharedKey;
+use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
 use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
 
@@ -88,7 +89,9 @@ final class AppServiceProvider implements ServiceProvider
         }));
 
         $app->set(Natrium::class, static function (App $app): Natrium {
-            return new Natrium(SharedKey::import($app->config->get('app.key')));
+            return new Natrium(
+                Type::of(AppConfigStruct::class, $app->config->get('app'))->key,
+            );
         });
 
         $app->set(

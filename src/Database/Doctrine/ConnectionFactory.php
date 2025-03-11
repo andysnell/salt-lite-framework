@@ -10,11 +10,12 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Logging\Middleware;
 use Doctrine\DBAL\Tools\Console\ConnectionNotFound;
 use PhoneBurner\SaltLite\Framework\App\BuildStage;
-use PhoneBurner\SaltLite\Framework\App\Configuration\Configuration;
 use PhoneBurner\SaltLite\Framework\App\Context;
 use PhoneBurner\SaltLite\Framework\App\Environment;
 use PhoneBurner\SaltLite\Framework\Cache\CacheDriver;
 use PhoneBurner\SaltLite\Framework\Cache\CacheItemPoolFactory;
+use PhoneBurner\SaltLite\Framework\Database\Config\DoctrineConfigStruct;
+use PhoneBurner\SaltLite\Framework\Database\Config\DoctrineConnectionConfigStruct;
 use Psr\Log\LoggerInterface;
 
 class ConnectionFactory
@@ -23,7 +24,7 @@ class ConnectionFactory
 
     public function __construct(
         private readonly Environment $environment,
-        private readonly Configuration $configuration,
+        private readonly DoctrineConfigStruct $config,
         private readonly CacheItemPoolFactory $cache_factory,
         private readonly LoggerInterface $logger,
     ) {
@@ -31,34 +32,49 @@ class ConnectionFactory
 
     public function connect(string $name = self::DEFAULT): Connection
     {
-        $params = $this->configuration->get("database.doctrine.connections.$name") ?? [];
-        if ($params === [] || ! \is_array($params)) {
-            throw new ConnectionNotFound('Unknown Connection: ' . $name);
-        }
+        $config = $this->config->connections[$name] ?? throw new ConnectionNotFound(
+            'Connection Not Defined In Configuration: ' . $name,
+        );
 
-        $cache_driver = CacheDriver::tryFrom((string)($params['cache_driver'] ?? '')) ?? match ($this->environment->stage) {
-            BuildStage::Production => CacheDriver::Remote,
-            BuildStage::Integration => match ($this->environment->context) {
-                Context::Test => CacheDriver::Memory,
-                default => CacheDriver::Remote,
-            },
-            default => CacheDriver::Memory,
-        };
+        \assert($config instanceof DoctrineConnectionConfigStruct);
 
         $connection_config = new ConnectionConfiguration();
-        $connection_config->setResultCache(match ($cache_driver) {
+        $connection_config->setResultCache(match ($this->resolveCacheDriver($config->result_cache_driver)) {
             CacheDriver::Remote => $this->cache_factory->make(CacheDriver::Remote, "dbal.$name.result."),
             CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, "dbal.$name.result."),
             CacheDriver::None => $this->cache_factory->make(CacheDriver::None),
             default => throw new \LogicException('Unsupported Cache Type for Doctrine DBAL Result Cache'),
         });
 
-        if ($params['enable_logging'] ?? false) {
+        if ($config->enable_logging) {
             $middleware = $connection_config->getMiddlewares();
             $middleware[] = new Middleware($this->logger);
             $connection_config->setMiddlewares($middleware);
         }
 
-        return DriverManager::getConnection($params, $connection_config);
+        \assert(\in_array($config->driver, DriverManager::getAvailableDrivers(), true));
+
+        return DriverManager::getConnection([
+            'host' => $config->host,
+            'port' => $config->port,
+            'dbname' => $config->dbname,
+            'user' => $config->user,
+            'password' => $config->password,
+            'driver' => $config->driver,
+            'charset' => $config->charset,
+            'driverOptions' => $config->driver_options,
+        ], $connection_config);
+    }
+
+    private function resolveCacheDriver(CacheDriver|null $cache_driver): CacheDriver
+    {
+        if ($this->environment->context === Context::Test) {
+            return CacheDriver::Memory;
+        }
+
+        return $cache_driver ?? match ($this->environment->stage) {
+            BuildStage::Production, BuildStage::Integration => CacheDriver::Remote,
+            default => CacheDriver::Memory,
+        };
     }
 }

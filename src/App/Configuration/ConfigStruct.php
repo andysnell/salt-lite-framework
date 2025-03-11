@@ -12,11 +12,12 @@ namespace PhoneBurner\SaltLite\Framework\App\Configuration;
  *
  * Implementations should be both final and readonly
  *
+ * @extends \ArrayAccess<string, mixed>
  * @todo Enforce that implementations are 'final' and 'readonly' via custom PHPStan rule
  * @todo Enforce allow-list of property types via custom PHPStan rule
  * @todo Add custom PHPStan rule to check that all declared properties are serialized/deserialized
  */
-interface ConfigStruct
+interface ConfigStruct extends \ArrayAccess
 {
     public function __serialize(): array;
 

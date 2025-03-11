@@ -45,6 +45,7 @@ final class Types
     public const string PHONE_NUMBER = 'phone_number';
     public const string AREA_CODE = 'area_code';
 
+    /** @var array<string, class-string> */
     public const array REGISTRATION_MAP = [
         // Register Vendor Doctrine Types
         self::BINARY_UUID => UuidBinaryType::class, // Use with BINARY(16) columns

@@ -7,8 +7,8 @@ namespace PhoneBurner\SaltLite\Framework\EventDispatcher;
 use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\Framework\Console\EventListener\ConsoleErrorListener;
 use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory;
+use PhoneBurner\SaltLite\Framework\EventDispatcher\Config\EventDispatcherConfigStruct;
 use PhoneBurner\SaltLite\Framework\EventDispatcher\EventListener\LazyListener;
-use PhoneBurner\SaltLite\Framework\Logging\LogLevel;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -46,23 +46,20 @@ class EventDispatcherServiceFactory implements ServiceFactory
 
     public function __invoke(App $app, string $id): SymfonyEventDispatcherAdapter
     {
+        $config = Type::of(EventDispatcherConfigStruct::class, $app->config->get('event_dispatcher'));
+
         try {
-            $event_dispatcher = ghost(function (EventDispatcher $ghost) use ($app): void {
+            $event_dispatcher = ghost(function (EventDispatcher $ghost) use ($app, $config): void {
                 $ghost->__construct();
 
-                $subscribers = \array_unique([
-                    ...self::FRAMEWORK_SUBSCRIBERS,
-                    ...$app->config->get('event_dispatcher.subscribers') ?: [],
-                ]);
-
-                foreach ($subscribers as $subscriber) {
+                foreach (\array_unique([...self::FRAMEWORK_SUBSCRIBERS, ...$config->subscribers]) as $subscriber) {
                     \assert(Type::isClassStringOf(EventSubscriberInterface::class, $subscriber));
                     foreach ($subscriber::getSubscribedEvents() as $event => $methods) {
                         $this->registerSubscriberListeners($app, $ghost, $event, $subscriber, $methods);
                     }
                 }
 
-                foreach ($app->config->get('event_dispatcher.listeners') ?: [] as $event => $listeners) {
+                foreach ($config->listeners as $event => $listeners) {
                     foreach ($listeners as $listener) {
                         $ghost->addListener($event, $this->listener($app, $listener));
                     }
@@ -72,10 +69,12 @@ class EventDispatcherServiceFactory implements ServiceFactory
             return new SymfonyEventDispatcherAdapter(
                 $event_dispatcher,
                 $app->get(LoggerInterface::class),
-                LogLevel::cast($app->config->get('event_dispatcher.event_dispatch_log_level')),
-                LogLevel::cast($app->config->get('event_dispatcher.event_failure_log_level')),
+                $config->event_dispatch_log_level,
+                $config->event_failure_log_level,
             );
         } finally {
+            // we only needed the listener cache while constructing the event dispatcher
+            // so we should clear it now to free up memory
             $this->cache = [];
         }
     }

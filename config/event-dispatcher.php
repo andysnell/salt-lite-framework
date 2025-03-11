@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use PhoneBurner\SaltLite\Framework\App\Event\ApplicationBootstrap;
 use PhoneBurner\SaltLite\Framework\App\Event\ApplicationTeardown;
-use PhoneBurner\SaltLite\Framework\Console\EventListener\ConsoleErrorListener;
+use PhoneBurner\SaltLite\Framework\EventDispatcher\Config\EventDispatcherConfigStruct;
 use PhoneBurner\SaltLite\Framework\Logging\LogLevel;
 use PhoneBurner\SaltLite\Framework\MessageBus\Event\InvokableMessageHandlingComplete;
 use PhoneBurner\SaltLite\Framework\MessageBus\Event\InvokableMessageHandlingFailed;
@@ -25,22 +25,15 @@ use Symfony\Component\Messenger\Event\WorkerRateLimitedEvent;
 use Symfony\Component\Messenger\Event\WorkerRunningEvent;
 use Symfony\Component\Messenger\Event\WorkerStartedEvent;
 use Symfony\Component\Messenger\Event\WorkerStoppedEvent;
-use Symfony\Component\Messenger\EventListener\AddErrorDetailsStampListener;
-use Symfony\Component\Messenger\EventListener\DispatchPcntlSignalListener;
-use Symfony\Component\Messenger\EventListener\SendFailedMessageForRetryListener;
-use Symfony\Component\Messenger\EventListener\SendFailedMessageToFailureTransportListener;
-use Symfony\Component\Messenger\EventListener\StopWorkerOnCustomStopExceptionListener;
-use Symfony\Component\Messenger\EventListener\StopWorkerOnRestartSignalListener;
 use Symfony\Component\Scheduler\Event\FailureEvent;
 use Symfony\Component\Scheduler\Event\PostRunEvent;
 use Symfony\Component\Scheduler\Event\PreRunEvent;
-use Symfony\Component\Scheduler\EventListener\DispatchSchedulerEventListener;
 
 return [
-    'event_dispatcher' => [
-        'event_dispatch_log_level' => LogLevel::Debug, // set to null to disable
-        'event_failure_log_level' => LogLevel::Warning, // set to null to disable
-        'listeners' => [
+    'event_dispatcher' => new EventDispatcherConfigStruct(
+        event_dispatch_log_level: LogLevel::Debug,
+        event_failure_log_level: LogLevel::Warning,
+        listeners: [
             // Application Lifecycle Events
             ApplicationBootstrap::class => [],
             ApplicationTeardown::class => [],
@@ -79,5 +72,5 @@ return [
 
             // Application Events & Listeners
         ],
-    ],
+    ),
 ];

@@ -39,6 +39,22 @@ final readonly class ClassString implements \Stringable
     }
 
     /**
+     * @param class-string<T> $type
+     * @return self<T>
+     * @phpstan-assert class-string<T> $value
+     */
+    public static function match(string $value, string $type): self
+    {
+        if (\is_a($value, $type, true)) {
+            /** @var ClassString<T> $class_string */
+            $class_string = new self($value);
+            return $class_string;
+        }
+
+        throw new \UnexpectedValueException("Class '$value' does not match type '$type'");
+    }
+
+    /**
      * @param self|object|class-string $class
      */
     public function is(object|string $class): bool

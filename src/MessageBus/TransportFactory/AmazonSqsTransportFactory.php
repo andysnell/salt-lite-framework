@@ -8,8 +8,8 @@ use Symfony\Component\Messenger\Bridge\AmazonSqs\Transport\AmazonSqsTransport;
 
 class AmazonSqsTransportFactory
 {
-    public function make(array $options): AmazonSqsTransport
+    public function make(string $connection, array $options): AmazonSqsTransport
     {
-        throw new \Exception('Not implemented');
+        throw new \LogicException('Not implemented');
     }
 }

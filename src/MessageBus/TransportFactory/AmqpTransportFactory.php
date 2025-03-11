@@ -8,8 +8,8 @@ use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpTransport;
 
 class AmqpTransportFactory
 {
-    public function make(array $options): AmqpTransport
+    public function make(string $connection, array $options): AmqpTransport
     {
-        throw new \Exception('Not implemented');
+        throw new \LogicException('Not implemented');
     }
 }

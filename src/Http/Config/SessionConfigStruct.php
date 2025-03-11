@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Http\Config;
 
 use PhoneBurner\SaltLite\Framework\App\Configuration\ConfigStruct;
+use PhoneBurner\SaltLite\Framework\App\Configuration\Struct\ConfigStructArrayAccess;
+use PhoneBurner\SaltLite\Framework\App\Configuration\Struct\ConfigStructSerialization;
 use PhoneBurner\SaltLite\Framework\Domain\Time\TimeConstant;
 use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
 use PhoneBurner\SaltLite\Framework\Http\Session\SessionHandlerType;
@@ -15,6 +17,9 @@ use const PhoneBurner\SaltLite\Framework\APP_ROOT;
 
 final readonly class SessionConfigStruct implements ConfigStruct
 {
+    use ConfigStructArrayAccess;
+    use ConfigStructSerialization;
+
     /**
      * @param SessionHandlerType $handler
      * The session handler to use for storing session data. Note that we do not
@@ -61,17 +66,5 @@ final readonly class SessionConfigStruct implements ConfigStruct
         public Serializer $serializer = Serializer::Igbinary,
         public string $file_path = APP_ROOT . '/storage/sessions',
     ) {
-    }
-
-    public function __serialize(): array
-    {
-        return \get_object_vars($this);
-    }
-
-    public function __unserialize(array $data): void
-    {
-        foreach ($data as $name => $value) {
-            $this->$name = $value;
-        }
     }
 }

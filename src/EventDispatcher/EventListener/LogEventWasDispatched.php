@@ -11,34 +11,29 @@ use PhoneBurner\SaltLite\Framework\Util\Attribute\DefaultServiceProvider;
 use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
 use Psr\Log\LoggerInterface;
 
+/**
+ * A listener to attach to an event to log that the specific event was dispatched.
+ * For more general logging, use the configuration settings in EventDispatcherConfigStruct
+ * to toggle event logging.
+ */
 #[DefaultServiceProvider(EventDispatcherServiceProvider::class)]
 class LogEventWasDispatched
 {
-    public function __construct(
-        private readonly LoggerInterface $logger,
-        private readonly bool $log_all_events = false,
-    ) {
+    public function __construct(private readonly LoggerInterface $logger)
+    {
     }
 
     public function __invoke(object $event): void
     {
         try {
-            match (true) {
-                $event instanceof Loggable => $this->log($event->getLogEntry()),
-                $this->log_all_events => $this->log($this->createLogEntry($event)),
-                default => null,
-            };
+            $log_entry = $this->createLogEntry($event);
+            $this->logger->log($log_entry->level, $log_entry->message, $log_entry->context);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to Log Event Was Dispatched', [
                 'class' => $event::class,
                 'exception' => $e,
             ]);
         }
-    }
-
-    private function log(LogEntry $log_entry): void
-    {
-        $this->logger->log($log_entry->level, $log_entry->message, $log_entry->context);
     }
 
     /**
@@ -48,6 +43,10 @@ class LogEventWasDispatched
      */
     private function createLogEntry(object $event): LogEntry
     {
+        if ($event instanceof Loggable) {
+            return $event->getLogEntry();
+        }
+
         return new LogEntry(message: Str::ucwords(Str::shortname($event::class)), context: [
             'event' => $event::class,
         ]);

@@ -143,9 +143,9 @@
     "symfony/var-dumper": "^7.2.3"
   },
   "scripts": {
-    "lint": "@php vendor/bin/parallel-lint -j $(nproc) --show-deprecated --exclude vendor --exclude build .",
-    "phpcbf": "@php vendor/bin/phpcbf --parallel=$(nproc) --report=full",
-    "phpcs": "@php vendor/bin/phpcs --parallel=$(nproc) --report=full",
+    "lint": "@php vendor/bin/parallel-lint -j $(nproc --ignore=2) --show-deprecated --exclude vendor --exclude build .",
+    "phpcbf": "@php vendor/bin/phpcbf --parallel=$(nproc --ignore=2) --report=full",
+    "phpcs": "@php vendor/bin/phpcs --parallel=$(nproc --ignore=2) --report=full",
     "phpstan": "@php vendor/bin/phpstan analyze --memory-limit=-1 --verbose",
     "test": [
       "@putenv XDEBUG_MODE=off",
