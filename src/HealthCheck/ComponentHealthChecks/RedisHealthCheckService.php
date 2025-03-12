@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks;
 
-use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
+use PhoneBurner\SaltLite\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
-use PhoneBurner\SaltLite\Framework\Domain\Time\StopWatch;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\ComponentHealthCheck;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\ComponentType;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthStatus;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\MeasurementName;
-use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
+use PhoneBurner\SaltLite\Logging\LogTrace;
+use PhoneBurner\SaltLite\Time\StopWatch;
 use Psr\Log\LoggerInterface;
 
 class RedisHealthCheckService implements ComponentHealthCheckService

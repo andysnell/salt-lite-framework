@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Cache;
 
-use PhoneBurner\SaltLite\Framework\App\BuildStage;
-use PhoneBurner\SaltLite\Framework\App\Context;
-use PhoneBurner\SaltLite\Framework\App\Environment;
+use PhoneBurner\SaltLite\App\BuildStage;
+use PhoneBurner\SaltLite\App\Context;
+use PhoneBurner\SaltLite\App\Environment;
+use PhoneBurner\SaltLite\Cache\CacheDriver;
+use PhoneBurner\SaltLite\Cache\Psr6\CacheItemPoolFactory as CacheItemPoolFactoryContract;
+use PhoneBurner\SaltLite\Cache\Psr6\CacheItemPoolProxy;
+use PhoneBurner\SaltLite\Cache\Psr6\FileCacheItemPoolFactory as FileCacheItemPoolFactoryContract;
 use PhoneBurner\SaltLite\Framework\Cache\Marshaller\RemoteCacheMarshaller;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
-use PhoneBurner\SaltLite\Framework\Util\Serialization\Serializer;
+use PhoneBurner\SaltLite\Serialization\Serializer;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -24,7 +28,7 @@ use Symfony\Component\Cache\Adapter\RedisAdapter;
 use function PhoneBurner\SaltLite\Framework\ghost;
 use function PhoneBurner\SaltLite\Framework\path;
 
-class CacheItemPoolFactory
+class CacheItemPoolFactory implements CacheItemPoolFactoryContract, FileCacheItemPoolFactoryContract
 {
     public const string DEFAULT_NAMESPACE = 'cache';
 
@@ -56,27 +60,28 @@ class CacheItemPoolFactory
     {
         return $namespace !== null ? new ProxyAdapter($this->make($driver), $namespace) : match ($driver) {
             CacheDriver::Remote => $this->pool ??= $this->createDefaultCacheItemPool(),
-            CacheDriver::File => $this->file ??= $this->createFileCacheItemPool(),
+            CacheDriver::File => $this->file ??= $this->createFileCacheItemPool(
+                self::DEFAULT_NAMESPACE,
+                path(self::DEFAULT_FILE_CACHE_DIRECTORY),
+            ),
             CacheDriver::Memory => $this->memory ??= new ArrayAdapter(storeSerialized: false),
             CacheDriver::None => $this->null ??= new NullAdapter(),
         };
     }
 
     public function createFileCacheItemPool(
-        string|null $namespace = null,
+        string $namespace = '',
         string|null $directory = null,
     ): CacheItemPoolInterface {
         if ($this->environment->context === Context::Test) {
             return $this->make(CacheDriver::Memory);
         }
 
-        return ghost(function (PhpFilesAdapter $ghost) use ($namespace, $directory): void {
-            $ghost->__construct(
-                $namespace ?: self::DEFAULT_NAMESPACE,
-                directory: $directory ?? path(self::DEFAULT_FILE_CACHE_DIRECTORY),
-                appendOnly: true,
-            );
-        });
+        return ghost(static fn(PhpFilesAdapter $ghost): null => $ghost->__construct(
+            $namespace,
+            directory: $directory,
+            appendOnly: true,
+        ));
     }
 
     /**

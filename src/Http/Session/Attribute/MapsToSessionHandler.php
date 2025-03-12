@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Session\Attribute;
 
-use PhoneBurner\SaltLite\Framework\Util\Attribute\MapsToClassString;
-use PhoneBurner\SaltLite\Framework\Util\ClassString;
+use PhoneBurner\SaltLite\String\ClassString\ClassString;
+use PhoneBurner\SaltLite\String\ClassString\MapsToClassString;
 
 /**
  * @implements MapsToClassString<\SessionHandlerInterface>

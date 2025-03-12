@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Console;
 
 use Crell\AttributeUtils\ClassAnalyzer;
-use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\App\Command\DebugAppKeys;
-use PhoneBurner\SaltLite\Framework\Console\Command\InteractiveSaltShell;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Container\DeferrableServiceProvider;
+use PhoneBurner\SaltLite\Container\ServiceFactory\NewInstanceServiceFactory;
+use PhoneBurner\SaltLite\Framework\App\Command\DebugAppKeysCommand;
+use PhoneBurner\SaltLite\Framework\Console\Command\InteractiveSaltShellCommand;
 use PhoneBurner\SaltLite\Framework\Console\EventListener\ConsoleErrorListener;
-use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
-use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory\NewInstanceServiceFactory;
-use PhoneBurner\SaltLite\Framework\EventDispatcher\Command\DebugEventListeners;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Command\CacheRoutes;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Command\ListRoutes;
-use PhoneBurner\SaltLite\Framework\Scheduler\Command\ConsumeScheduleMessages;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
+use PhoneBurner\SaltLite\Framework\EventDispatcher\Command\DebugEventListenersCommand;
+use PhoneBurner\SaltLite\Framework\Http\Routing\Command\CacheRoutesCommand;
+use PhoneBurner\SaltLite\Framework\Http\Routing\Command\ListRoutesCommand;
+use PhoneBurner\SaltLite\Framework\Scheduler\Command\ConsumeScheduledMessagesCommand;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\CommandLoader\CommandLoaderInterface;
@@ -33,13 +33,13 @@ use Symfony\Component\Scheduler\Command\DebugCommand as ScheduleDebugCommand;
 final class ConsoleServiceProvider implements DeferrableServiceProvider
 {
     public const array FRAMEWORK_COMMANDS = [
-        InteractiveSaltShell::class,
-        ListRoutes::class,
-        CacheRoutes::class,
-        DebugAppKeys::class,
-        DebugEventListeners::class,
+        InteractiveSaltShellCommand::class,
+        ListRoutesCommand::class,
+        CacheRoutesCommand::class,
+        DebugAppKeysCommand::class,
+        DebugEventListenersCommand::class,
         ConsumeMessagesCommand::class,
-        ConsumeScheduleMessages::class,
+        ConsumeScheduledMessagesCommand::class,
         StatsCommand::class,
         StopWorkersCommand::class,
         ScheduleDebugCommand::class,
@@ -53,7 +53,7 @@ final class ConsoleServiceProvider implements DeferrableServiceProvider
             CommandLoaderInterface::class,
             Application::class,
             ConsoleApplication::class,
-            InteractiveSaltShell::class,
+            InteractiveSaltShellCommand::class,
             ConsoleErrorListener::class,
         ];
     }
@@ -91,6 +91,6 @@ final class ConsoleServiceProvider implements DeferrableServiceProvider
 
         $app->set(ConsoleApplication::class, new ConsoleApplicationServiceFactory());
 
-        $app->set(InteractiveSaltShell::class, new NewInstanceServiceFactory(InteractiveSaltShell::class, [$app]));
+        $app->set(InteractiveSaltShellCommand::class, new NewInstanceServiceFactory(InteractiveSaltShellCommand::class, [$app]));
     }
 }

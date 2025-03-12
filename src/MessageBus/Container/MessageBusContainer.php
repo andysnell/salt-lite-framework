@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\MessageBus\Container;
 
-use PhoneBurner\SaltLite\Framework\Container\ObjectContainer\MutableObjectContainer;
-use PhoneBurner\SaltLite\Framework\MessageBus\MessageBus;
+use PhoneBurner\SaltLite\Container\ObjectContainer\MutableObjectContainer;
 use PhoneBurner\SaltLite\Framework\MessageBus\SymfonyMessageBusAdapter;
+use PhoneBurner\SaltLite\MessageBus\MessageBus;
 
 /**
  * @extends MutableObjectContainer<SymfonyMessageBusAdapter>

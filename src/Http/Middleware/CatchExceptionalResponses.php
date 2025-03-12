@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Middleware;
 
-use PhoneBurner\SaltLite\Framework\App\BuildStage;
-use PhoneBurner\SaltLite\Framework\App\Context;
-use PhoneBurner\SaltLite\Framework\Http\Domain\ContentType;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpStatus;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\ServerErrorResponse;
-use PhoneBurner\SaltLite\Framework\Http\Response\StreamResponse;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Psr7;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
+use PhoneBurner\SaltLite\App\BuildStage;
+use PhoneBurner\SaltLite\App\Context;
+use PhoneBurner\SaltLite\Http\Domain\ContentType;
+use PhoneBurner\SaltLite\Http\Domain\HttpHeader;
+use PhoneBurner\SaltLite\Http\Domain\HttpStatus;
+use PhoneBurner\SaltLite\Http\Psr7;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\ServerErrorResponse;
+use PhoneBurner\SaltLite\Http\Response\StreamResponse;
+use PhoneBurner\SaltLite\String\Str;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;

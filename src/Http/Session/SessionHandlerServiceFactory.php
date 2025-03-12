@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Session;
 
-use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
-use PhoneBurner\SaltLite\Framework\Cache\Lock\LockFactory;
-use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\Cache\Lock\LockFactory;
+use PhoneBurner\SaltLite\Clock\Clock;
+use PhoneBurner\SaltLite\Container\ServiceFactory;
+use PhoneBurner\SaltLite\Cryptography\Natrium;
+use PhoneBurner\SaltLite\Cryptography\Random\Random;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use PhoneBurner\SaltLite\Framework\Http\Config\SessionConfigStruct;
-use PhoneBurner\SaltLite\Framework\Http\Cookie\CookieJar;
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\CompressingSessionHandlerDecorator;
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\CookieSessionHandler;
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\EncodingSessionHandlerDecorator;
@@ -20,10 +21,9 @@ use PhoneBurner\SaltLite\Framework\Http\Session\Handler\InMemorySessionHandler;
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\LockingSessionHandlerDecorator;
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\NullSessionHandler;
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\RedisSessionHandler;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\Natrium;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\Random\Random;
-use PhoneBurner\SaltLite\Framework\Util\Encoding;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
+use PhoneBurner\SaltLite\Http\Cookie\CookieJar;
+use PhoneBurner\SaltLite\String\Encoding\Encoding;
+use PhoneBurner\SaltLite\Type\Type;
 
 use function PhoneBurner\SaltLite\Framework\ghost;
 

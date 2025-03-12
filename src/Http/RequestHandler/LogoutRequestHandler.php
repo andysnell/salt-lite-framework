@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\RequestHandler;
 
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpStatus;
-use PhoneBurner\SaltLite\Framework\Http\Event\HandlingLogoutRequest;
-use PhoneBurner\SaltLite\Framework\Http\Response\RedirectResponse;
-use PhoneBurner\SaltLite\Framework\Http\Session\SessionManager;
+use PhoneBurner\SaltLite\Http\Domain\HttpStatus;
+use PhoneBurner\SaltLite\Http\Event\HandlingLogoutRequest;
+use PhoneBurner\SaltLite\Http\Response\RedirectResponse;
+use PhoneBurner\SaltLite\Http\Session\SessionManager;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

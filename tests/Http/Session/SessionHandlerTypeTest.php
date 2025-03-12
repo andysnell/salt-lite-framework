@@ -18,7 +18,7 @@ final class SessionHandlerTypeTest extends TestCase
 {
     #[Test]
     #[DataProvider('providesTestCases')]
-    public function happy_path_for_getSessionHandlerClass(string $class_string, SessionHandlerType $type): void
+    public function happyPathForGetSessionHandlerClass(string $class_string, SessionHandlerType $type): void
     {
         self::assertSame($class_string, $type->getSessionHandlerClass()->value);
     }

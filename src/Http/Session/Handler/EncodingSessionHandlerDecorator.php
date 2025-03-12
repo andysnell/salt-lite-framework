@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Session\Handler;
 
-use PhoneBurner\SaltLite\Framework\Http\Session\Exception\HttpSessionException;
-use PhoneBurner\SaltLite\Framework\Http\Session\Exception\SessionWriteFailure;
-use PhoneBurner\SaltLite\Framework\Http\Session\SessionHandler;
-use PhoneBurner\SaltLite\Framework\Http\Session\SessionId;
-use PhoneBurner\SaltLite\Framework\Util\Encoding;
+use PhoneBurner\SaltLite\Cryptography\ConstantTime;
+use PhoneBurner\SaltLite\Http\Session\Exception\HttpSessionException;
+use PhoneBurner\SaltLite\Http\Session\Exception\SessionWriteFailure;
+use PhoneBurner\SaltLite\Http\Session\SessionHandler;
+use PhoneBurner\SaltLite\Http\Session\SessionId;
+use PhoneBurner\SaltLite\String\Encoding\Encoding;
 
 final class EncodingSessionHandlerDecorator extends SessionHandlerDecorator
 {
@@ -25,7 +26,7 @@ final class EncodingSessionHandlerDecorator extends SessionHandlerDecorator
     public function read(string|SessionId $id): string
     {
         $data = $this->handler->read($id);
-        return $data === '' ? '' : $this->encoding->decode($data);
+        return $data === '' ? '' : ConstantTime::decode($this->encoding, $data);
     }
 
     /**
@@ -35,7 +36,7 @@ final class EncodingSessionHandlerDecorator extends SessionHandlerDecorator
     public function write(string|SessionId $id, string $data): bool
     {
         try {
-            return $this->handler->write($id, $this->encoding->encode($data));
+            return $this->handler->write($id, ConstantTime::encode($this->encoding, $data));
         } catch (\Throwable $e) {
             throw $e instanceof HttpSessionException ? $e : new SessionWriteFailure(
                 message: 'Failed to encode session data',

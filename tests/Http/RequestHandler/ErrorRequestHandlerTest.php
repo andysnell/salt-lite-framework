@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Tests\Http\RequestHandler;
 
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpReasonPhrase;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpStatus;
 use PhoneBurner\SaltLite\Framework\Http\RequestHandler\ErrorRequestHandler;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\GenericHttpExceptionResponse;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\HttpExceptionResponse;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Match\RouteMatch;
+use PhoneBurner\SaltLite\Http\Domain\HttpReasonPhrase;
+use PhoneBurner\SaltLite\Http\Domain\HttpStatus;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\GenericHttpExceptionResponse;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\HttpExceptionResponse;
+use PhoneBurner\SaltLite\Http\Routing\Match\RouteMatch;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
@@ -24,7 +24,7 @@ final class ErrorRequestHandlerTest extends TestCase
     #[TestWith([451])]
     #[TestWith([500])]
     #[Test]
-    public function handle_returns_mapped_error_response(int $status_code): void
+    public function handleReturnsMappedErrorResponse(int $status_code): void
     {
         $route_match = $this->createMock(RouteMatch::class);
         $route_match->expects($this->once())
@@ -52,7 +52,7 @@ final class ErrorRequestHandlerTest extends TestCase
     #[TestWith([666])]
     #[TestWith([''])]
     #[Test]
-    public function handle_returns_fallback_404_response(mixed $error_param): void
+    public function handleReturnsFallback404Response(mixed $error_param): void
     {
         $route_match = $this->createMock(RouteMatch::class);
         $route_match->expects($this->once())

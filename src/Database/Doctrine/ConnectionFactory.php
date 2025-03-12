@@ -9,11 +9,11 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Logging\Middleware;
 use Doctrine\DBAL\Tools\Console\ConnectionNotFound;
-use PhoneBurner\SaltLite\Framework\App\BuildStage;
-use PhoneBurner\SaltLite\Framework\App\Context;
-use PhoneBurner\SaltLite\Framework\App\Environment;
-use PhoneBurner\SaltLite\Framework\Cache\CacheDriver;
-use PhoneBurner\SaltLite\Framework\Cache\CacheItemPoolFactory;
+use PhoneBurner\SaltLite\App\BuildStage;
+use PhoneBurner\SaltLite\App\Context;
+use PhoneBurner\SaltLite\App\Environment;
+use PhoneBurner\SaltLite\Cache\CacheDriver;
+use PhoneBurner\SaltLite\Cache\Psr6\CacheItemPoolFactory;
 use PhoneBurner\SaltLite\Framework\Database\Config\DoctrineConfigStruct;
 use PhoneBurner\SaltLite\Framework\Database\Config\DoctrineConnectionConfigStruct;
 use Psr\Log\LoggerInterface;
@@ -40,8 +40,8 @@ class ConnectionFactory
 
         $connection_config = new ConnectionConfiguration();
         $connection_config->setResultCache(match ($this->resolveCacheDriver($config->result_cache_driver)) {
-            CacheDriver::Remote => $this->cache_factory->make(CacheDriver::Remote, "dbal.$name.result."),
-            CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, "dbal.$name.result."),
+            CacheDriver::Remote => $this->cache_factory->make(CacheDriver::Remote, \sprintf('dbal.%s.result.', $name)),
+            CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, \sprintf('dbal.%s.result.', $name)),
             CacheDriver::None => $this->cache_factory->make(CacheDriver::None),
             default => throw new \LogicException('Unsupported Cache Type for Doctrine DBAL Result Cache'),
         });

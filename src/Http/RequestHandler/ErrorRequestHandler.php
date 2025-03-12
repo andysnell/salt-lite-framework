@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\RequestHandler;
 
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpReasonPhrase;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpStatus;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\GenericHttpExceptionResponse;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\PageNotFoundResponse;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Match\RouteMatch;
+use PhoneBurner\SaltLite\Http\Domain\HttpReasonPhrase;
+use PhoneBurner\SaltLite\Http\Domain\HttpStatus;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\GenericHttpExceptionResponse;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\PageNotFoundResponse;
+use PhoneBurner\SaltLite\Http\Routing\Match\RouteMatch;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;

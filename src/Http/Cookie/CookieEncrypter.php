@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Cookie;
 
+use PhoneBurner\SaltLite\Cryptography\ConstantTime;
+use PhoneBurner\SaltLite\Cryptography\Natrium;
+use PhoneBurner\SaltLite\Cryptography\String\Ciphertext;
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\CookieSessionHandler;
 use PhoneBurner\SaltLite\Framework\Http\Session\SessionManager;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\Natrium;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\String\Ciphertext;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\String\ConstantTime;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\String\ConstantTimeEncoding;
+use PhoneBurner\SaltLite\Http\Cookie\Cookie;
+use PhoneBurner\SaltLite\String\Encoding\Encoding;
 
 /**
  * When using encrypted cookies, one implementation detail that has to be addressed
@@ -75,7 +76,7 @@ class CookieEncrypter
     public const int PREFIX_ENCODED_CHARS = 22;
     public const int PREFIX_BYTES = 16;
 
-    public const ConstantTimeEncoding ENCODING = ConstantTimeEncoding::Base64UrlNoPadding;
+    public const Encoding ENCODING = Encoding::Base64UrlNoPadding;
 
     public function __construct(
         private readonly Natrium $natrium,
@@ -115,7 +116,7 @@ class CookieEncrypter
         }
 
        // Just return values that don't match the Base64URLNoPadding encoding regex
-        if (! \preg_match(ConstantTimeEncoding::BASE64URL_NO_PADDING_REGEX, $value)) {
+        if (! \preg_match(Encoding::BASE64URL_NO_PADDING_REGEX, $value)) {
             return $value;
         }
 

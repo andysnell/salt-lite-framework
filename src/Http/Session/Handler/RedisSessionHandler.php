@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Session\Handler;
 
-use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
 use PhoneBurner\SaltLite\Framework\Http\Session\SessionHandler;
-use PhoneBurner\SaltLite\Framework\Http\Session\SessionId;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
+use PhoneBurner\SaltLite\Http\Session\SessionId;
+use PhoneBurner\SaltLite\Time\Ttl;
 
 #[Internal]
 final class RedisSessionHandler extends SessionHandler
@@ -34,7 +34,7 @@ final class RedisSessionHandler extends SessionHandler
     }
 
     /**
-     * Note: we cannot use PhoneBurner\SaltLite\Framework\Cache\CacheKey::make()
+     * Note: we cannot use PhoneBurner\SaltLite\Cache\CacheKey::make()
      * like we normally would for creating a normalized cache key because our session
      * key has invalid characters for a PSR-6, which get converted to underscores,
      * reducing the variance of the session id.

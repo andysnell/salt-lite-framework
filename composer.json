@@ -38,6 +38,10 @@
     {
       "type": "github",
       "url": "https://github.com/phoneburner/salt-lite-phpstan"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/phoneburner/salt-lite"
     }
   ],
   "autoload": {
@@ -56,7 +60,6 @@
   },
   "require": {
     "php": "^8.4",
-    "ext-amqp": "*",
     "ext-bcmath": "*",
     "ext-ctype": "*",
     "ext-curl": "*",
@@ -75,7 +78,6 @@
     "ext-zip": "*",
     "ext-zlib": "*",
     "alek13/slack": "^2.3",
-    "brick/varexporter": "^0.5.0",
     "composer/composer": "^2.8",
     "crell/api-problem": "^3.7",
     "crell/attributeutils": "^1.2",
@@ -97,6 +99,7 @@
     "phoneburner/api-handler": "dev-develop",
     "phoneburner/http-tortilla": "dev-develop",
     "phoneburner/link-tortilla": "dev-main",
+    "phoneburner/salt-lite": "dev-main",
     "psr/cache": "^3.0.0",
     "psr/clock": "^1.0.0",
     "psr/container": "^2.0.2",
@@ -128,16 +131,12 @@
     "symfony/sendgrid-mailer": "^7.2.3"
   },
   "require-dev": {
-    "brianium/paratest": "^7.7",
     "filp/whoops": "^2.17",
-    "jangregor/phpstan-prophecy": "^2",
     "phoneburner/coding-standard": "dev-main",
     "phoneburner/composer-replacements": "dev-main",
     "phoneburner/salt-lite-phpstan": "dev-main",
     "php-parallel-lint/php-parallel-lint": "^1.4",
-    "phpspec/prophecy": "^1.20",
-    "phpspec/prophecy-phpunit": "^2.3",
-    "phpunit/phpunit": "^11.5.6",
+    "phpunit/phpunit": "^12",
     "rector/rector": "^2.0.7",
     "roave/security-advisories": "dev-latest",
     "symfony/var-dumper": "^7.2.3"

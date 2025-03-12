@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Console;
 
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
 use Symfony\Component\Console\Application as SymfonyConsoleApplication;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Input\InputInterface;

@@ -4,44 +4,32 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Tests\Http\Routing\Middleware;
 
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;
-use PhoneBurner\SaltLite\Framework\Http\Response\EmptyResponse;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\MethodNotAllowedResponse;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Definition\RouteDefinition;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Match\RouteMatch;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Middleware\AttachRouteToRequest;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Result\MethodNotAllowed;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Result\RouteFound;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Result\RouteNotFound;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Router;
+use PhoneBurner\SaltLite\Http\Domain\HttpHeader;
+use PhoneBurner\SaltLite\Http\Domain\HttpMethod;
+use PhoneBurner\SaltLite\Http\Response\EmptyResponse;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\MethodNotAllowedResponse;
+use PhoneBurner\SaltLite\Http\Routing\Definition\RouteDefinition;
+use PhoneBurner\SaltLite\Http\Routing\Match\RouteMatch;
+use PhoneBurner\SaltLite\Http\Routing\Result\MethodNotAllowed;
+use PhoneBurner\SaltLite\Http\Routing\Result\RouteFound;
+use PhoneBurner\SaltLite\Http\Routing\Result\RouteNotFound;
+use PhoneBurner\SaltLite\Http\Routing\Router;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Prophecy\PhpUnit\ProphecyTrait;
-use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 final class AttachRouteToRequestTest extends TestCase
 {
-    use ProphecyTrait;
+    private MockObject&Router $router;
 
-    /**
-     * @var ObjectProphecy<Router>
-     */
-    private ObjectProphecy $router;
+    private MockObject&ServerRequestInterface $request;
 
-    /**
-     * @var ObjectProphecy<ServerRequestInterface>
-     */
-    private ObjectProphecy $request;
-
-    /**
-     * @var ObjectProphecy<RequestHandlerInterface>
-     */
-    private ObjectProphecy $next_handler;
+    private MockObject&RequestHandlerInterface $next_handler;
 
     private ResponseInterface $response;
 
@@ -50,28 +38,28 @@ final class AttachRouteToRequestTest extends TestCase
     #[\Override]
     protected function setUp(): void
     {
-        $this->request = $this->prophesize(ServerRequestInterface::class);
-        $this->next_handler = $this->prophesize(RequestHandlerInterface::class);
+        $this->request = $this->createMock(ServerRequestInterface::class);
+        $this->next_handler = $this->createMock(RequestHandlerInterface::class);
         $this->response = $this->createMock(ResponseInterface::class);
 
-        $this->router = $this->prophesize(Router::class);
+        $this->router = $this->createMock(Router::class);
 
-        $this->sut = new AttachRouteToRequest($this->router->reveal());
+        $this->sut = new AttachRouteToRequest($this->router);
     }
 
     #[Test]
     #[DataProvider('providesMethodsOtherThanOptions')]
-    public function process_returns_MethodNotAllowedResponse_when_match_method_is_not_allowed(HttpMethod $method): void
+    public function processReturnsMethodNotAllowedResponseWhenMatchMethodIsNotAllowed(HttpMethod $method): void
     {
         $methods = [HttpMethod::Get, HttpMethod::Post];
 
-        $this->router->resolveForRequest($this->request->reveal())->willReturn(
-            MethodNotAllowed::make(...$methods),
-        );
+        $this->router->method('resolveForRequest')
+            ->with($this->request)
+            ->willReturn(MethodNotAllowed::make(...$methods));
 
-        $this->request->getMethod()->willReturn($method->value);
+        $this->request->method('getMethod')->willReturn($method->value);
 
-        $response = $this->sut->process($this->request->reveal(), $this->next_handler->reveal());
+        $response = $this->sut->process($this->request, $this->next_handler);
         self::assertInstanceOf(MethodNotAllowedResponse::class, $response);
         self::assertSame($response->allowed_methods, [HttpMethod::Get, HttpMethod::Post]);
     }
@@ -89,79 +77,81 @@ final class AttachRouteToRequestTest extends TestCase
     }
 
     #[Test]
-    public function process_returns_EmptyResponse_when_options_is_method(): void
+    public function processReturnsEmptyResponseWhenOptionsIsMethod(): void
     {
         $methods = [HttpMethod::Get, HttpMethod::Post];
 
-        $this->router->resolveForRequest($this->request->reveal())->willReturn(
-            MethodNotAllowed::make(...$methods),
-        );
+        $this->router->method('resolveForRequest')
+            ->with($this->request)
+            ->willReturn(MethodNotAllowed::make(...$methods));
 
-        $this->request->getMethod()->willReturn(HttpMethod::Options->value);
-        $this->request->getHeaderLine(HttpHeader::ACCESS_CONTROL_REQUEST_HEADERS)->willReturn('Authorization, Cookie');
-        $this->request->hasHeader(HttpHeader::ORIGIN)->willReturn(false);
+        $this->request->method('getMethod')->willReturn(HttpMethod::Options->value);
+        $this->request->method('getHeaderLine')
+            ->with(HttpHeader::ACCESS_CONTROL_REQUEST_HEADERS)
+            ->willReturn('Authorization, Cookie');
+        $this->request->method('hasHeader')->with(HttpHeader::ORIGIN)->willReturn(false);
 
-        $response = $this->sut->process($this->request->reveal(), $this->next_handler->reveal());
+        $response = $this->sut->process($this->request, $this->next_handler);
         self::assertInstanceOf(EmptyResponse::class, $response);
         self::assertSame('OPTIONS, GET, POST', $response->getHeaderLine(HttpHeader::ALLOW));
     }
 
-
     #[Test]
     #[DataProvider('providesMethodsOtherThanOptions')]
-    public function process_returns_d(HttpMethod $method): void
+    public function processReturnsD(HttpMethod $method): void
     {
         $methods = [HttpMethod::Get, HttpMethod::Post];
 
-        $this->router->resolveForRequest($this->request->reveal())->willReturn(
-            MethodNotAllowed::make(...$methods),
-        );
+        $this->router->method('resolveForRequest')
+            ->with($this->request)
+            ->willReturn(MethodNotAllowed::make(...$methods));
 
-        $this->request->getMethod()->willReturn($method->value);
+        $this->request->method('getMethod')->willReturn($method->value);
 
-        $response = $this->sut->process($this->request->reveal(), $this->next_handler->reveal());
+        $response = $this->sut->process($this->request, $this->next_handler);
         self::assertInstanceOf(MethodNotAllowedResponse::class, $response);
         self::assertSame($response->allowed_methods, [HttpMethod::Get, HttpMethod::Post]);
     }
 
     #[Test]
-    public function process_attaches_route_when_match_is_found(): void
+    public function processAttachesRouteWhenMatchIsFound(): void
     {
         $route = RouteDefinition::get('/test');
         $result = RouteFound::make($route, ['path' => 'data']);
 
-        $this->router->resolveForRequest($this->request->reveal())->willReturn(
-            $result,
-        );
+        $this->router->method('resolveForRequest')
+            ->with($this->request)
+            ->willReturn($result);
 
-        $request_with_route = $this->prophesize(ServerRequestInterface::class)->reveal();
-        $this->request->withAttribute(
-            RouteMatch::class,
-            RouteMatch::make($route, ['path' => 'data']),
-        )->willReturn($request_with_route)
-            ->shouldBeCalledOnce();
+        $request_with_route = $this->createMock(ServerRequestInterface::class);
+        $this->request->expects($this->once())
+            ->method('withAttribute')
+            ->with(RouteMatch::class, RouteMatch::make($route, ['path' => 'data']))
+            ->willReturn($request_with_route);
 
-        $this->next_handler->handle($request_with_route)
-            ->willReturn($this->response)
-            ->shouldBeCalled();
+        $this->next_handler->expects($this->once())
+            ->method('handle')
+            ->with($request_with_route)
+            ->willReturn($this->response);
 
-        $response = $this->sut->process($this->request->reveal(), $this->next_handler->reveal());
+        $response = $this->sut->process($this->request, $this->next_handler);
 
         self::assertSame($this->response, $response);
     }
 
     #[Test]
-    public function process_passes_when_match_is_not_found(): void
+    public function processPassesWhenMatchIsNotFound(): void
     {
-        $this->router->resolveForRequest($this->request->reveal())->willReturn(
-            RouteNotFound::make(),
-        );
+        $this->router->method('resolveForRequest')
+            ->with($this->request)
+            ->willReturn(RouteNotFound::make());
 
-        $this->next_handler->handle($this->request->reveal())
-            ->willReturn($this->response)
-            ->shouldBeCalled();
+        $this->next_handler->expects($this->once())
+            ->method('handle')
+            ->with($this->request)
+            ->willReturn($this->response);
 
-        $response = $this->sut->process($this->request->reveal(), $this->next_handler->reveal());
+        $response = $this->sut->process($this->request, $this->next_handler);
 
         self::assertSame($this->response, $response);
     }

@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Mailer;
 
-use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
-use PhoneBurner\SaltLite\Framework\Domain\Email\EmailAddress;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Container\DeferrableServiceProvider;
+use PhoneBurner\SaltLite\Domain\Email\EmailAddress;
 use PhoneBurner\SaltLite\Framework\Mailer\Transport\TransportServiceFactory;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
+use PhoneBurner\SaltLite\Mailer\Mailer;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Mailer\Command\MailerTestCommand;
 use Symfony\Component\Mailer\Mailer as SymfonyMailer;

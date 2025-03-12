@@ -7,9 +7,9 @@ namespace PhoneBurner\SaltLite\Framework\Database\Doctrine\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Exception\InvalidType;
 use Doctrine\DBAL\Types\Type;
+use PhoneBurner\SaltLite\Domain\PhoneNumber\E164;
+use PhoneBurner\SaltLite\Domain\PhoneNumber\NullablePhoneNumber;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\Types;
-use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\E164;
-use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\NullablePhoneNumber;
 
 class NullablePhoneNumberType extends Type
 {

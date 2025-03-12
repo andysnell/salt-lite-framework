@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Tests\App;
 
-use PhoneBurner\SaltLite\Framework\App\BuildStage;
-use PhoneBurner\SaltLite\Framework\App\Context;
+use PhoneBurner\SaltLite\App\BuildStage;
+use PhoneBurner\SaltLite\App\Context;
 use PhoneBurner\SaltLite\Framework\App\Environment;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 final class EnvironmentTest extends TestCase
 {
     #[Test]
-    public function environment_has_root(): void
+    public function environmentHasRoot(): void
     {
         $root = 'some/system/path';
         $server = [
@@ -28,7 +28,7 @@ final class EnvironmentTest extends TestCase
     }
 
     #[Test]
-    public function environment_can_get_values_from_the_environment_and_server(): void
+    public function environmentCanGetValuesFromTheEnvironmentAndServer(): void
     {
         $empty = [];
         $server = [

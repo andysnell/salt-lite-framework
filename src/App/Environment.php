@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\App;
 
-use PhoneBurner\SaltLite\Framework\Util\Attribute\DefaultServiceProvider;
-use Psr\Container\ContainerInterface;
+use PhoneBurner\SaltLite\App\BuildStage;
+use PhoneBurner\SaltLite\App\Context;
+use PhoneBurner\SaltLite\App\Environment as EnvironmentContract;
 
 /**
  * Represents the environment and context in which the application is running.
@@ -13,17 +14,16 @@ use Psr\Container\ContainerInterface;
  * (The server is checked first before the environment.) It also defines some
  * methods for getting things like the root directory and hostname.
  */
-#[DefaultServiceProvider(AppServiceProvider::class)]
-final class Environment implements ContainerInterface
+final class Environment implements EnvironmentContract
 {
-    public readonly BuildStage $stage;
+    public BuildStage $stage;
 
     /**
      * @param array<string, mixed> $server Since this will usually be $_SERVER, it cannot be readonly
      * @param array<string, mixed> $env Since this will usually be $_ENV, it cannot be readonly
      */
     public function __construct(
-        public readonly Context $context,
+        public Context $context,
         public readonly string $root,
         private array &$server,
         private array &$env,

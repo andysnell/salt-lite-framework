@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Session\Handler;
 
-use PhoneBurner\SaltLite\Framework\Cache\CacheKey;
-use PhoneBurner\SaltLite\Framework\Cache\Lock\Lock;
-use PhoneBurner\SaltLite\Framework\Cache\Lock\LockFactory;
-use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\ServerErrorResponse;
+use PhoneBurner\SaltLite\Cache\CacheKey;
+use PhoneBurner\SaltLite\Cache\Lock\Lock;
+use PhoneBurner\SaltLite\Cache\Lock\LockFactory;
 use PhoneBurner\SaltLite\Framework\Http\Session\SessionHandler;
-use PhoneBurner\SaltLite\Framework\Http\Session\SessionId;
 use PhoneBurner\SaltLite\Framework\Http\Session\SessionManager;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\ServerErrorResponse;
+use PhoneBurner\SaltLite\Http\Session\SessionId;
+use PhoneBurner\SaltLite\Time\Ttl;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -36,7 +36,7 @@ final class LockingSessionHandlerDecorator extends SessionHandlerDecorator
         SessionId|null $id = null,
         ServerRequestInterface|null $request = null,
     ): bool {
-        if ($id) {
+        if ($id !== null) {
             $this->lock = $this->lock_factory->make(CacheKey::make('session', $id), Ttl::seconds(10));
             $this->lock->acquire(true, 30) || throw new ServerErrorResponse(detail: 'Could not acquire session lock');
         }

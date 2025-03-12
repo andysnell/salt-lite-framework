@@ -7,9 +7,9 @@ namespace PhoneBurner\SaltLite\Framework\Storage;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\FilesystemReader;
 use League\Flysystem\FilesystemWriter;
-use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Container\DeferrableServiceProvider;
 
 /**
  * @codeCoverageIgnore

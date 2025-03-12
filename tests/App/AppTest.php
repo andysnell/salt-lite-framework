@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Tests\App;
 
+use PhoneBurner\SaltLite\App\Context;
 use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\App\Context;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\JsonResponseTransformerStrategy;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\TransformerStrategies\JsonResponseTransformerStrategy;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 final class AppTest extends TestCase
 {
     #[Test]
-    public function application_lifecycle_happy_path(): void
+    public function applicationLifecycleHappyPath(): void
     {
         $app = App::bootstrap(Context::Test);
         self::assertTrue(App::booted());

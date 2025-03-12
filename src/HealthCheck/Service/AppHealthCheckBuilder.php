@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\HealthCheck\Service;
 
-use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
+use PhoneBurner\SaltLite\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthCheck;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthStatus;

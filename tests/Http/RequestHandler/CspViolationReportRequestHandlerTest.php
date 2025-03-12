@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Tests\Http\RequestHandler;
 
 use Laminas\Diactoros\ServerRequest;
-use PhoneBurner\SaltLite\Framework\Http\Domain\ContentType;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpStatus;
 use PhoneBurner\SaltLite\Framework\Http\RequestHandler\CspViolationReportRequestHandler;
-use PhoneBurner\SaltLite\Framework\Http\Response\EmptyResponse;
+use PhoneBurner\SaltLite\Http\Domain\ContentType;
+use PhoneBurner\SaltLite\Http\Domain\HttpHeader;
+use PhoneBurner\SaltLite\Http\Domain\HttpMethod;
+use PhoneBurner\SaltLite\Http\Domain\HttpStatus;
+use PhoneBurner\SaltLite\Http\Response\EmptyResponse;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
 final class CspViolationReportRequestHandlerTest extends TestCase
 {
     #[Test]
-    public function respond_logs_reported_violations(): void
+    public function respondLogsReportedViolations(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects($this->once())->method('notice')->with('CSP Violation Reported', [
@@ -53,12 +53,12 @@ final class CspViolationReportRequestHandlerTest extends TestCase
     }
 
     #[Test]
-    public function respond_handles_the_empty_case(): void
+    public function respondHandlesTheEmptyCase(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects($this->once())->method('notice')->with('CSP Violation Reported', []);
 
-        $request = (new ServerRequest())
+        $request = new ServerRequest()
             ->withMethod(HttpMethod::Post->value)
             ->withHeader(HttpHeader::CONTENT_TYPE, ContentType::JSON)
             ->withParsedBody(null);

@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Cache\Lock;
 
-use PhoneBurner\SaltLite\Framework\Domain\Time\StopWatch;
-use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Cache\Lock\Lock;
+use PhoneBurner\SaltLite\Cache\Lock\SharedLockMode;
+use PhoneBurner\SaltLite\Time\StopWatch;
+use PhoneBurner\SaltLite\Time\Ttl;
+use PhoneBurner\SaltLite\Time\TtlRemaining;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Lock\SharedLockInterface;
@@ -61,10 +64,10 @@ class SymfonyLockAdapter implements Lock, LoggerAwareInterface
     }
 
     #[\Override]
-    public function ttl(): Ttl|null
+    public function ttl(): TtlRemaining|null
     {
         $ttl = $this->lock->getRemainingLifetime();
-        return $ttl !== null ? new Ttl($ttl) : null;
+        return $ttl !== null ? new TtlRemaining($ttl) : null;
     }
 
     #[\Override]

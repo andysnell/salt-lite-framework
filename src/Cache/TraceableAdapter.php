@@ -66,7 +66,8 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
             $event->end = \microtime(true);
         }
 
-        if ($event->result[$key] = $item->isHit()) {
+        $event->result[$key] = $item->isHit();
+        if ($event->result[$key]) {
             ++$event->hits;
         } else {
             ++$event->misses;
@@ -136,7 +137,8 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
         $f = static function () use ($result, $event) {
             $event->result = [];
             foreach ($result as $key => $item) {
-                if ($event->result[$key] = $item->isHit()) {
+                $event->result[$key] = $item->isHit();
+                if ($event->result[$key]) {
                     ++$event->hits;
                 } else {
                     ++$event->misses;

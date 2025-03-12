@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Tests\HealthCheck\Domain;
 
-use PhoneBurner\SaltLite\Framework\Domain\Time\Standards\Rfc3339;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\ComponentHealthCheck;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthStatus;
+use PhoneBurner\SaltLite\Time\Standards\Rfc3339;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
@@ -17,7 +17,7 @@ final class ComponentHealthCheckTest extends TestCase
     #[TestWith([HealthStatus::Pass])]
     #[TestWith([HealthStatus::Warn])]
     #[TestWith([HealthStatus::Fail])]
-    public function happy_path_with_all_properties(HealthStatus $status): void
+    public function happyPathWithAllProperties(HealthStatus $status): void
     {
         $now = new \DateTimeImmutable();
 
@@ -56,7 +56,7 @@ final class ComponentHealthCheckTest extends TestCase
     #[TestWith([HealthStatus::Pass])]
     #[TestWith([HealthStatus::Warn])]
     #[TestWith([HealthStatus::Fail])]
-    public function happy_path_with_some_properties(HealthStatus $status): void
+    public function happyPathWithSomeProperties(HealthStatus $status): void
     {
         $now = new \DateTimeImmutable();
 
@@ -86,7 +86,7 @@ final class ComponentHealthCheckTest extends TestCase
     #[TestWith([HealthStatus::Pass])]
     #[TestWith([HealthStatus::Warn])]
     #[TestWith([HealthStatus::Fail])]
-    public function happy_path_with_component_only(HealthStatus $status): void
+    public function happyPathWithComponentOnly(HealthStatus $status): void
     {
         $now = new \DateTimeImmutable();
 
@@ -108,7 +108,7 @@ final class ComponentHealthCheckTest extends TestCase
     }
 
     #[Test]
-    public function happy_path_with_no_properties(): void
+    public function happyPathWithNoProperties(): void
     {
         $health_check = new ComponentHealthCheck();
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Http\Middleware;
 
 use PhoneBurner\ApiHandler\TransformableResponse;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\ResponseException;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\ResponseException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;

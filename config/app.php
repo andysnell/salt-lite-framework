@@ -11,9 +11,9 @@
 declare(strict_types=1);
 
 use PhoneBurner\SaltLite\Framework\App\Config\AppConfigStruct;
-use PhoneBurner\SaltLite\Framework\Domain\I18n\IsoLocale;
-use PhoneBurner\SaltLite\Framework\Domain\Time\TimeZone\Tz;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\Symmetric\SharedKey;
+use PhoneBurner\SaltLite\I18n\IsoLocale;
+use PhoneBurner\SaltLite\Time\TimeZone\Tz;
+use PhoneBurner\SaltLite\Cryptography\Symmetric\SharedKey;
 
 use function PhoneBurner\SaltLite\Framework\env;
 

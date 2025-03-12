@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Database\Config;
 
 use Doctrine\DBAL\Types\Type;
-use PhoneBurner\SaltLite\Framework\App\Configuration\ConfigStruct;
-use PhoneBurner\SaltLite\Framework\App\Configuration\Struct\ConfigStructArrayAccess;
-use PhoneBurner\SaltLite\Framework\App\Configuration\Struct\ConfigStructSerialization;
+use PhoneBurner\SaltLite\Configuration\ConfigStruct;
+use PhoneBurner\SaltLite\Configuration\Struct\ConfigStructArrayAccess;
+use PhoneBurner\SaltLite\Configuration\Struct\ConfigStructSerialization;
 
 final readonly class DoctrineConfigStruct implements ConfigStruct
 {

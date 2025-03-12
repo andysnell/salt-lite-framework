@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use PhoneBurner\SaltLite\App\BuildStage;
+use PhoneBurner\SaltLite\App\Context;
 use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\App\BuildStage;
-use PhoneBurner\SaltLite\Framework\App\Context;
 use PhoneBurner\SaltLite\Framework\App\ErrorReporting;
 
 use const PhoneBurner\SaltLite\Framework\APP_ROOT;

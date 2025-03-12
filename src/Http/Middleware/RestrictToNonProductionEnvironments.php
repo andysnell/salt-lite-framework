@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Middleware;
 
-use PhoneBurner\SaltLite\Framework\App\BuildStage;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\ServerErrorResponse;
+use PhoneBurner\SaltLite\App\BuildStage;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\ServerErrorResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;

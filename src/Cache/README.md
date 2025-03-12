@@ -1,6 +1,6 @@
 # Cache
 
-The default cache interface is `\PhoneBurner\SaltLite\Framework\Cache\Cache`. This
+The default cache interface is `\PhoneBurner\SaltLite\Cache\Cache`. This
 interface is a simple wrapper around the PSR-16 Simple Cache interface with defined
 parameter and return types. It also enforces a TTL be set on all cache items. 
 Note that using `Ttl::max()` is functionally equivalent to not setting a TTL at all,

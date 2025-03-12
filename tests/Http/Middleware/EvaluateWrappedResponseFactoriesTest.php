@@ -6,7 +6,7 @@ namespace PhoneBurner\SaltLite\Framework\Tests\Http\Middleware;
 
 use PhoneBurner\ApiHandler\TransformableResponse;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\EvaluateWrappedResponseFactories;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\ResponseException;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\ResponseException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
@@ -19,7 +19,7 @@ final class EvaluateWrappedResponseFactoriesTest extends TestCase
     #[Test]
     #[TestWith([ResponseException::class])]
     #[TestWith([TransformableResponse::class])]
-    public function process_transforms_wrapped_responses(string $class): void
+    public function processTransformsWrappedResponses(string $class): void
     {
         self::assertTrue(\is_a($class, ResponseInterface::class, true));
         $response = $this->createMock($class);
@@ -42,7 +42,7 @@ final class EvaluateWrappedResponseFactoriesTest extends TestCase
     }
 
     #[Test]
-    public function process_ignores_other_responses(): void
+    public function processIgnoresOtherResponses(): void
     {
         $response = $this->createMock(ResponseInterface::class);
         $response->expects($this->never())->method(self::anything());

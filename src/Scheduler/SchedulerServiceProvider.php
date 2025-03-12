@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Scheduler;
 
-use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\Cache\CacheKey;
-use PhoneBurner\SaltLite\Framework\Cache\Lock\LockFactory;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Cache\CacheKey;
+use PhoneBurner\SaltLite\Cache\Lock\LockFactory;
+use PhoneBurner\SaltLite\Container\DeferrableServiceProvider;
 use PhoneBurner\SaltLite\Framework\Cache\Lock\SymfonyLockAdapter;
-use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
-use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
 use PhoneBurner\SaltLite\Framework\MessageBus\Container\ReceiverContainer;
-use PhoneBurner\SaltLite\Framework\Scheduler\Command\ConsumeScheduleMessages;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
+use PhoneBurner\SaltLite\Framework\Scheduler\Command\ConsumeScheduledMessagesCommand;
+use PhoneBurner\SaltLite\Time\Ttl;
+use PhoneBurner\SaltLite\Type\Type;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Clock\ClockInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -39,7 +39,7 @@ final class SchedulerServiceProvider implements DeferrableServiceProvider
             ScheduleProviderCollection::class,
             DebugCommand::class,
             DispatchSchedulerEventListener::class,
-            ConsumeScheduleMessages::class,
+            ConsumeScheduledMessagesCommand::class,
         ];
     }
 
@@ -80,8 +80,8 @@ final class SchedulerServiceProvider implements DeferrableServiceProvider
         );
 
         $app->set(
-            ConsumeScheduleMessages::class,
-            static function (App $app): ConsumeScheduleMessages {
+            ConsumeScheduledMessagesCommand::class,
+            static function (App $app): ConsumeScheduledMessagesCommand {
                 $clock = $app->get(ClockInterface::class);
 
                 // Add a transport instance for every configured schedule provider
@@ -92,7 +92,7 @@ final class SchedulerServiceProvider implements DeferrableServiceProvider
                     ));
                 }
 
-                return new ConsumeScheduleMessages(
+                return new ConsumeScheduledMessagesCommand(
                     $app->get(RoutableMessageBus::class),
                     $receiver_locator,
                     $app->get(SymfonyEventDispatcherInterface::class),

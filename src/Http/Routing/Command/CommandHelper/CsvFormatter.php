@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Http\Routing\Command\CommandHelper;
 
 use PhoneBurner\SaltLite\Framework\Http\Routing\Command\CommandHelper\RouteDefinitionListFormatter;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Definition\DefinitionList;
+use PhoneBurner\SaltLite\Http\Routing\Definition\DefinitionList;
 use SplTempFileObject;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -24,7 +24,7 @@ class CsvFormatter extends RouteDefinitionListFormatter
         $headers = self::HEADER_FIELDS;
 
         $csv_file = new SplTempFileObject();
-        $csv_file->fputcsv($headers);
+        $csv_file->fputcsv($headers, escape: '\\');
 
         foreach ($definitions as $definition) {
             $attributes = self::formatAttributes($definition);
@@ -34,7 +34,7 @@ class CsvFormatter extends RouteDefinitionListFormatter
                 \count($definition->getMethods()) >= 9 ? self::ALL_METHODS : \implode(', ', $definition->getMethods()),
                 $definition->getRoutePath(),
                 \implode(\PHP_EOL, $attributes),
-            ]);
+            ], escape: '\\');
         }
 
         $csv_file->rewind();

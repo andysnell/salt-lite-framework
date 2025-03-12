@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use PhoneBurner\SaltLite\Framework\App\Event\ApplicationBootstrap;
-use PhoneBurner\SaltLite\Framework\App\Event\ApplicationTeardown;
+use PhoneBurner\SaltLite\App\Event\ApplicationBootstrap;
+use PhoneBurner\SaltLite\App\Event\ApplicationTeardown;
 use PhoneBurner\SaltLite\Framework\EventDispatcher\Config\EventDispatcherConfigStruct;
-use PhoneBurner\SaltLite\Framework\Logging\LogLevel;
-use PhoneBurner\SaltLite\Framework\MessageBus\Event\InvokableMessageHandlingComplete;
-use PhoneBurner\SaltLite\Framework\MessageBus\Event\InvokableMessageHandlingFailed;
-use PhoneBurner\SaltLite\Framework\MessageBus\Event\InvokableMessageHandlingStarting;
+use PhoneBurner\SaltLite\Logging\LogLevel;
+use PhoneBurner\SaltLite\MessageBus\Event\InvokableMessageHandlingComplete;
+use PhoneBurner\SaltLite\MessageBus\Event\InvokableMessageHandlingFailed;
+use PhoneBurner\SaltLite\MessageBus\Event\InvokableMessageHandlingStarting;
 use PhoneBurner\SaltLite\Framework\MessageBus\EventListener\LogFailedInvokableMessageHandlingAttempt;
 use PhoneBurner\SaltLite\Framework\MessageBus\EventListener\LogWorkerMessageFailedEvent;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\MessageBus\EventListener;
 
-use PhoneBurner\SaltLite\Framework\MessageBus\Event\InvokableMessageHandlingFailed;
+use PhoneBurner\SaltLite\MessageBus\Event\InvokableMessageHandlingFailed;
 use Psr\Log\LoggerInterface;
 
 class LogFailedInvokableMessageHandlingAttempt

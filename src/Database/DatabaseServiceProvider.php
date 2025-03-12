@@ -8,16 +8,17 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Tools\Console\ConnectionProvider as DoctrineConnectionProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Console\EntityManagerProvider as DoctrineEntityManagerProvider;
-use PhoneBurner\SaltLite\Framework\App\App;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Cache\Psr6\CacheItemPoolFactory as CacheItemPoolFactoryContract;
+use PhoneBurner\SaltLite\Container\DeferrableServiceProvider;
 use PhoneBurner\SaltLite\Framework\Cache\CacheItemPoolFactory;
-use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\ConnectionFactory;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\ConnectionProvider;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\Orm\EntityManagerFactory;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\Orm\EntityManagerProvider;
 use PhoneBurner\SaltLite\Framework\Database\Redis\CachingRedisManager;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\Log\LoggerInterface;
 
 use function PhoneBurner\SaltLite\Framework\ghost;
@@ -77,7 +78,7 @@ final class DatabaseServiceProvider implements DeferrableServiceProvider
             ghost(static fn(ConnectionFactory $ghost): null => $ghost->__construct(
                 $app->environment,
                 $app->config->get('database.doctrine'),
-                $app->get(CacheItemPoolFactory::class),
+                $app->get(CacheItemPoolFactoryContract::class),
                 $app->get(LoggerInterface::class),
             )),
         );

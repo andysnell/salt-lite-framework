@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Session\Handler;
 
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
 use PhoneBurner\SaltLite\Framework\Http\Session\SessionHandler;
-use PhoneBurner\SaltLite\Framework\Http\Session\SessionId;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
+use PhoneBurner\SaltLite\Http\Session\SessionId;
 
 #[Internal]
 class InMemorySessionHandler extends SessionHandler

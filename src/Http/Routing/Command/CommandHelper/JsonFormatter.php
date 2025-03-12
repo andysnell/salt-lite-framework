@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Http\Routing\Command\CommandHelper;
 
 use PhoneBurner\SaltLite\Framework\Http\Routing\Command\CommandHelper\RouteDefinitionListFormatter;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Definition\DefinitionList;
+use PhoneBurner\SaltLite\Http\Routing\Definition\DefinitionList;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 

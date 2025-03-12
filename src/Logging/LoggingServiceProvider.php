@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Logging;
 
 use Monolog\Processor\PsrLogMessageProcessor;
-use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory\NewInstanceServiceFactory;
-use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Container\ServiceFactory\NewInstanceServiceFactory;
+use PhoneBurner\SaltLite\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\EnvironmentProcessor;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\LogTraceProcessor;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\PhoneNumberProcessor;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\PsrMessageInterfaceProcessor;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
+use PhoneBurner\SaltLite\Logging\LogTrace;
 use Psr\Log\LoggerInterface;
 
 /**

@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\EventDispatcher\EventListener;
 
-use PhoneBurner\SaltLite\Framework\EventDispatcher\EventDispatcherServiceProvider;
-use PhoneBurner\SaltLite\Framework\Logging\LogEntry;
-use PhoneBurner\SaltLite\Framework\Logging\Loggable;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\DefaultServiceProvider;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
+use PhoneBurner\SaltLite\Logging\LogEntry;
+use PhoneBurner\SaltLite\Logging\Loggable;
+use PhoneBurner\SaltLite\String\Str;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -16,7 +14,6 @@ use Psr\Log\LoggerInterface;
  * For more general logging, use the configuration settings in EventDispatcherConfigStruct
  * to toggle event logging.
  */
-#[DefaultServiceProvider(EventDispatcherServiceProvider::class)]
 class LogEventWasDispatched
 {
     public function __construct(private readonly LoggerInterface $logger)
@@ -38,7 +35,7 @@ class LogEventWasDispatched
 
     /**
      * Returns a debug log message with the unqualified event class name in
-     * title case, e.g.\PhoneBurner\SaltLite\Framework\MessageBus\Event\InvokableMessageHandlingStarting
+     * title case, e.g.\PhoneBurner\SaltLite\MessageBus\Event\InvokableMessageHandlingStarting
      * would become "Invokable Message Handling Starting".
      */
     private function createLogEntry(object $event): LogEntry

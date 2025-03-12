@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Tests\Cache\Lock;
 
-use PhoneBurner\SaltLite\Framework\Cache\Lock\NamedKey;
-use PhoneBurner\SaltLite\Framework\Cache\Lock\NamedKeyFactory;
 use PhoneBurner\SaltLite\Framework\Cache\Lock\SymfonyLockAdapter;
 use PhoneBurner\SaltLite\Framework\Cache\Lock\SymfonyLockFactoryAdapter;
-use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
+use PhoneBurner\SaltLite\Framework\Cache\Lock\SymfonyNamedKey;
+use PhoneBurner\SaltLite\Framework\Cache\Lock\SymfonyNamedKeyFactory;
+use PhoneBurner\SaltLite\Time\Ttl;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -20,31 +20,31 @@ use Symfony\Component\Lock\SharedLockInterface;
 final class SymfonyLockFactoryAdapterTest extends TestCase
 {
     #[Test]
-    public function lock_factory_sets_logger_on_wrapped_factory(): void
+    public function lockFactorySetsLoggerOnWrappedFactory(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $symfony_lock_factory = $this->createMock(SymfonyLockFactory::class);
-        $symfony_lock_factory->expects(self::once())->method('setLogger')->with($logger);
+        $symfony_lock_factory->expects($this->once())->method('setLogger')->with($logger);
 
-        $lock_factory = new SymfonyLockFactoryAdapter(new NamedKeyFactory(), $symfony_lock_factory);
+        $lock_factory = new SymfonyLockFactoryAdapter(new SymfonyNamedKeyFactory(), $symfony_lock_factory);
 
         $lock_factory->setLogger($logger);
     }
 
     #[DataProvider('providesTests')]
     #[Test]
-    public function lock_factory_creates_locks(
+    public function lockFactoryCreatesLocks(
         Key|\Stringable|string $key,
         bool $auto_release,
         int|float $ttl,
     ): void {
         $symfony_lock_factory = $this->createMock(SymfonyLockFactory::class);
-        $symfony_lock_factory->expects(self::once())
+        $symfony_lock_factory->expects($this->once())
             ->method('createLockFromKey')
             ->with(new Key('locks.test_resource_key'), $ttl, $auto_release)
             ->willReturn($this->createMock(SharedLockInterface::class));
 
-        $lock_factory = new SymfonyLockFactoryAdapter(new NamedKeyFactory(), $symfony_lock_factory);
+        $lock_factory = new SymfonyLockFactoryAdapter(new SymfonyNamedKeyFactory(), $symfony_lock_factory);
 
         $lock = $lock_factory->make($key, Ttl::seconds($ttl), $auto_release);
 
@@ -55,7 +55,7 @@ final class SymfonyLockFactoryAdapterTest extends TestCase
     {
         $keys = [
             'TestResourceKey',
-            new NamedKey('test_resource_key'),
+            new SymfonyNamedKey('test_resource_key'),
             new class implements \Stringable {
                 public function __toString(): string
                 {

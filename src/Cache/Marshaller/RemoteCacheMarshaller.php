@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Cache\Marshaller;
 
-use PhoneBurner\SaltLite\Framework\Cache\Exception\CacheMarshallingError;
-use PhoneBurner\SaltLite\Framework\Domain\Memory\Bytes;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
-use PhoneBurner\SaltLite\Framework\Util\Encoding;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
-use PhoneBurner\SaltLite\Framework\Util\Serialization\Marshaller;
-use PhoneBurner\SaltLite\Framework\Util\Serialization\Serializer;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Cache\Exception\CacheMarshallingError;
+use PhoneBurner\SaltLite\Domain\Memory\Bytes;
+use PhoneBurner\SaltLite\Serialization\Marshaller;
+use PhoneBurner\SaltLite\Serialization\Serializer;
+use PhoneBurner\SaltLite\String\Encoding\Encoding;
+use PhoneBurner\SaltLite\String\Str;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Cache\Marshaller\MarshallerInterface;
 

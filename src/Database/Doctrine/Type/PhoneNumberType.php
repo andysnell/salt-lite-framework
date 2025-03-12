@@ -7,10 +7,10 @@ namespace PhoneBurner\SaltLite\Framework\Database\Doctrine\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Exception\InvalidType;
 use Doctrine\DBAL\Types\Type;
+use PhoneBurner\SaltLite\Domain\PhoneNumber\DomesticPhoneNumber;
+use PhoneBurner\SaltLite\Domain\PhoneNumber\E164;
+use PhoneBurner\SaltLite\Domain\PhoneNumber\PhoneNumber;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\Types;
-use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\DomesticPhoneNumber;
-use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\E164;
-use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\PhoneNumber;
 
 class PhoneNumberType extends Type
 {

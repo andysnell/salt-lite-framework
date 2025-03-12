@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Tests\TestSupport;
 
 use GuzzleHttp\Psr7\Uri;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
+use PhoneBurner\SaltLite\Http\Domain\HttpHeader;
+use PhoneBurner\SaltLite\Http\Domain\HttpMethod;
+use PhoneBurner\SaltLite\String\Str;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Http\Message\ServerRequestInterface;
 

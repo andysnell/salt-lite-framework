@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Tests\Cache\Lock;
 
-use PhoneBurner\SaltLite\Framework\Cache\Lock\SharedLockMode;
+use PhoneBurner\SaltLite\Cache\Lock\SharedLockMode;
 use PhoneBurner\SaltLite\Framework\Cache\Lock\SymfonyLockAdapter;
-use PhoneBurner\SaltLite\Framework\Domain\Time\StopWatch;
-use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
+use PhoneBurner\SaltLite\Time\StopWatch;
+use PhoneBurner\SaltLite\Time\Ttl;
+use PhoneBurner\SaltLite\Time\TtlRemaining;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -19,7 +20,7 @@ use Symfony\Component\Lock\SharedLockInterface;
 final class SymfonyLockAdapterTest extends TestCase
 {
     #[Test]
-    public function adapter_sets_logger_on_wrapped_lock(): void
+    public function adapterSetsLoggerOnWrappedLock(): void
     {
         $symfony_lock = new class implements SharedLockInterface, LoggerAwareInterface {
             use LoggerAwareTrait;
@@ -73,7 +74,7 @@ final class SymfonyLockAdapterTest extends TestCase
 
     #[DataProvider('providesBooleanValues')]
     #[Test]
-    public function adapter_acquires_write_lock_without_blocking(bool $acquired): void
+    public function adapterAcquiresWriteLockWithoutBlocking(bool $acquired): void
     {
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->once())->method('acquire')->with(false)->willReturn($acquired);
@@ -86,7 +87,7 @@ final class SymfonyLockAdapterTest extends TestCase
 
     #[DataProvider('providesBooleanValues')]
     #[Test]
-    public function adapter_acquires_read_lock_without_blocking(bool $acquired): void
+    public function adapterAcquiresReadLockWithoutBlocking(bool $acquired): void
     {
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->once())->method('acquireRead')->with(false)->willReturn($acquired);
@@ -98,7 +99,7 @@ final class SymfonyLockAdapterTest extends TestCase
     }
 
     #[Test]
-    public function adapter_acquires_successful_write_lock_with_blocking(): void
+    public function adapterAcquiresSuccessfulWriteLockWithBlocking(): void
     {
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->exactly(3))
@@ -113,7 +114,7 @@ final class SymfonyLockAdapterTest extends TestCase
     }
 
     #[Test]
-    public function adapter_acquires_successful_read_lock_with_blocking(): void
+    public function adapterAcquiresSuccessfulReadLockWithBlocking(): void
     {
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->exactly(3))
@@ -128,7 +129,7 @@ final class SymfonyLockAdapterTest extends TestCase
     }
 
     #[Test]
-    public function adapter_times_out_on_write_lock_with_blocking(): void
+    public function adapterTimesOutOnWriteLockWithBlocking(): void
     {
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->atLeast(2))
@@ -143,7 +144,7 @@ final class SymfonyLockAdapterTest extends TestCase
     }
 
     #[Test]
-    public function adapter_times_out_on_read_lock_with_blocking(): void
+    public function adapterTimesOutOnReadLockWithBlocking(): void
     {
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->atLeast(2))
@@ -158,7 +159,7 @@ final class SymfonyLockAdapterTest extends TestCase
     }
 
     #[Test]
-    public function adapter_releases_lock(): void
+    public function adapterReleasesLock(): void
     {
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->once())->method('release');
@@ -168,17 +169,17 @@ final class SymfonyLockAdapterTest extends TestCase
     }
 
     #[Test]
-    public function adapter_refreshes_lock_with_ttl(): void
+    public function adapterRefreshesLockWithTtl(): void
     {
         $lock = $this->createMock(SharedLockInterface::class);
-        $lock->expects($this->once())->method('refresh')->with(123.45);
+        $lock->expects($this->once())->method('refresh')->with(123);
 
         $adapter = new SymfonyLockAdapter($lock);
         $adapter->refresh(Ttl::seconds(123.45));
     }
 
     #[Test]
-    public function adapter_refreshes_lock_without_ttl(): void
+    public function adapterRefreshesLockWithoutTtl(): void
     {
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->once())->method('refresh')->with(null);
@@ -189,7 +190,7 @@ final class SymfonyLockAdapterTest extends TestCase
 
     #[DataProvider('providesBooleanValues')]
     #[Test]
-    public function adapter_checks_if_lock_is_acquired(bool $is_acquired): void
+    public function adapterChecksIfLockIsAcquired(bool $is_acquired): void
     {
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->once())->method('isAcquired')->willReturn($is_acquired);
@@ -200,18 +201,18 @@ final class SymfonyLockAdapterTest extends TestCase
 
     #[DataProvider('providesTtlValues')]
     #[Test]
-    public function adapter_returns_non_null_ttl(int|float $ttl): void
+    public function adapterReturnsNonNullTtl(int|float $ttl): void
     {
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->once())->method('getRemainingLifetime')->willReturn($ttl);
 
         $adapter = new SymfonyLockAdapter($lock);
 
-        self::assertEquals(new Ttl($ttl), $adapter->ttl());
+        self::assertEquals(new TtlRemaining($ttl), $adapter->ttl());
     }
 
     #[Test]
-    public function adapter_returns_null_ttl(): void
+    public function adapterReturnsNullTtl(): void
     {
         $lock = $this->createMock(SharedLockInterface::class);
         $lock->expects($this->once())->method('getRemainingLifetime')->willReturn(null);

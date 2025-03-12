@@ -6,44 +6,47 @@ namespace PhoneBurner\SaltLite\Framework\Http;
 
 use Laminas\HttpHandlerRunner\Emitter\EmitterInterface;
 use Laminas\HttpHandlerRunner\Emitter\SapiStreamEmitter;
-use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
-use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
-use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory\NewInstanceServiceFactory;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Clock\Clock;
+use PhoneBurner\SaltLite\Container\DeferrableServiceProvider;
+use PhoneBurner\SaltLite\Container\ServiceFactory\NewInstanceServiceFactory;
+use PhoneBurner\SaltLite\Cryptography\Natrium;
 use PhoneBurner\SaltLite\Framework\Http\Cookie\CookieEncrypter;
-use PhoneBurner\SaltLite\Framework\Http\Cookie\CookieJar;
 use PhoneBurner\SaltLite\Framework\Http\Cookie\Middleware\ManageCookies;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\CatchExceptionalResponses;
-use PhoneBurner\SaltLite\Framework\Http\Middleware\LazyMiddlewareRequestHandlerFactory;
-use PhoneBurner\SaltLite\Framework\Http\Middleware\MiddlewareRequestHandlerFactory;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\TransformHttpExceptionResponses;
 use PhoneBurner\SaltLite\Framework\Http\RequestHandler\CspViolationReportRequestHandler;
 use PhoneBurner\SaltLite\Framework\Http\RequestHandler\ErrorRequestHandler;
 use PhoneBurner\SaltLite\Framework\Http\RequestHandler\LogoutRequestHandler;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\HtmlResponseTransformerStrategy;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\JsonResponseTransformerStrategy;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\TextResponseTransformerStrategy;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Command\CacheRoutes;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Command\ListRoutes;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Definition\DefinitionList;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Definition\LazyConfigDefinitionList;
+use PhoneBurner\SaltLite\Framework\Http\Routing\Command\CacheRoutesCommand;
+use PhoneBurner\SaltLite\Framework\Http\Routing\Command\ListRoutesCommand;
 use PhoneBurner\SaltLite\Framework\Http\Routing\FastRoute\FastRouteDispatcherFactory;
-use PhoneBurner\SaltLite\Framework\Http\Routing\FastRoute\FastRouter;
 use PhoneBurner\SaltLite\Framework\Http\Routing\FastRoute\FastRouteResultFactory;
+use PhoneBurner\SaltLite\Framework\Http\Routing\FastRouter;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Middleware\AttachRouteToRequest;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Middleware\DispatchRouteMiddleware;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Middleware\DispatchRouteRequestHandler;
-use PhoneBurner\SaltLite\Framework\Http\Routing\RequestHandler\NotFoundRequestHandler;
-use PhoneBurner\SaltLite\Framework\Http\Routing\RequestHandler\StaticFileRequestHandler;
-use PhoneBurner\SaltLite\Framework\Http\Routing\RouteProvider;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Router;
-use PhoneBurner\SaltLite\Framework\Http\Session\SessionHandler;
 use PhoneBurner\SaltLite\Framework\Http\Session\SessionHandlerServiceFactory;
 use PhoneBurner\SaltLite\Framework\Http\Session\SessionManager;
-use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\Natrium;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
+use PhoneBurner\SaltLite\Http\Cookie\CookieJar;
+use PhoneBurner\SaltLite\Http\Middleware\LazyMiddlewareRequestHandlerFactory;
+use PhoneBurner\SaltLite\Http\Middleware\MiddlewareRequestHandlerFactory;
+use PhoneBurner\SaltLite\Http\RequestFactory;
+use PhoneBurner\SaltLite\Http\RequestHandlerFactory;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\TransformerStrategies\HtmlResponseTransformerStrategy;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\TransformerStrategies\JsonResponseTransformerStrategy;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\TransformerStrategies\TextResponseTransformerStrategy;
+use PhoneBurner\SaltLite\Http\Routing\Definition\DefinitionList;
+use PhoneBurner\SaltLite\Http\Routing\Definition\LazyConfigDefinitionList;
+use PhoneBurner\SaltLite\Http\Routing\RequestHandler\NotFoundRequestHandler;
+use PhoneBurner\SaltLite\Http\Routing\RequestHandler\StaticFileRequestHandler;
+use PhoneBurner\SaltLite\Http\Routing\RouteProvider;
+use PhoneBurner\SaltLite\Http\Routing\Router;
+use PhoneBurner\SaltLite\Http\Session\SessionHandler;
+use PhoneBurner\SaltLite\Http\Session\SessionManager as SessionManagerContract;
+use PhoneBurner\SaltLite\Logging\LogTrace;
+use PhoneBurner\SaltLite\Type\Type;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
@@ -75,8 +78,8 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             FastRouteDispatcherFactory::class,
             FastRouteResultFactory::class,
             DefinitionList::class,
-            ListRoutes::class,
-            CacheRoutes::class,
+            ListRoutesCommand::class,
+            CacheRoutesCommand::class,
             CookieEncrypter::class,
             CookieJar::class,
             ManageCookies::class,
@@ -97,6 +100,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
     {
         return [
             Router::class => FastRouter::class,
+            SessionManagerContract::class => SessionManager::class,
         ];
     }
 
@@ -215,13 +219,13 @@ final class HttpServiceProvider implements DeferrableServiceProvider
         );
 
         $app->set(
-            ListRoutes::class,
-            static fn(App $app): ListRoutes => new ListRoutes($app->get(DefinitionList::class)),
+            ListRoutesCommand::class,
+            static fn(App $app): ListRoutesCommand => new ListRoutesCommand($app->get(DefinitionList::class)),
         );
 
         $app->set(
-            CacheRoutes::class,
-            static fn(App $app): CacheRoutes => new CacheRoutes(
+            CacheRoutesCommand::class,
+            static fn(App $app): CacheRoutesCommand => new CacheRoutesCommand(
                 $app->config,
                 $app->get(FastRouter::class),
             ),

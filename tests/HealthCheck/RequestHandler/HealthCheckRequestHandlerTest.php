@@ -9,10 +9,10 @@ use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthCheck;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthStatus;
 use PhoneBurner\SaltLite\Framework\HealthCheck\HealthCheckBuilder;
 use PhoneBurner\SaltLite\Framework\HealthCheck\RequestHandler\HealthCheckRequestHandler;
-use PhoneBurner\SaltLite\Framework\Http\Domain\ContentType;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpStatus;
-use PhoneBurner\SaltLite\Framework\Http\Response\JsonResponse;
+use PhoneBurner\SaltLite\Http\Domain\ContentType;
+use PhoneBurner\SaltLite\Http\Domain\HttpHeader;
+use PhoneBurner\SaltLite\Http\Domain\HttpStatus;
+use PhoneBurner\SaltLite\Http\Response\JsonResponse;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
@@ -25,7 +25,7 @@ final class HealthCheckRequestHandlerTest extends TestCase
     #[TestWith([HealthStatus::Pass, HttpStatus::OK])]
     #[TestWith([HealthStatus::Warn, HttpStatus::SERVICE_UNAVAILABLE])]
     #[TestWith([HealthStatus::Fail, HttpStatus::SERVICE_UNAVAILABLE])]
-    public function happy_path(HealthStatus $health_status, int $http_status): void
+    public function happyPath(HealthStatus $health_status, int $http_status): void
     {
         $request = $this->createMock(ServerRequestInterface::class);
         $request->method('getUri')->willReturn(new Uri('http://localhost/health'));

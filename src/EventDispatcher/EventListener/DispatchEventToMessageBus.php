@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\EventDispatcher\EventListener;
 
-use PhoneBurner\SaltLite\Framework\MessageBus\MessageBus;
+use PhoneBurner\SaltLite\MessageBus\MessageBus;
 
 class DispatchEventToMessageBus
 {

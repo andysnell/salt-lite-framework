@@ -38,7 +38,7 @@ a number of contexts.
 
 ### ObjectContainer
 
-`\PhoneBurner\SaltLite\Framework\Container\ObjectContainer\ObjectContainer` is a simple
+`\PhoneBurner\SaltLite\Container\ObjectContainer\ObjectContainer` is a simple
 interface defining a container that stores objects of a single type. It is countable, 
 iterable, and array-accessible. It currently has to variants, though in both cases, 
 the "genericness" of the container is defined by type annotations. These classes

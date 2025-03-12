@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Http\Routing\Command\CommandHelper;
 
 use Generator;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Definition\DefinitionList;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Definition\RouteDefinition;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Route;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Arr;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
+use PhoneBurner\SaltLite\Http\Routing\Definition\DefinitionList;
+use PhoneBurner\SaltLite\Http\Routing\Definition\RouteDefinition;
+use PhoneBurner\SaltLite\Http\Routing\Route;
+use PhoneBurner\SaltLite\Iterator\Arr;
+use PhoneBurner\SaltLite\String\Str;
 use Symfony\Component\Console\Output\OutputInterface;
 
 abstract class RouteDefinitionListFormatter

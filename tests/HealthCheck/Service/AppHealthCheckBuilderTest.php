@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Tests\HealthCheck\Service;
 
 use Carbon\CarbonImmutable;
-use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
-use PhoneBurner\SaltLite\Framework\App\Clock\StaticClock;
+use PhoneBurner\SaltLite\Clock\Clock;
+use PhoneBurner\SaltLite\Clock\StaticClock;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\ComponentHealthCheck;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthCheck;
@@ -19,7 +19,7 @@ use Psr\Log\LoggerInterface;
 final class AppHealthCheckBuilderTest extends TestCase
 {
     #[Test]
-    public function happy_path(): void
+    public function happyPath(): void
     {
         $now = new CarbonImmutable();
         $clock = new StaticClock($now);
@@ -77,7 +77,7 @@ final class AppHealthCheckBuilderTest extends TestCase
             },
         ];
 
-        $sut = (new AppHealthCheckBuilder($clock, $logger))
+        $sut = new AppHealthCheckBuilder($clock, $logger)
             ->withDescription('Test Description')
             ->withLinks(['self' => '/health'])
             ->withServices(...$services);
@@ -126,7 +126,7 @@ final class AppHealthCheckBuilderTest extends TestCase
     }
 
     #[Test]
-    public function sad_path_catches_exceptions(): void
+    public function sadPathCatchesExceptions(): void
     {
         $exception = new \RuntimeException('test exception');
 
@@ -149,7 +149,7 @@ final class AppHealthCheckBuilderTest extends TestCase
             },
         ];
 
-        $sut = (new AppHealthCheckBuilder($clock, $logger))
+        $sut = new AppHealthCheckBuilder($clock, $logger)
             ->withDescription('Test Description')
             ->withLinks(['self' => '/health'])
             ->withServices(...$services);

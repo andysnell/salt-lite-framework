@@ -7,8 +7,8 @@ namespace PhoneBurner\SaltLite\Framework\Database\Doctrine\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Exception\InvalidType;
 use Doctrine\DBAL\Types\Type;
+use PhoneBurner\SaltLite\Domain\PhoneNumber\AreaCode\AreaCode;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\Types;
-use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\AreaCode\AreaCode;
 
 class AreaCodeType extends Type
 {

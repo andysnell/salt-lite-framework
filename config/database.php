@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use PhoneBurner\SaltLite\Framework\Cache\CacheDriver;
+use PhoneBurner\SaltLite\Cache\CacheDriver;
 use PhoneBurner\SaltLite\Framework\Database\Config\AmpqConfigStruct;
 use PhoneBurner\SaltLite\Framework\Database\Config\AmpqConnectionConfigStruct;
 use PhoneBurner\SaltLite\Framework\Database\Config\DoctrineConfigStruct;

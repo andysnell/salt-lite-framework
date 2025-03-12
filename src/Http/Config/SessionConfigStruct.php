@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Config;
 
-use PhoneBurner\SaltLite\Framework\App\Configuration\ConfigStruct;
-use PhoneBurner\SaltLite\Framework\App\Configuration\Struct\ConfigStructArrayAccess;
-use PhoneBurner\SaltLite\Framework\App\Configuration\Struct\ConfigStructSerialization;
-use PhoneBurner\SaltLite\Framework\Domain\Time\TimeConstant;
-use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
+use PhoneBurner\SaltLite\Configuration\ConfigStruct;
+use PhoneBurner\SaltLite\Configuration\Struct\ConfigStructArrayAccess;
+use PhoneBurner\SaltLite\Configuration\Struct\ConfigStructSerialization;
 use PhoneBurner\SaltLite\Framework\Http\Session\SessionHandlerType;
-use PhoneBurner\SaltLite\Framework\Util\Encoding;
-use PhoneBurner\SaltLite\Framework\Util\Serialization\Serializer;
+use PhoneBurner\SaltLite\Serialization\Serializer;
+use PhoneBurner\SaltLite\String\Encoding\Encoding;
+use PhoneBurner\SaltLite\Time\TimeConstant;
+use PhoneBurner\SaltLite\Time\Ttl;
 
 use const PhoneBurner\SaltLite\Framework\APP_ROOT;
 

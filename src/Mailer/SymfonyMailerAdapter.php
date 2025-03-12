@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Mailer;
 
-use PhoneBurner\SaltLite\Framework\Domain\Email\EmailAddress;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Domain\Email\EmailAddress;
+use PhoneBurner\SaltLite\Mailer\AttachmentType;
+use PhoneBurner\SaltLite\Mailer\Mailable;
+use PhoneBurner\SaltLite\Mailer\MailableMessage;
+use PhoneBurner\SaltLite\Mailer\Mailer;
+use PhoneBurner\SaltLite\Mailer\Priority;
 use Symfony\Component\Mailer\MailerInterface as SymfonyMailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email as SymfonyEmail;

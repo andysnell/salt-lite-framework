@@ -6,14 +6,14 @@ namespace PhoneBurner\SaltLite\Framework\Notifier;
 
 use GuzzleHttp\Client as GuzzleClient;
 use Maknz\Slack\Client;
-use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\App\BuildStage;
-use PhoneBurner\SaltLite\Framework\Cache\Lock\LockFactory;
-use PhoneBurner\SaltLite\Framework\Container\DeferrableServiceProvider;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\App\BuildStage;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Cache\Lock\LockFactory;
+use PhoneBurner\SaltLite\Container\DeferrableServiceProvider;
 use PhoneBurner\SaltLite\Framework\Notifier\Slack\NullSlackNotificationClient;
 use PhoneBurner\SaltLite\Framework\Notifier\Slack\SlackNotificationClient;
 use PhoneBurner\SaltLite\Framework\Notifier\Slack\SlackWebhookNotificationClient;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\Log\LoggerInterface;
 
 use function PhoneBurner\SaltLite\Framework\ghost;

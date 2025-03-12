@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Session\Middleware;
 
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;
-use PhoneBurner\SaltLite\Framework\Http\Middleware\Exception\InvalidMiddlewareConfiguration;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\CsrfTokenRequiredResponse;
-use PhoneBurner\SaltLite\Framework\Http\Session\CsrfToken;
-use PhoneBurner\SaltLite\Framework\Http\Session\SessionData;
-use PhoneBurner\SaltLite\Framework\Http\Session\SessionManager;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\String\ConstantTime;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Psr7;
+use PhoneBurner\SaltLite\Cryptography\ConstantTime;
+use PhoneBurner\SaltLite\Http\Domain\HttpMethod;
+use PhoneBurner\SaltLite\Http\Middleware\Exception\InvalidMiddlewareConfiguration;
+use PhoneBurner\SaltLite\Http\Psr7;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\CsrfTokenRequiredResponse;
+use PhoneBurner\SaltLite\Http\Session\CsrfToken;
+use PhoneBurner\SaltLite\Http\Session\SessionData;
+use PhoneBurner\SaltLite\Http\Session\SessionManager;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\EventDispatcher\Config;
 
-use PhoneBurner\SaltLite\Framework\App\Configuration\ConfigStruct;
-use PhoneBurner\SaltLite\Framework\App\Configuration\Struct\ConfigStructArrayAccess;
-use PhoneBurner\SaltLite\Framework\App\Configuration\Struct\ConfigStructSerialization;
-use PhoneBurner\SaltLite\Framework\Logging\LogLevel;
+use PhoneBurner\SaltLite\Configuration\ConfigStruct;
+use PhoneBurner\SaltLite\Configuration\Struct\ConfigStructArrayAccess;
+use PhoneBurner\SaltLite\Configuration\Struct\ConfigStructSerialization;
+use PhoneBurner\SaltLite\Logging\LogLevel;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 final readonly class EventDispatcherConfigStruct implements ConfigStruct

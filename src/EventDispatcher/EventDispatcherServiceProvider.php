@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\EventDispatcher;
 
-use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
-use PhoneBurner\SaltLite\Framework\EventDispatcher\Command\DebugEventListeners;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Container\ServiceProvider;
+use PhoneBurner\SaltLite\Framework\EventDispatcher\Command\DebugEventListenersCommand;
 use PhoneBurner\SaltLite\Framework\EventDispatcher\EventListener\LogEventWasDispatched;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
@@ -41,8 +41,8 @@ final class EventDispatcherServiceProvider implements ServiceProvider
         );
 
         $app->set(
-            DebugEventListeners::class,
-            static fn(App $app): DebugEventListeners => new DebugEventListeners(
+            DebugEventListenersCommand::class,
+            static fn(App $app): DebugEventListenersCommand => new DebugEventListenersCommand(
                 $app->get(SymfonyEventDispatcherInterface::class),
             ),
         );

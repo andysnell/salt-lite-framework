@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Mailer\Transport;
 
-use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\Container\ServiceFactory;
 use PhoneBurner\SaltLite\Framework\Mailer\Config\SendgridDriverConfigStruct;
 use PhoneBurner\SaltLite\Framework\Mailer\Config\SmtpDriverConfigStruct;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -25,7 +25,7 @@ class TransportServiceFactory implements ServiceFactory
             TransportDriver::SendGrid => $this->makeSendGridTransportDns($transport_config),
             TransportDriver::Smtp => $this->makeSmptTransportDns($transport_config),
             TransportDriver::None => 'null://default',
-            default => throw new \RuntimeException("Unknown/Unsupported mailer transport driver: {$transport_driver}"),
+            default => throw new \RuntimeException('Unknown/Unsupported mailer transport driver: ' . $transport_driver),
         };
 
         return Transport::fromDsn(

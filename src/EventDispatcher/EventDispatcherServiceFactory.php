@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\EventDispatcher;
 
-use PhoneBurner\SaltLite\Framework\App\App;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\Container\ServiceFactory;
 use PhoneBurner\SaltLite\Framework\Console\EventListener\ConsoleErrorListener;
-use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory;
 use PhoneBurner\SaltLite\Framework\EventDispatcher\Config\EventDispatcherConfigStruct;
 use PhoneBurner\SaltLite\Framework\EventDispatcher\EventListener\LazyListener;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
+use PhoneBurner\SaltLite\Type\Type;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;

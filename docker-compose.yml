@@ -38,24 +38,6 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
 
-  app:
-    container_name: "salt-lite-framework-app"
-    build:
-      context: ./
-      dockerfile: Dockerfile
-      target: development
-    platform: linux/amd64
-    volumes:
-      - ${SOURCE_DIR:-./}:/app
-      - ./settings.ini:/usr/local/etc/php/conf.d/settings.ini
-    env_file:
-      - .env
-    environment:
-      PHP_IDE_CONFIG: "serverName=cli" # Used by PhpStorm for path mapping
-      COMPOSER_AUTH: "{\"github-oauth\": {\"github.com\":\"${GITHUB_TOKEN}\"}}"
-    extra_hosts:
-      - host.docker.internal:host-gateway
-
   message-consumer:
     container_name: "salt-lite-framework-message-consumer"
     profiles:

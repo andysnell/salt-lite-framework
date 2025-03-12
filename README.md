@@ -29,16 +29,16 @@ framework and trying to adapt that to our needs.
 - PHPUnit 11 is used for testing, with ParaTest for parallel execution, this is
   a significant upgrade from the previous version. Notably unit tests are defined
   with attributes and data providers must be defined as static functions.
-- When cast to a string, `\PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\DomesticPhoneNumber` is formatted as an
+- When cast to a string, `\PhoneBurner\SaltLite\Domain\PhoneNumber\DomesticPhoneNumber` is formatted as an
   E.164 phone number ("+13145551234"), instead a ten-digit number ("3145551234").
 
 ### Backwards Capability Guarantees
 
-Classes and interfaces with the `#[PhoneBurner\SaltLite\Framework\Util\Attribute\Contract]` attribute
+Classes and interfaces with the `#[PhoneBurner\SaltLite\Attribute\Usage\Contract]` attribute
 are considered part of the public API of the framework and should not be changed without
 a major version bump. These "contracts" can be freely used in application code.
 
-Conversely, classes and interfaces with the `#[PhoneBurner\SaltLite\Framework\Util\Attribute\Internal]`
+Conversely, classes and interfaces with the `#[PhoneBurner\SaltLite\Attribute\Usage\Internal]`
 attribute are very tightly coupled to third-party vendor and/or framework logic,
 and should not be used in application code.
 

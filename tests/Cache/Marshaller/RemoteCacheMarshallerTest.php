@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Tests\Cache\Marshaller;
 
-use PhoneBurner\SaltLite\Framework\Cache\Exception\CacheMarshallingError;
+use PhoneBurner\SaltLite\Cache\Exception\CacheMarshallingError;
 use PhoneBurner\SaltLite\Framework\Cache\Marshaller\RemoteCacheMarshaller;
-use PhoneBurner\SaltLite\Framework\Tests\Util\Helper\Fixture\LazyObject;
-use PhoneBurner\SaltLite\Framework\Tests\Util\Helper\Fixture\Mirror;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
-use PhoneBurner\SaltLite\Framework\Util\Serialization\Marshaller;
-use PhoneBurner\SaltLite\Framework\Util\Serialization\Serializer;
+use PhoneBurner\SaltLite\Framework\Tests\Fixtures\LazyObject;
+use PhoneBurner\SaltLite\Framework\Tests\Fixtures\Mirror;
+use PhoneBurner\SaltLite\Serialization\Marshaller;
+use PhoneBurner\SaltLite\Serialization\Serializer;
+use PhoneBurner\SaltLite\String\Str;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\WithoutErrorHandler;
@@ -21,7 +21,7 @@ final class RemoteCacheMarshallerTest extends TestCase
     #[DataProvider('providesSimpleTestValuesWithSerializer')]
     #[Test]
     #[WithoutErrorHandler]
-    public function simple_values_are_always_marshalled_as_serialized_php(
+    public function simpleValuesAreAlwaysMarshalledAsSerializedPhp(
         Serializer $serializer,
         mixed $value,
         string $serialized,
@@ -54,7 +54,7 @@ final class RemoteCacheMarshallerTest extends TestCase
     #[DataProvider('providesScalarTestValuesWithSerializer')]
     #[Test]
     #[WithoutErrorHandler]
-    public function scalar_values_are_serialized(Serializer $serializer, mixed $value): void
+    public function scalarValuesAreSerialized(Serializer $serializer, mixed $value): void
     {
         $sut = new RemoteCacheMarshaller($serializer, true, false);
         ['foo' => $marshalled] = $sut->marshall(['foo' => $value], $failed);
@@ -79,7 +79,7 @@ final class RemoteCacheMarshallerTest extends TestCase
     #[DataProvider('providesComplexTestValuesWithSerializer')]
     #[Test]
     #[WithoutErrorHandler]
-    public function complex_values_are_serialized(Serializer $serializer, mixed $value): void
+    public function complexValuesAreSerialized(Serializer $serializer, mixed $value): void
     {
         $sut = new RemoteCacheMarshaller($serializer, false, false);
         ['foo' => $marshalled] = $sut->marshall(['foo' => $value], $failed);
@@ -106,7 +106,7 @@ final class RemoteCacheMarshallerTest extends TestCase
     #[DataProvider('providesScalarTestValuesWithSerializer')]
     #[Test]
     #[WithoutErrorHandler]
-    public function simple_and_scalar_values_can_be_base64_encoded(Serializer $serializer, mixed $value): void
+    public function simpleAndScalarValuesCanBeBase64Encoded(Serializer $serializer, mixed $value): void
     {
         $sut = new RemoteCacheMarshaller($serializer, true, true);
         ['foo' => $marshalled] = $sut->marshall(['foo' => $value], $failed);
@@ -119,7 +119,7 @@ final class RemoteCacheMarshallerTest extends TestCase
     #[DataProvider('providesComplexTestValuesWithSerializer')]
     #[Test]
     #[WithoutErrorHandler]
-    public function complex_values_can_be_base64_encoded(Serializer $serializer, mixed $value): void
+    public function complexValuesCanBeBase64Encoded(Serializer $serializer, mixed $value): void
     {
         $sut = new RemoteCacheMarshaller($serializer, true, true);
         ['foo' => $marshalled] = $sut->marshall(['foo' => $value], $failed);
@@ -132,7 +132,7 @@ final class RemoteCacheMarshallerTest extends TestCase
     #[DataProvider('providesSerializer')]
     #[Test]
     #[WithoutErrorHandler]
-    public function scalar_values_can_be_compressed(Serializer $serializer): void
+    public function scalarValuesCanBeCompressed(Serializer $serializer): void
     {
         $value = \str_repeat('a', RemoteCacheMarshaller::COMPRESSION_THRESHOLD_BYTES + 1);
 
@@ -147,7 +147,7 @@ final class RemoteCacheMarshallerTest extends TestCase
     #[DataProvider('providesSerializer')]
     #[Test]
     #[WithoutErrorHandler]
-    public function large_complex_values_can_be_marshalled(Serializer $serializer): void
+    public function largeComplexValuesCanBeMarshalled(Serializer $serializer): void
     {
         $value = [
             'members' => [
@@ -167,30 +167,30 @@ final class RemoteCacheMarshallerTest extends TestCase
         self::assertEmpty($failed);
         self::assertMatchesSerializerHeader($serializer, $marshalled);
         self::assertEquals($value, $sut->unmarshall($marshalled));
-        self::assertEquals($value, (new RemoteCacheMarshaller(Serializer::Igbinary))->unmarshall($marshalled));
-        self::assertEquals($value, (new RemoteCacheMarshaller(Serializer::Php))->unmarshall($marshalled));
+        self::assertEquals($value, new RemoteCacheMarshaller(Serializer::Igbinary)->unmarshall($marshalled));
+        self::assertEquals($value, new RemoteCacheMarshaller(Serializer::Php)->unmarshall($marshalled));
 
         $sut = new RemoteCacheMarshaller($serializer, true, false);
         ['foo' => $marshalled] = $sut->marshall(['foo' => $value], $failed);
 
         self::assertEmpty($failed);
         self::assertMatchesRegularExpression('#^\x78\x01|\x78\x5E|\x78\x9C|\x78\xDA#', $marshalled);
-        self::assertEquals($value, (new RemoteCacheMarshaller(Serializer::Igbinary))->unmarshall($marshalled));
-        self::assertEquals($value, (new RemoteCacheMarshaller(Serializer::Php))->unmarshall($marshalled));
+        self::assertEquals($value, new RemoteCacheMarshaller(Serializer::Igbinary)->unmarshall($marshalled));
+        self::assertEquals($value, new RemoteCacheMarshaller(Serializer::Php)->unmarshall($marshalled));
 
         $sut = new RemoteCacheMarshaller($serializer, true, true);
         ['foo' => $marshalled] = $sut->marshall(['foo' => $value], $failed);
 
         self::assertEmpty($failed);
         self::assertMatchesRegularExpression('#^base64:[a-zA-Z0-9/+]*={0,2}$#', $marshalled);
-        self::assertEquals($value, (new RemoteCacheMarshaller(Serializer::Igbinary))->unmarshall($marshalled));
-        self::assertEquals($value, (new RemoteCacheMarshaller(Serializer::Php))->unmarshall($marshalled));
+        self::assertEquals($value, new RemoteCacheMarshaller(Serializer::Igbinary)->unmarshall($marshalled));
+        self::assertEquals($value, new RemoteCacheMarshaller(Serializer::Php)->unmarshall($marshalled));
     }
 
     #[DataProvider('providesSerializer')]
     #[Test]
     #[WithoutErrorHandler]
-    public function multiple_values_can_be_marshalled(Serializer $serializer): void
+    public function multipleValuesCanBeMarshalled(Serializer $serializer): void
     {
         $values = [
             'int' => 12345,
@@ -228,7 +228,7 @@ final class RemoteCacheMarshallerTest extends TestCase
     #[DataProvider('providesUnserializableValuesWithSerializer')]
     #[Test]
     #[WithoutErrorHandler]
-    public function unserializable_values_are_not_marshalled(Serializer $serializer, mixed $value): void
+    public function unserializableValuesAreNotMarshalled(Serializer $serializer, mixed $value): void
     {
         $sut = new RemoteCacheMarshaller($serializer, true, false);
         $marshalled = $sut->marshall(['foo' => $value], $failed);
@@ -254,7 +254,7 @@ final class RemoteCacheMarshallerTest extends TestCase
 
     #[DataProvider('providesValuesWithUndefinedClasses')]
     #[Test]
-    public function undefined_classes_are_not_marshalled(string $value): void
+    public function undefinedClassesAreNotMarshalled(string $value): void
     {
         $sut = new RemoteCacheMarshaller();
 

@@ -8,6 +8,7 @@ use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Formatter\LogglyFormatter;
 use Monolog\Handler\ErrorLogHandler;
+use Monolog\Handler\FallbackGroupHandler;
 use Monolog\Handler\FormattableHandlerInterface;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\LogglyHandler;
@@ -17,12 +18,19 @@ use Monolog\Handler\RotatingFileHandler;
 use Monolog\Handler\SlackWebhookHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\TestHandler;
+use Monolog\Level;
 use Monolog\Logger;
-use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceFactory;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\Container\ServiceFactory;
+use PhoneBurner\SaltLite\Filesystem\FileMode;
+use PhoneBurner\SaltLite\Framework\Logging\Config\LoggingConfigStruct;
+use PhoneBurner\SaltLite\Framework\Logging\Config\LoggingHandlerConfigStruct;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Exception\InvalidHandlerConfiguration;
-use PhoneBurner\SaltLite\Framework\Util\Filesystem\FileMode;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
+use PhoneBurner\SaltLite\Framework\Logging\Monolog\LoggerExceptionHandler;
+use PhoneBurner\SaltLite\Framework\MessageBus\LongRunningProcessServiceResetter;
+use PhoneBurner\SaltLite\Logging\PsrLoggerAdapter;
+use PhoneBurner\SaltLite\String\Str;
+use PhoneBurner\SaltLite\Type\Type;
 use Psr\Log\LoggerInterface;
 
 use function PhoneBurner\SaltLite\Framework\ghost;
@@ -38,125 +46,123 @@ class LoggerServiceFactory implements ServiceFactory
         TestHandler::class => LineFormatter::class,
     ];
 
+    public HandlerInterface|null $fallback_handler = null;
+
     public function __invoke(App $app, string $id): LoggerInterface
     {
         return new PsrLoggerAdapter(ghost(function (Logger $logger) use ($app): void {
+            $config = Type::of(LoggingConfigStruct::class, $app->config->get('logging'));
+
+            // Configure the fallback handler to use when an error is encountered while
+            // processing a log entry. Defaults to the noop handler, which does nothing.
+            $fallback_handler = $this->handler($config->fallback_handler);
+
+            // Wrap each handler in a FallbackGroupHandler to ensure that any error
+            // while writing to the log do not break the application, but still try
+            // to log it somewhere.
+            $handlers = \array_map(fn(LoggingHandlerConfigStruct $handler_config): HandlerInterface => new FallbackGroupHandler([
+                $this->handler($handler_config),
+                $fallback_handler,
+            ]), \array_values($app->config->get('logging.handlers')));
+
             $logger->__construct(
                 $app->config->get('logging.channel') ?? Str::kabob($app->config->get('app.name')),
-                \array_values(\array_map(function (array|LoggingHandlerConfigStruct $params): HandlerInterface {
-                    if ($params instanceof LoggingHandlerConfigStruct) {
-                        return $this->handler(
-                            $params->handler_class,
-                            $params->handler_options ?? [],
-                            $params->formatter_class,
-                            $params->formatter_options ?? [],
-                        );
-                    }
-
-                    return $this->handler(
-                        $params['handler_class'],
-                        $params['handler_options'] ?? [],
-                        $params['formatter_class'] ?? null,
-                        $params['formatter_options'] ?? [],
-                    );
-                }, $app->config->get('logging.handlers') ?? [])),
+                $handlers,
                 \array_map($app->services->get(...), $app->config->get('logging.processors') ?? []),
             );
+
+            $logger->setExceptionHandler($app->get(LoggerExceptionHandler::class)(...));
 
             // On resolution, replace the resolved logger as the container's
             // logger instance, which should also consume any buffered log
             // entries from the default buffer logger.
             $app->services->setLogger($logger);
+
+            // Register with the long-running process service resetter to make sure
+            // that we batch/flush any buffered log entries when the worker stops.
+            $app->services->get(LongRunningProcessServiceResetter::class)->add($logger, 'reset');
         }));
     }
 
     private function handler(
-        string $handler_class,
-        array $handler_options,
-        string|null $formatter_class = null,
-        array $formatter_options = [],
+        LoggingHandlerConfigStruct $config,
     ): HandlerInterface {
-
-        // Standardize the level and bubble options
-        $handler_options['level'] = LogLevel::instance($handler_options['level'] ?? LogLevel::Info)->toMonlogLogLevel();
-        $handler_options['bubble'] = (bool)($handler_options['bubble'] ?? true);
-
-        $handler = match ($handler_class) {
+        $handler = match ($config->handler_class) {
             LogglyHandler::class => new LogglyHandler(
-                $handler_options['token'] ?? throw new InvalidHandlerConfiguration('Missing Loggly API Token'),
-                $handler_options['level'],
-                $handler_options['bubble'],
+                $config->handler_options['token'] ?? throw new InvalidHandlerConfiguration('Missing Loggly API Token'),
+                Level::from($config->level->toMonlogLogLevel()),
+                $config->bubble,
             ),
             RotatingFileHandler::class => new RotatingFileHandler(
-                $handler_options['filename'] ?? throw new InvalidHandlerConfiguration('Missing Rotating File Handler Filename'),
-                $handler_options['max_files'] ?? 7,
-                $handler_options['level'],
-                $handler_options['bubble'],
-                $handler_options['file_permission'] ?? null,
-                $handler_options['use_locking'] ?? false,
-                $handler_options['date_format'] ?? RotatingFileHandler::FILE_PER_DAY,
-                $handler_options['filename_format'] ?? '{filename}-{date}',
+                $config->handler_options['filename'] ?? throw new InvalidHandlerConfiguration('Missing Rotating File Handler Filename'),
+                $config->handler_options['max_files'] ?? 7,
+                Level::from($config->level->toMonlogLogLevel()),
+                $config->bubble,
+                $config->handler_options['file_permission'] ?? null,
+                $config->handler_options['use_locking'] ?? false,
+                $config->handler_options['date_format'] ?? RotatingFileHandler::FILE_PER_DAY,
+                $config->handler_options['filename_format'] ?? '{filename}-{date}',
             ),
             StreamHandler::class => new StreamHandler(
-                $handler_options['stream'] ?? throw new InvalidHandlerConfiguration('Missing Stream Handler Stream/Path'),
-                $handler_options['level'],
-                $handler_options['bubble'],
-                $handler_options['file_permission'] ?? null,
-                $handler_options['use_locking'] ?? false,
-                $handler_options['file_open_mode'] ?? FileMode::WriteOnlyCreateNewOrAppendExisting->value,
+                $config->handler_options['stream'] ?? throw new InvalidHandlerConfiguration('Missing Stream Handler Stream/Path'),
+                Level::from($config->level->toMonlogLogLevel()),
+                $config->bubble,
+                $config->handler_options['file_permission'] ?? null,
+                $config->handler_options['use_locking'] ?? false,
+                $config->handler_options['file_open_mode'] ?? FileMode::WriteCreateOrAppendExisting->value,
             ),
             SlackWebhookHandler::class => new SlackWebhookHandler(
-                $handler_options['webhook_url'] ?? throw new InvalidHandlerConfiguration('Missing Slack Webhook URL'),
-                $handler_options['channel'] ?? null,
-                $handler_options['username'] ?? null,
-                $handler_options['use_attachment'] ?? true,
-                $handler_options['icon_emoji'] ?? null,
-                $handler_options['use_short_attachment'] ?? false,
-                $handler_options['include_context_and_extra'] ?? false,
-                $handler_options['level'],
-                $handler_options['bubble'],
-                $handler_options['exclude_fields'] ?? [],
+                $config->handler_options['webhook_url'] ?? throw new InvalidHandlerConfiguration('Missing Slack Webhook URL'),
+                $config->handler_options['channel'] ?? null,
+                $config->handler_options['username'] ?? null,
+                $config->handler_options['use_attachment'] ?? true,
+                $config->handler_options['icon_emoji'] ?? null,
+                $config->handler_options['use_short_attachment'] ?? false,
+                $config->handler_options['include_context_and_extra'] ?? false,
+                Level::from($config->level->toMonlogLogLevel()),
+                $config->bubble,
+                $config->handler_options['exclude_fields'] ?? [],
             ),
             ErrorLogHandler::class => new ErrorLogHandler(
-                $handler_options['message_type'],
-                $handler_options['level'],
-                $handler_options['bubble'],
-                $handler_options['expand_newlines'],
+                $config->handler_options['message_type'] ?? ErrorLogHandler::OPERATING_SYSTEM,
+                Level::from($config->level->toMonlogLogLevel()),
+                $config->bubble,
+                $config->handler_options['expand_newlines'] ?? false,
             ),
             TestHandler::class => new TestHandler(
-                $handler_options['level'],
-                $handler_options['bubble'],
+                Level::from($config->level->toMonlogLogLevel()),
+                $config->bubble,
             ),
             NullHandler::class => new NullHandler(
-                $handler_options['level'],
+                Level::from($config->level->toMonlogLogLevel()),
             ),
             NoopHandler::class => new NoopHandler(),
-            default => throw new \UnexpectedValueException("Unsupported Handler Class: $handler_class"),
+            default => throw new \UnexpectedValueException('Unsupported Handler Class: ' . $config->handler_class),
         };
 
         if (! $handler instanceof FormattableHandlerInterface) {
             return $handler;
         }
 
-        $formatter = match ($formatter_class ?? self::DEFAULT_FORMATTERS[$handler_class] ?? LineFormatter::class) {
+        $formatter = match ($config->formatter_class ?? self::DEFAULT_FORMATTERS[$config->handler_class] ?? LineFormatter::class) {
             LineFormatter::class => new LineFormatter(
-                $formatter_options['format'] ?? null,
-                $formatter_options['date_format'] ?? null,
-                $formatter_options['allow_inline_line_breaks'] ?? false,
-                $formatter_options['ignore_empty_context_and_extra'] ?? false,
-                $formatter_options['include_stacktraces'] ?? false,
+                $config->formatter_options['format'] ?? null,
+                $config->formatter_options['date_format'] ?? null,
+                $config->formatter_options['allow_inline_line_breaks'] ?? false,
+                $config->formatter_options['ignore_empty_context_and_extra'] ?? false,
+                $config->formatter_options['include_stacktraces'] ?? false,
             ),
             LogglyFormatter::class => new LogglyFormatter(
-                $formatter_options['batch_mode'] ?? JsonFormatter::BATCH_MODE_NEWLINES,
-                $formatter_options['append_new_line'] ?? false,
+                $config->formatter_options['batch_mode'] ?? JsonFormatter::BATCH_MODE_NEWLINES,
+                $config->formatter_options['append_new_line'] ?? false,
             ),
             JsonFormatter::class => new JsonFormatter(
-                $formatter_options['batch_mode'] ?? JsonFormatter::BATCH_MODE_NEWLINES,
-                $formatter_options['append_new_line'] ?? true,
-                $formatter_options['ignore_empty_context_and_extra'] ?? false,
-                $formatter_options['include_stacktraces'] ?? false,
+                $config->formatter_options['batch_mode'] ?? JsonFormatter::BATCH_MODE_NEWLINES,
+                $config->formatter_options['append_new_line'] ?? true,
+                $config->formatter_options['ignore_empty_context_and_extra'] ?? false,
+                $config->formatter_options['include_stacktraces'] ?? false,
             ),
-            default => throw new \UnexpectedValueException("Unsupported Formatter Class: $handler_class"),
+            default => throw new \UnexpectedValueException('Unsupported Formatter Class: ' . $config->formatter_class),
         };
 
         $handler->setFormatter($formatter);

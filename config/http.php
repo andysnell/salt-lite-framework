@@ -3,17 +3,17 @@
 declare(strict_types=1);
 
 use PhoneBurner\SaltLite\Framework\ApplicationRouteProvider;
-use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
+use PhoneBurner\SaltLite\Time\Ttl;
 use PhoneBurner\SaltLite\Framework\Http\Config\SessionConfigStruct;
 use PhoneBurner\SaltLite\Framework\Http\Cookie\Middleware\ManageCookies;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\CatchExceptionalResponses;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\EvaluateWrappedResponseFactories;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\TransformHttpExceptionResponses;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\JsonResponseTransformerStrategy;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\TransformerStrategies\JsonResponseTransformerStrategy;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Middleware\AttachRouteToRequest;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Middleware\DispatchRouteMiddleware;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Middleware\DispatchRouteRequestHandler;
-use PhoneBurner\SaltLite\Framework\Http\Routing\RequestHandler\NotFoundRequestHandler;
+use PhoneBurner\SaltLite\Http\Routing\RequestHandler\NotFoundRequestHandler;
 use PhoneBurner\SaltLite\Framework\Http\Session\SessionHandlerType;
 
 use function PhoneBurner\SaltLite\Framework\env;

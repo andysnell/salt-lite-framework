@@ -4,18 +4,15 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Session\Middleware;
 
-use PhoneBurner\SaltLite\Framework\Http\Cookie\CookieJar;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
-use PhoneBurner\SaltLite\Framework\Http\HttpServiceProvider;
-use PhoneBurner\SaltLite\Framework\Http\Session\SessionData;
-use PhoneBurner\SaltLite\Framework\Http\Session\SessionManager;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\DefaultServiceProvider;
+use PhoneBurner\SaltLite\Http\Cookie\CookieJar;
+use PhoneBurner\SaltLite\Http\Domain\HttpHeader;
+use PhoneBurner\SaltLite\Http\Session\SessionData;
+use PhoneBurner\SaltLite\Http\Session\SessionManager;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-#[DefaultServiceProvider(HttpServiceProvider::class)]
 class EnableHttpSession implements MiddlewareInterface
 {
     public function __construct(

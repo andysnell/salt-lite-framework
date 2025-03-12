@@ -6,7 +6,7 @@ namespace PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor;
 
 use Monolog\LogRecord;
 use Monolog\Processor\ProcessorInterface;
-use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
+use PhoneBurner\SaltLite\Logging\LogTrace;
 
 class LogTraceProcessor implements ProcessorInterface
 {

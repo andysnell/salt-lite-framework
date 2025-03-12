@@ -1,0 +1,27 @@
+<?php
+
+declare(strict_types=1);
+
+namespace PhoneBurner\SaltLite\Framework\Logging\Monolog;
+
+use Monolog\LogRecord;
+use PhoneBurner\SaltLite\App\BuildStage;
+
+/**
+ * The exception handler for Throwable instances thrown within in the Monolog
+ * logger while writing a log record.
+ */
+class LoggerExceptionHandler
+{
+    public function __construct(private readonly BuildStage $build_stage)
+    {
+    }
+
+    public function __invoke(\Throwable $e, LogRecord $record): void
+    {
+        // Only suppress errors in production environments
+        if ($this->build_stage !== BuildStage::Production) {
+            throw $e;
+        }
+    }
+}

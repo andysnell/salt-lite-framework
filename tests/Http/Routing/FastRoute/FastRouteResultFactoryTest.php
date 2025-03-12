@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Tests\Http\Routing\FastRoute;
 
 use FastRoute\Dispatcher;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Definition\RouteDefinition;
 use PhoneBurner\SaltLite\Framework\Http\Routing\FastRoute\FastRouteMatch;
 use PhoneBurner\SaltLite\Framework\Http\Routing\FastRoute\FastRouteResultFactory as SUT;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Match\RouteMatch;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Result\MethodNotAllowed;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Result\RouteFound;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Result\RouteNotFound;
+use PhoneBurner\SaltLite\Http\Domain\HttpMethod;
+use PhoneBurner\SaltLite\Http\Routing\Definition\RouteDefinition;
+use PhoneBurner\SaltLite\Http\Routing\Match\RouteMatch;
+use PhoneBurner\SaltLite\Http\Routing\Result\MethodNotAllowed;
+use PhoneBurner\SaltLite\Http\Routing\Result\RouteFound;
+use PhoneBurner\SaltLite\Http\Routing\Result\RouteNotFound;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -27,7 +27,7 @@ final class FastRouteResultFactoryTest extends TestCase
     }
 
     #[Test]
-    public function make_returns_MethodNotAllowed(): void
+    public function makeReturnsMethodNotAllowed(): void
     {
         $result = $this->sut->make(FastRouteMatch::make([
             Dispatcher::METHOD_NOT_ALLOWED,
@@ -42,7 +42,7 @@ final class FastRouteResultFactoryTest extends TestCase
     }
 
     #[Test]
-    public function make_returns_RouteNotFound(): void
+    public function makeReturnsRouteNotFound(): void
     {
         $result = $this->sut->make(FastRouteMatch::make([
             Dispatcher::NOT_FOUND,
@@ -52,7 +52,7 @@ final class FastRouteResultFactoryTest extends TestCase
     }
 
     #[Test]
-    public function make_returns_RouteFound(): void
+    public function makeReturnsRouteFound(): void
     {
         $route = RouteDefinition::all('/test', ['test' => 'value']);
 

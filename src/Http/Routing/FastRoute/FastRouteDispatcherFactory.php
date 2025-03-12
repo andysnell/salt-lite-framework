@@ -4,21 +4,18 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Routing\FastRoute;
 
-use Brick\VarExporter\VarExporter;
 use FastRoute\DataGenerator\GroupCountBased as GroupCountBasedGenerator;
 use FastRoute\Dispatcher;
 use FastRoute\Dispatcher\GroupCountBased as GroupCountBasedDispatcher;
 use FastRoute\RouteCollector;
 use FastRoute\RouteParser\Std as StdRouteParser;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
-use PhoneBurner\SaltLite\Framework\Util\Filesystem\FileWriter;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Serialization\VarExport;
 use Psr\Log\LoggerInterface;
 
 #[Internal]
 class FastRouteDispatcherFactory
 {
-    private const int EXPORT_OPTIONS = VarExporter::ADD_RETURN | VarExporter::TRAILING_COMMA_IN_ARRAY;
-
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly bool $cache_enable,
@@ -56,7 +53,7 @@ class FastRouteDispatcherFactory
 
         if ($this->cache_enable) {
             try {
-                FileWriter::string($this->cache_file, '<?php ' . VarExporter::export($dispatch_data, self::EXPORT_OPTIONS));
+                VarExport::toFile($this->cache_file, $dispatch_data);
             } catch (\Throwable $e) {
                 $this->logger->critical('Route Cache File Write Failed', ['exception' => $e]);
             }

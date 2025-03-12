@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks;
 
-use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
+use PhoneBurner\SaltLite\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\ComponentHealthCheck;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\ComponentType;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthStatus;
-use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
+use PhoneBurner\SaltLite\Logging\LogTrace;
 
 class PhpRuntimeHealthCheckService implements ComponentHealthCheckService
 {

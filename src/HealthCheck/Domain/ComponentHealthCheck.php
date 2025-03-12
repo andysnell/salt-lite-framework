@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\HealthCheck\Domain;
 
-use PhoneBurner\SaltLite\Framework\Domain\Time\Standards\Rfc3339;
+use PhoneBurner\SaltLite\Time\Standards\Rfc3339;
 
 class ComponentHealthCheck implements \JsonSerializable
 {

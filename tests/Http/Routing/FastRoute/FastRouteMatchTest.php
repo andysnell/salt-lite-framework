@@ -6,8 +6,8 @@ namespace PhoneBurner\SaltLite\Framework\Tests\Http\Routing\FastRoute;
 
 use FastRoute\Dispatcher;
 use Generator;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;
 use PhoneBurner\SaltLite\Framework\Http\Routing\FastRoute\FastRouteMatch as SUT;
+use PhoneBurner\SaltLite\Http\Domain\HttpMethod;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -17,14 +17,14 @@ final class FastRouteMatchTest extends TestCase
 {
     #[DataProvider('provideInvalidMatch')]
     #[Test]
-    public function make_throws_UnexpectedValueException(array $match): void
+    public function makeThrowsUnexpectedValueException(array $match): void
     {
         $this->expectException(UnexpectedValueException::class);
         SUT::make($match);
     }
 
     #[Test]
-    public function make_not_found_returns_expected_data(): void
+    public function makeNotFoundReturnsExpectedData(): void
     {
         $sut = SUT::make([
             Dispatcher::NOT_FOUND,
@@ -37,7 +37,7 @@ final class FastRouteMatchTest extends TestCase
     }
 
     #[Test]
-    public function make_found_returns_expected_data(): void
+    public function makeFoundReturnsExpectedData(): void
     {
         $sut = SUT::make([
             Dispatcher::FOUND,
@@ -52,7 +52,7 @@ final class FastRouteMatchTest extends TestCase
     }
 
     #[Test]
-    public function make_method_not_allowed_returns_expected_data(): void
+    public function makeMethodNotAllowedReturnsExpectedData(): void
     {
         $sut = SUT::make([
             Dispatcher::METHOD_NOT_ALLOWED,

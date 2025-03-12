@@ -9,8 +9,8 @@ use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\Local\LocalFilesystemAdapter;
-use PhoneBurner\SaltLite\Framework\App\Configuration\Configuration;
-use PhoneBurner\SaltLite\Framework\App\Exception\InvalidConfiguration;
+use PhoneBurner\SaltLite\Configuration\Configuration;
+use PhoneBurner\SaltLite\Configuration\Exception\InvalidConfiguration;
 
 class FilesystemOperatorFactory
 {
@@ -34,13 +34,13 @@ class FilesystemOperatorFactory
     {
         $config = $this->configuration->get('storage.drivers.' . $driver);
         if (! $config || ! \is_array($config)) {
-            throw new InvalidConfiguration("No configuration defined for driver: $driver");
+            throw new InvalidConfiguration('No configuration defined for driver: ' . $driver);
         }
 
         return match ($config['adapter'] ?? null) {
             LocalFilesystemAdapter::class => $this->createLocalFilesystemOperator($config),
             AwsS3V3Adapter::class => $this->createS3FilesystemOperator($config),
-            default => throw new \UnexpectedValueException("Unsupported adapter for : $driver"),
+            default => throw new \UnexpectedValueException('Unsupported adapter for : ' . $driver),
         };
     }
 

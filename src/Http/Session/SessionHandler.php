@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Session;
 
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
+use PhoneBurner\SaltLite\Attribute\Usage\Contract;
+use PhoneBurner\SaltLite\Http\Session\SessionHandler as SessionHandlerContract;
+use PhoneBurner\SaltLite\Http\Session\SessionId;
 use Psr\Http\Message\ServerRequestInterface;
 
 #[Contract]
-abstract class SessionHandler implements \SessionHandlerInterface
+abstract class SessionHandler implements SessionHandlerContract
 {
     /**
      * Called before reading from the session

@@ -6,10 +6,10 @@ namespace PhoneBurner\SaltLite\Framework\HealthCheck\RequestHandler;
 
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthStatus;
 use PhoneBurner\SaltLite\Framework\HealthCheck\HealthCheckBuilder;
-use PhoneBurner\SaltLite\Framework\Http\Domain\ContentType;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpStatus;
-use PhoneBurner\SaltLite\Framework\Http\Response\JsonResponse;
+use PhoneBurner\SaltLite\Http\Domain\ContentType;
+use PhoneBurner\SaltLite\Http\Domain\HttpHeader;
+use PhoneBurner\SaltLite\Http\Domain\HttpStatus;
+use PhoneBurner\SaltLite\Http\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;

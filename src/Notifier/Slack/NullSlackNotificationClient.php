@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Notifier\Slack;
 
-use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
+use PhoneBurner\SaltLite\Time\Ttl;
 use Psr\Log\LoggerInterface;
 
 final readonly class NullSlackNotificationClient implements SlackNotificationClient

@@ -6,9 +6,9 @@ namespace PhoneBurner\SaltLite\Framework\Notifier\Slack;
 
 use Maknz\Slack\Client;
 use Maknz\Slack\Message;
-use PhoneBurner\SaltLite\Framework\Cache\CacheKey;
-use PhoneBurner\SaltLite\Framework\Cache\Lock\LockFactory;
-use PhoneBurner\SaltLite\Framework\Domain\Time\Ttl;
+use PhoneBurner\SaltLite\Cache\CacheKey;
+use PhoneBurner\SaltLite\Cache\Lock\LockFactory;
+use PhoneBurner\SaltLite\Time\Ttl;
 use Psr\Log\LoggerInterface;
 
 class SlackWebhookNotificationClient implements SlackNotificationClient

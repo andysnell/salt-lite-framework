@@ -10,7 +10,8 @@ use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\AmazonSqsTranspor
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\AmqpTransportFactory;
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\DoctrineTransportFactory;
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\RedisTransportFactory;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
+use PhoneBurner\SaltLite\MessageBus\MessageBus;
+use PhoneBurner\SaltLite\Type\Type;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\Messenger\Bridge\AmazonSqs\Transport\AmazonSqsTransport;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpTransport;

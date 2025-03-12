@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use PhoneBurner\SaltLite\Framework\Cache\CacheDriver;
-use PhoneBurner\SaltLite\Framework\Util\Serialization\Serializer;
+use PhoneBurner\SaltLite\Cache\CacheDriver;
+use PhoneBurner\SaltLite\Serialization\Serializer;
 use Symfony\Component\Lock\Store\InMemoryStore;
 
 use function PhoneBurner\SaltLite\Framework\env;

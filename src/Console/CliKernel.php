@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Console;
 
-use PhoneBurner\SaltLite\Framework\App\Event\KernelExecutionComplete;
-use PhoneBurner\SaltLite\Framework\App\Event\KernelExecutionStart;
-use PhoneBurner\SaltLite\Framework\App\Kernel;
+use PhoneBurner\SaltLite\App\Event\KernelExecutionComplete;
+use PhoneBurner\SaltLite\App\Event\KernelExecutionStart;
+use PhoneBurner\SaltLite\App\Kernel;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
 class CliKernel implements Kernel

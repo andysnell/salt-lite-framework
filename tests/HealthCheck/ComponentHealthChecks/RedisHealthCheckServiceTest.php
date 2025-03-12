@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Tests\HealthCheck\ComponentHealthChecks;
 
 use Carbon\CarbonImmutable;
-use PhoneBurner\SaltLite\Framework\App\Clock\StaticClock;
+use PhoneBurner\SaltLite\Clock\StaticClock;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks\RedisHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\ComponentHealthCheck;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthStatus;
-use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
+use PhoneBurner\SaltLite\Logging\LogTrace;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
 final class RedisHealthCheckServiceTest extends TestCase
 {
     #[Test]
-    public function happy_path(): void
+    public function happyPath(): void
     {
         $now = new CarbonImmutable();
         $clock = new StaticClock($now);
@@ -66,7 +66,7 @@ final class RedisHealthCheckServiceTest extends TestCase
     }
 
     #[Test]
-    public function sad_path_catches_exceptions(): void
+    public function sadPathCatchesExceptions(): void
     {
         $exception = new \RuntimeException('test exception');
 

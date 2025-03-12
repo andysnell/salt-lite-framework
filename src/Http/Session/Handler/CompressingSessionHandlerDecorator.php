@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Session\Handler;
 
-use PhoneBurner\SaltLite\Framework\Http\Session\Exception\HttpSessionException;
-use PhoneBurner\SaltLite\Framework\Http\Session\Exception\SessionWriteFailure;
-use PhoneBurner\SaltLite\Framework\Http\Session\SessionHandler;
-use PhoneBurner\SaltLite\Framework\Http\Session\SessionId;
+use PhoneBurner\SaltLite\Framework\Http\Session\Handler\SessionHandlerDecorator;
+use PhoneBurner\SaltLite\Http\Session\Exception\HttpSessionException;
+use PhoneBurner\SaltLite\Http\Session\Exception\SessionWriteFailure;
+use PhoneBurner\SaltLite\Http\Session\SessionHandler;
+use PhoneBurner\SaltLite\Http\Session\SessionId;
 
 class CompressingSessionHandlerDecorator extends SessionHandlerDecorator
 {

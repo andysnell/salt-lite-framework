@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework;
 
 use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Reflect;
+use PhoneBurner\SaltLite\Type\Reflect;
 
 use const PhoneBurner\SaltLite\Framework\APP_ROOT;
 

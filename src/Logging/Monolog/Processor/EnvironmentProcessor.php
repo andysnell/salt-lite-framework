@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor;
 
 use Monolog\LogRecord;
+use Monolog\Processor\ProcessorInterface;
 use PhoneBurner\SaltLite\Framework\App\Environment;
 
-class EnvironmentProcessor
+class EnvironmentProcessor implements ProcessorInterface
 {
     public function __construct(private readonly Environment $environment)
     {

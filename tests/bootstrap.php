@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-use PhoneBurner\SaltLite\Framework\App\Context;
+use PhoneBurner\SaltLite\App\Context;
 
 \defined('PhoneBurner\SaltLite\Framework\CONTEXT')
 || \define('PhoneBurner\SaltLite\Framework\CONTEXT', Context::Test);

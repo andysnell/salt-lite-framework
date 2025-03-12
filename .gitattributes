@@ -1,4 +1,5 @@
 /.allowed-licenses          export-ignore
+/.cursor                    export-ignore
 /.dockerignore              export-ignore
 /.editorconfig              export-ignore
 /.env                       export-ignore

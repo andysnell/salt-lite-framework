@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Routing\Middleware;
 
-use PhoneBurner\SaltLite\Framework\Domain\Time\TimeConstant;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpMethod;
-use PhoneBurner\SaltLite\Framework\Http\Response\EmptyResponse;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\MethodNotAllowedResponse;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Match\RouteMatch;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Result\MethodNotAllowed;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Result\RouteFound;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Router;
+use PhoneBurner\SaltLite\Http\Domain\HttpHeader;
+use PhoneBurner\SaltLite\Http\Domain\HttpMethod;
+use PhoneBurner\SaltLite\Http\Response\EmptyResponse;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\MethodNotAllowedResponse;
+use PhoneBurner\SaltLite\Http\Routing\Match\RouteMatch;
+use PhoneBurner\SaltLite\Http\Routing\Result\MethodNotAllowed;
+use PhoneBurner\SaltLite\Http\Routing\Result\RouteFound;
+use PhoneBurner\SaltLite\Http\Routing\Router;
+use PhoneBurner\SaltLite\Time\TimeConstant;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;

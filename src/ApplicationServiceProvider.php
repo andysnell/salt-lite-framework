@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework;
 
-use PhoneBurner\SaltLite\Framework\App\App;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\ApplicationRouteProvider;
-use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
 
 /**
  * @codeCoverageIgnore

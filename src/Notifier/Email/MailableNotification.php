@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Notifier\Email;
 
-use PhoneBurner\SaltLite\Framework\Mailer\Mailable;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
+use PhoneBurner\SaltLite\Attribute\Usage\Contract;
+use PhoneBurner\SaltLite\Mailer\Mailable;
 
 /**
  * Used for "simple" email notifications that don't require additional headers

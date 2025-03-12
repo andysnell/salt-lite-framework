@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Routing\Middleware;
 
-use PhoneBurner\SaltLite\Framework\Http\RequestHandlerFactory;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Match\RouteMatch;
+use PhoneBurner\SaltLite\Http\RequestHandlerFactory;
+use PhoneBurner\SaltLite\Http\Routing\Match\RouteMatch;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;

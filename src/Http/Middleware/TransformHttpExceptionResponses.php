@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Middleware;
 
-use PhoneBurner\SaltLite\Framework\Http\Domain\ContentType;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\HttpExceptionResponse;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\HttpExceptionResponseTransformerStrategy;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\HtmlResponseTransformerStrategy;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\JsonResponseTransformerStrategy;
-use PhoneBurner\SaltLite\Framework\Http\Response\Exceptional\TransformerStrategies\TextResponseTransformerStrategy;
-use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Psr7;
+use PhoneBurner\SaltLite\Http\Domain\ContentType;
+use PhoneBurner\SaltLite\Http\Psr7;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\HttpExceptionResponse;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\HttpExceptionResponseTransformerStrategy;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\TransformerStrategies\HtmlResponseTransformerStrategy;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\TransformerStrategies\JsonResponseTransformerStrategy;
+use PhoneBurner\SaltLite\Http\Response\Exceptional\TransformerStrategies\TextResponseTransformerStrategy;
+use PhoneBurner\SaltLite\Logging\LogTrace;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;

@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Session;
 
+use PhoneBurner\SaltLite\Cryptography\ConstantTime;
+use PhoneBurner\SaltLite\Cryptography\Natrium;
+use PhoneBurner\SaltLite\Cryptography\String\Ciphertext;
 use PhoneBurner\SaltLite\Framework\Http\Config\SessionConfigStruct;
-use PhoneBurner\SaltLite\Framework\Http\Cookie\Cookie;
-use PhoneBurner\SaltLite\Framework\Http\Cookie\SameSite;
-use PhoneBurner\SaltLite\Framework\Http\Session\Exception\SessionAlreadyStarted;
-use PhoneBurner\SaltLite\Framework\Http\Session\Exception\SessionNotStarted;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\Natrium;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\String\Ciphertext;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\String\ConstantTime;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\String\ConstantTimeEncoding;
-use PhoneBurner\SaltLite\Framework\Util\Serialization\Marshaller;
+use PhoneBurner\SaltLite\Http\Cookie\Cookie;
+use PhoneBurner\SaltLite\Http\Cookie\SameSite;
+use PhoneBurner\SaltLite\Http\Session\CsrfToken;
+use PhoneBurner\SaltLite\Http\Session\Exception\SessionAlreadyStarted;
+use PhoneBurner\SaltLite\Http\Session\Exception\SessionNotStarted;
+use PhoneBurner\SaltLite\Http\Session\SessionData;
+use PhoneBurner\SaltLite\Http\Session\SessionHandler as SessionHandlerContract;
+use PhoneBurner\SaltLite\Http\Session\SessionId;
+use PhoneBurner\SaltLite\Http\Session\SessionManager as SessionManagerContract;
+use PhoneBurner\SaltLite\Serialization\Marshaller;
+use PhoneBurner\SaltLite\String\Encoding\Encoding;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 
@@ -21,11 +26,11 @@ use Psr\Log\LoggerInterface;
  * The SessionManager is responsible for managing the session lifecycle, e.g.
  * starting, saving, regenerating, and destroying sessions.
  */
-class SessionManager
+class SessionManager implements SessionManagerContract
 {
     public const string HKDF_CONTEXT = 'http-session';
 
-    public const ConstantTimeEncoding ENCODING = ConstantTimeEncoding::Base64UrlNoPadding;
+    public const Encoding ENCODING = Encoding::Base64UrlNoPadding;
 
     /**
      * @link https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#session-id-name-fingerprinting
@@ -44,7 +49,7 @@ class SessionManager
     private SessionData|null $session_data = null;
 
     public function __construct(
-        private readonly SessionHandler $session_handler,
+        private readonly SessionHandlerContract $session_handler,
         private readonly SessionConfigStruct $config,
         private readonly Natrium $natrium,
         private readonly LoggerInterface|null $logger = null,
@@ -106,7 +111,7 @@ class SessionManager
      * of moving the data from one ID to another, if any data exists.
      *
      * This should be called whenever there is a change to the user's authentication
-     * state, e.g. login, logout, or change of user permisssions in order to prevent
+     * state, e.g. login, logout, or change of user permissions in order to prevent
      * session fixation attacks. This is called by the invalidate() method.
      *
      * @param bool $destroy_existing If true, the existing session record will be
@@ -145,7 +150,9 @@ class SessionManager
         return $this->session_id instanceof SessionId && $this->session_data instanceof SessionData;
     }
 
-    /** @return array<Cookie> */
+    /**
+     * array<Cookie>
+     */
     public function cookies(): array
     {
         $cookies = [];

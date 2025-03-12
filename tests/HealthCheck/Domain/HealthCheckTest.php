@@ -18,7 +18,7 @@ final class HealthCheckTest extends TestCase
     #[TestWith([HealthStatus::Warn, HealthStatus::Warn])]
     #[TestWith([HealthStatus::Fail, HealthStatus::Fail])]
     #[TestWith([null, HealthStatus::Pass])]
-    public function happy_path_with_empty_case(HealthStatus|null $status, HealthStatus $expected): void
+    public function happyPathWithEmptyCase(HealthStatus|null $status, HealthStatus $expected): void
     {
         $health_check = new HealthCheck(status: $status);
         $this->assertSame($expected, $health_check->status);
@@ -37,7 +37,7 @@ final class HealthCheckTest extends TestCase
     }
 
     #[Test]
-    public function happy_path_with_all_properties(): void
+    public function happyPathWithAllProperties(): void
     {
         $component_check = new ComponentHealthCheck(
             component_name: 'x_component',
@@ -93,7 +93,7 @@ final class HealthCheckTest extends TestCase
     #[TestWith([HealthStatus::Pass, HealthStatus::Pass])]
     #[TestWith([HealthStatus::Warn, HealthStatus::Warn])]
     #[TestWith([HealthStatus::Fail, HealthStatus::Fail])]
-    public function overall_status_can_be_derived_from_component_checks(
+    public function overallStatusCanBeDerivedFromComponentChecks(
         HealthStatus $component_status,
         HealthStatus $expected_status,
     ): void {

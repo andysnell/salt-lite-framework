@@ -6,7 +6,7 @@ namespace PhoneBurner\SaltLite\Framework\MessageBus;
 
 class Transport
 {
-    public const ASYNC = 'async';
-    public const SYNC = 'sync';
-    public const FAILED = 'failed';
+    final public const string ASYNC = 'async';
+    final public const string SYNC = 'sync';
+    final public const string FAILED = 'failed';
 }

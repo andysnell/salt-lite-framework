@@ -17,18 +17,19 @@ use Doctrine\ORM\Mapping\DefaultTypedFieldMapper;
 use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\Proxy\ProxyFactory;
 use Doctrine\ORM\Tools\Console\EntityManagerProvider\UnknownManagerException;
-use PhoneBurner\SaltLite\Framework\App\BuildStage;
-use PhoneBurner\SaltLite\Framework\App\Context;
-use PhoneBurner\SaltLite\Framework\App\Environment;
-use PhoneBurner\SaltLite\Framework\Cache\CacheDriver;
-use PhoneBurner\SaltLite\Framework\Cache\CacheItemPoolFactory;
+use PhoneBurner\SaltLite\App\BuildStage;
+use PhoneBurner\SaltLite\App\Context;
+use PhoneBurner\SaltLite\App\Environment;
+use PhoneBurner\SaltLite\Cache\CacheDriver;
+use PhoneBurner\SaltLite\Cache\Psr6\CacheItemPoolFactory;
+use PhoneBurner\SaltLite\Cache\Psr6\FileCacheItemPoolFactory;
 use PhoneBurner\SaltLite\Framework\Database\Config\DoctrineConfigStruct;
 use PhoneBurner\SaltLite\Framework\Database\Config\DoctrineEntityManagerConfigStruct;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\Cache\CacheRegion;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\Cache\CacheType;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\ConnectionFactory;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\Types;
-use PhoneBurner\SaltLite\Framework\Domain\Time\TimeConstant;
+use PhoneBurner\SaltLite\Time\TimeConstant;
 use Psr\Container\ContainerInterface;
 
 use function PhoneBurner\SaltLite\Framework\ghost;
@@ -40,7 +41,7 @@ class EntityManagerFactory
         private readonly Environment $environment,
         private readonly DoctrineConfigStruct $config,
         private readonly DoctrineConnectionProvider $connection_provider,
-        private readonly CacheItemPoolFactory $cache_factory,
+        private readonly CacheItemPoolFactory&FileCacheItemPoolFactory $cache_factory,
     ) {
     }
 
@@ -97,21 +98,21 @@ class EntityManagerFactory
             $doctrine_config->setMetadataDriverImpl(new AttributeDriver($config->entity_paths, true));
             $doctrine_config->setMetadataCache(match ($this->resolveCacheDriver(CacheType::Metadata, $config->metadata_cache_driver)) {
                 CacheDriver::File => $this->cache_factory->createFileCacheItemPool(CacheType::Metadata->value, $cache_path),
-                CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, "orm.$name.metadata."),
+                CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, \sprintf('orm.%s.metadata.', $name)),
                 CacheDriver::None => $this->cache_factory->make(CacheDriver::None),
                 default => throw new \LogicException('Unsupported Cache Type for Doctrine ORM Metadata Cache'),
             });
 
             $doctrine_config->setQueryCache(match ($this->resolveCacheDriver(CacheType::Query, $config->query_cache_driver)) {
                 CacheDriver::File => $this->cache_factory->createFileCacheItemPool(CacheType::Query->value, $cache_path),
-                CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, "orm.$name.query."),
+                CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, \sprintf('orm.%s.query.', $name)),
                 CacheDriver::None => $this->cache_factory->make(CacheDriver::None),
                 default => throw new \LogicException('Unsupported Cache Type for Doctrine ORM Query Cache'),
             });
 
             $doctrine_config->setResultCache(match ($this->resolveCacheDriver(CacheType::Result, $config->result_cache_driver)) {
-                CacheDriver::Remote => $this->cache_factory->make(CacheDriver::Remote, "orm.$name.result."),
-                CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, "orm.$name.result."),
+                CacheDriver::Remote => $this->cache_factory->make(CacheDriver::Remote, \sprintf('orm.%s.result.', $name)),
+                CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, \sprintf('orm.%s.result.', $name)),
                 CacheDriver::None => $this->cache_factory->make(CacheDriver::None),
                 default => throw new \LogicException('Unsupported Cache Type for Doctrine ORM Result Cache'),
             });
@@ -164,14 +165,14 @@ class EntityManagerFactory
         $regions_config = new RegionsConfiguration(TimeConstant::SECONDS_IN_HOUR);
 
         $factory = new DefaultCacheFactory($regions_config, match ($cache_driver) {
-            CacheDriver::Remote => $this->cache_factory->make(CacheDriver::Remote, "orm.$name.entity."),
-            CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, "orm.$name.entity."),
+            CacheDriver::Remote => $this->cache_factory->make(CacheDriver::Remote, \sprintf('orm.%s.entity.', $name)),
+            CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, \sprintf('orm.%s.entity.', $name)),
             default => throw new \LogicException('Unsupported Cache Type for Doctrine ORM Entity Cache'),
         });
 
         $factory->setRegion(new DefaultRegion(CacheRegion::APPEND_ONLY, match ($cache_driver) {
             CacheDriver::File, CacheDriver::Remote => $this->cache_factory->createFileCacheItemPool(CacheType::Entity->value, $cache_path),
-            CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, "orm.$name.entity."),
+            CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, \sprintf('orm.%s.entity.', $name)),
             default => throw new \LogicException('Unsupported Cache Type for Doctrine ORM Entity Cache (Append Only Region)'),
         }));
 

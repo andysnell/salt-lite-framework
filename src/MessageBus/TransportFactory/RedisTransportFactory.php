@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory;
 
-use PhoneBurner\SaltLite\Framework\App\Environment;
+use PhoneBurner\SaltLite\App\Environment;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use Symfony\Component\Messenger\Bridge\Redis\Transport\Connection as RedisTransportConnection;
 use Symfony\Component\Messenger\Bridge\Redis\Transport\RedisTransport;

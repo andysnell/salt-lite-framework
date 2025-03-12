@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\EventDispatcher;
 
-use PhoneBurner\SaltLite\Framework\Logging\LogEntry;
-use PhoneBurner\SaltLite\Framework\Logging\Loggable;
-use PhoneBurner\SaltLite\Framework\Logging\LogLevel;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Str;
+use PhoneBurner\SaltLite\Logging\LogEntry;
+use PhoneBurner\SaltLite\Logging\Loggable;
+use PhoneBurner\SaltLite\Logging\LogLevel;
+use PhoneBurner\SaltLite\String\Str;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -81,7 +81,7 @@ class SymfonyEventDispatcherAdapter implements SymfonyEventDispatcherInterface
 
     /**
      * By default, creates debug-level log message with the unqualified event
-     * class name in title case, e.g.\PhoneBurner\SaltLite\Framework\MessageBus\Event\InvokableMessageHandlingStarting
+     * class name in title case, e.g.\PhoneBurner\SaltLite\MessageBus\Event\InvokableMessageHandlingStarting
      * would become "Invokable Message Handling Starting".
      */
     private function logEventWasDispatched(object $event, LogLevel $log_level): void

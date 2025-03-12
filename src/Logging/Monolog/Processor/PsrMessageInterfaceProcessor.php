@@ -6,8 +6,8 @@ namespace PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor;
 
 use Monolog\LogRecord;
 use Monolog\Processor\ProcessorInterface;
-use PhoneBurner\SaltLite\Framework\Http\Domain\HttpHeader;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Arr;
+use PhoneBurner\SaltLite\Http\Domain\HttpHeader;
+use PhoneBurner\SaltLite\Iterator\Arr;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;

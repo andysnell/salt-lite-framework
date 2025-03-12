@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Http\Session\Handler;
 
 use PhoneBurner\SaltLite\Framework\Http\Session\SessionHandler;
-use PhoneBurner\SaltLite\Framework\Http\Session\SessionId;
 use PhoneBurner\SaltLite\Framework\Http\Session\SessionManager;
+use PhoneBurner\SaltLite\Http\Session\SessionHandler as SessionHandlerContract;
+use PhoneBurner\SaltLite\Http\Session\SessionId;
 use Psr\Http\Message\ServerRequestInterface;
 
 abstract class SessionHandlerDecorator extends SessionHandler
 {
     // phpcs:ignore
-    abstract protected SessionHandler $handler { get; }
+    abstract protected SessionHandlerContract $handler { get; }
 
     #[\Override]
     public function open(

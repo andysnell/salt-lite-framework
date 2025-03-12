@@ -8,28 +8,35 @@ use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\AttributeUtils\Psr6CacheAnalyzer;
-use PhoneBurner\SaltLite\Framework\App\Analyzer\AttributeAnalyzer;
-use PhoneBurner\SaltLite\Framework\App\Clock\Clock;
-use PhoneBurner\SaltLite\Framework\App\Clock\HighResolutionTimer;
-use PhoneBurner\SaltLite\Framework\App\Clock\SystemClock;
-use PhoneBurner\SaltLite\Framework\App\Clock\SystemHighResolutionTimer;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\App\BuildStage;
+use PhoneBurner\SaltLite\App\Context;
+use PhoneBurner\SaltLite\App\Exception\KernelError;
+use PhoneBurner\SaltLite\App\Kernel;
+use PhoneBurner\SaltLite\Attribute\AttributeAnalyzer;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Cache\CacheDriver;
+use PhoneBurner\SaltLite\Cache\Psr6\CacheItemPoolFactory;
+use PhoneBurner\SaltLite\Clock\Clock;
+use PhoneBurner\SaltLite\Clock\HighResolutionTimer;
+use PhoneBurner\SaltLite\Clock\SystemClock;
+use PhoneBurner\SaltLite\Clock\SystemHighResolutionTimer;
+use PhoneBurner\SaltLite\Configuration\Configuration;
+use PhoneBurner\SaltLite\Container\Exception\NotResolvable;
+use PhoneBurner\SaltLite\Container\InvokingContainer;
+use PhoneBurner\SaltLite\Container\MutableContainer;
+use PhoneBurner\SaltLite\Container\ServiceContainer;
+use PhoneBurner\SaltLite\Container\ServiceContainer\ServiceContainerAdapter;
+use PhoneBurner\SaltLite\Container\ServiceProvider;
+use PhoneBurner\SaltLite\Cryptography\Defaults;
+use PhoneBurner\SaltLite\Cryptography\KeyManagement\KeyChain;
+use PhoneBurner\SaltLite\Cryptography\Natrium;
+use PhoneBurner\SaltLite\Framework\App\App as FrameworkApp;
 use PhoneBurner\SaltLite\Framework\App\Config\AppConfigStruct;
-use PhoneBurner\SaltLite\Framework\App\Configuration\Configuration;
-use PhoneBurner\SaltLite\Framework\App\Exception\KernelError;
-use PhoneBurner\SaltLite\Framework\Cache\CacheDriver;
-use PhoneBurner\SaltLite\Framework\Cache\CacheItemPoolFactory;
 use PhoneBurner\SaltLite\Framework\Console\CliKernel;
-use PhoneBurner\SaltLite\Framework\Container\Exception\NotResolvable;
-use PhoneBurner\SaltLite\Framework\Container\InvokingContainer;
-use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
-use PhoneBurner\SaltLite\Framework\Container\ServiceContainer;
-use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceContainerAdapter;
-use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\Http\HttpKernel;
-use PhoneBurner\SaltLite\Framework\Logging\LogTrace;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\Natrium;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Type;
+use PhoneBurner\SaltLite\Logging\LogTrace;
+use PhoneBurner\SaltLite\Type\Type;
 use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
 
@@ -55,6 +62,7 @@ final class AppServiceProvider implements ServiceProvider
         // These services must be set explicitly in the container by the application
         // after service provider registration.
         $app->set(App::class, static fn (App $app): never => throw new NotResolvable(App::class));
+        $app->set(FrameworkApp::class, static fn (App $app): never => throw new NotResolvable(FrameworkApp::class));
         $app->set(Environment::class, static fn (App $app): never => throw new NotResolvable(Environment::class));
         $app->set(Configuration::class, static fn (App $app): never => throw new NotResolvable(Configuration::class));
 
@@ -90,7 +98,12 @@ final class AppServiceProvider implements ServiceProvider
 
         $app->set(Natrium::class, static function (App $app): Natrium {
             return new Natrium(
-                Type::of(AppConfigStruct::class, $app->config->get('app'))->key,
+                new KeyChain(Type::of(AppConfigStruct::class, $app->config->get('app'))->key),
+                $app->get(Clock::class),
+                new Defaults(
+                    $app->config->get('app')->symmetric_algorithm,
+                    $app->config->get('app')->asymmetric_algorithm,
+                ),
             );
         });
 

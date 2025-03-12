@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Session;
 
+use PhoneBurner\SaltLite\Attribute\Usage\Contract;
+use PhoneBurner\SaltLite\Enum\EnumCaseAttr;
 use PhoneBurner\SaltLite\Framework\Http\Session\Attribute\MapsToSessionHandler;
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\CookieSessionHandler;
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\FileSessionHandler;
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\InMemorySessionHandler;
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\NullSessionHandler;
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\RedisSessionHandler;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Contract;
-use PhoneBurner\SaltLite\Framework\Util\ClassString;
-use PhoneBurner\SaltLite\Framework\Util\Helper\CaseAttr;
+use PhoneBurner\SaltLite\String\ClassString\ClassString;
 
 #[Contract]
 enum SessionHandlerType
@@ -32,11 +32,11 @@ enum SessionHandlerType
     #[MapsToSessionHandler(NullSessionHandler::class)]
     case Null;
 
-    /** @return ClassString<\SessionHandlerInterface> */
+    /**
+     * @return ClassString<\SessionHandlerInterface>
+     */
     public function getSessionHandlerClass(): ClassString
     {
-        return CaseAttr::first($this, MapsToSessionHandler::class)?->mapsTo() ?? throw new \LogicException(
-            'no session handler defined for this case',
-        );
+        return EnumCaseAttr::fetch($this, MapsToSessionHandler::class)->mapsTo();
     }
 }

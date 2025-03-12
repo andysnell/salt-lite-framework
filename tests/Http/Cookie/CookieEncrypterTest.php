@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Tests\Http\Cookie;
 
-use PhoneBurner\SaltLite\Framework\Http\Cookie\Cookie;
+use PhoneBurner\SaltLite\Cryptography\KeyManagement\KeyChain;
+use PhoneBurner\SaltLite\Cryptography\Natrium;
+use PhoneBurner\SaltLite\Cryptography\String\MessageSignature;
+use PhoneBurner\SaltLite\Cryptography\Symmetric\SharedKey;
 use PhoneBurner\SaltLite\Framework\Http\Cookie\CookieEncrypter;
 use PhoneBurner\SaltLite\Framework\Http\Session\SessionManager;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\Natrium;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\String\MessageSignature;
-use PhoneBurner\SaltLite\Framework\Util\Cryptography\Symmetric\SharedKey;
-use PhoneBurner\SaltLite\Framework\Util\Helper\Uuid;
+use PhoneBurner\SaltLite\Http\Cookie\Cookie;
+use PhoneBurner\SaltLite\Uuid\Uuid;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -20,16 +21,16 @@ final class CookieEncrypterTest extends TestCase
     public const string COOKIE_NAME = 'test_cookie_name';
     public const string COOKIE_VALUE = '31b85f9d-5901-45e0-b798-05d101383c58';
     public const string ENCRYPTED_COOKIE = <<<EOL
-        2Cvx_rZHp0MMuKJ2q1OJpQmgL8TA__3tYYAQJMkG8QWMLxY9reo9v_nCnQsg_EpMaaYw38ft4Yh48nTeROTiD84JX3ocNyY8TVckAyBCi4Pb6iU-IVWuzBR9lAwehHAB-20n7cy-DOyE3aE5p_WEdfALyXt6f3yP-0jvEnH9WIxiQ-r-Byrb3GHHFh8g
+        2Cvx_rZHp0MMuKJ2q1OJpQON8IxEYD2bKoaxd8-KY_U9cRus8DqvixoeQhaWBf-I4eCNaF21ikpdqSsGpP7IFL3UzOxnVG7g0i6iwjm6DekpEYNQhdsvsFJBRYGJ0vBfgcD_geWb839qDS_72Vyry-uUX-4Q
         EOL;
 
     #[Test]
-    public function happy_path(): void
+    public function happyPath(): void
     {
         $cookie = new Cookie(self::COOKIE_NAME, self::COOKIE_VALUE);
 
         $seed_key = SharedKey::import(self::KEY);
-        $sut = new CookieEncrypter(new Natrium($seed_key));
+        $sut = new CookieEncrypter(new Natrium(new KeyChain($seed_key)));
 
         $encrypted_cookie = $sut->encrypt($cookie);
 
@@ -57,12 +58,12 @@ final class CookieEncrypterTest extends TestCase
     }
 
     #[Test]
-    public function happy_path_mismatch_key(): void
+    public function happyPathMismatchKey(): void
     {
         $cookie = new Cookie(self::COOKIE_NAME, self::COOKIE_VALUE);
 
         $seed_key = SharedKey::generate();
-        $sut = new CookieEncrypter(new Natrium($seed_key));
+        $sut = new CookieEncrypter(new Natrium(new KeyChain($seed_key)));
 
         $decrypted_value = $sut->decrypt($cookie->name, self::ENCRYPTED_COOKIE);
 
@@ -70,11 +71,11 @@ final class CookieEncrypterTest extends TestCase
     }
 
     #[Test]
-    public function happy_path_too_short_to_decrypt(): void
+    public function happyPathTooShortToDecrypt(): void
     {
         $cookie = new Cookie('test_cookie_name', Uuid::random()->toString());
 
-        $sut = new CookieEncrypter(new Natrium(SharedKey::generate()));
+        $sut = new CookieEncrypter(new Natrium(new KeyChain(SharedKey::generate())));
 
         $decrypted_value = $sut->decrypt($cookie->name, $cookie->value());
 
@@ -82,10 +83,10 @@ final class CookieEncrypterTest extends TestCase
     }
 
     #[Test]
-    public function happy_path_skipped_key(): void
+    public function happyPathSkippedKey(): void
     {
         $seed_key = SharedKey::import(self::KEY);
-        $sut = new CookieEncrypter(new Natrium($seed_key));
+        $sut = new CookieEncrypter(new Natrium(new KeyChain($seed_key)));
 
         self::assertSame(self::ENCRYPTED_COOKIE, $sut->decrypt(
             SessionManager::SESSION_ID_COOKIE_NAME,
@@ -94,14 +95,14 @@ final class CookieEncrypterTest extends TestCase
     }
 
     #[Test]
-    public function happy_path_not_base64_encoded(): void
+    public function happyPathNotBase64Encoded(): void
     {
         $cookie = new Cookie(self::COOKIE_NAME, <<<EOL
             v4.public.eyJmb28iOjQyLCJiYXIiOiJiYXoiLCJxdXoiOlsicXV4Il19vJDkR3LoXgiOhtHEsk83hgG_tVZJUWaxYGLP32WNx-vW8udavDQ-RY8NS4Gjt7Q5JHz7JBXWE14dAm0ureUgCA.eyJrZXlfaWQiOiJmb29iYXJiYXoifQ
             EOL,);
 
         $seed_key = SharedKey::generate();
-        $sut = new CookieEncrypter(new Natrium($seed_key));
+        $sut = new CookieEncrypter(new Natrium(new KeyChain($seed_key)));
 
         $decrypted_value = $sut->decrypt($cookie->name, $cookie->value());
 
@@ -109,17 +110,17 @@ final class CookieEncrypterTest extends TestCase
     }
 
     #[Test]
-    public function sad_path(): void
+    public function sadPath(): void
     {
         $seed_key = SharedKey::import(self::KEY);
-        $sut = new CookieEncrypter(new Natrium($seed_key));
+        $sut = new CookieEncrypter(new Natrium(new KeyChain($seed_key)));
         $bad_value = \substr_replace(self::ENCRYPTED_COOKIE, 'A', -1);
 
         self::assertNull($sut->decrypt(self::COOKIE_NAME, $bad_value));
     }
 
     #[Test]
-    public function sad_path_with_thrown_exception(): void
+    public function sadPathWithThrownException(): void
     {
         $natrium = $this->createMock(Natrium::class);
         $natrium->method('sign')->willReturn(MessageSignature::import(<<<'EOF'

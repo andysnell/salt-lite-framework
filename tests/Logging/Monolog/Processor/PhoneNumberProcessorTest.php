@@ -6,8 +6,8 @@ namespace PhoneBurner\SaltLite\Framework\Tests\Logging\Monolog\Processor;
 
 use Monolog\Level;
 use Monolog\LogRecord;
-use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\DomesticPhoneNumber;
-use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\NullPhoneNumber;
+use PhoneBurner\SaltLite\Domain\PhoneNumber\DomesticPhoneNumber;
+use PhoneBurner\SaltLite\Domain\PhoneNumber\NullPhoneNumber;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\PhoneNumberProcessor;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 final class PhoneNumberProcessorTest extends TestCase
 {
     #[Test]
-    public function context_without_phone_number(): void
+    public function contextWithoutPhoneNumber(): void
     {
         $record = new LogRecord(
             new \DateTimeImmutable(),
@@ -34,7 +34,7 @@ final class PhoneNumberProcessorTest extends TestCase
     }
 
     #[Test]
-    public function context_with_null_phone_number(): void
+    public function contextWithNullPhoneNumber(): void
     {
         $now = new \DateTimeImmutable();
         $record = new LogRecord(
@@ -65,7 +65,7 @@ final class PhoneNumberProcessorTest extends TestCase
     }
 
     #[Test]
-    public function context_with_phone_number(): void
+    public function contextWithPhoneNumber(): void
     {
         $now = new \DateTimeImmutable();
         $record = new LogRecord(

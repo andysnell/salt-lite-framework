@@ -4,21 +4,23 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\MessageBus;
 
-use PhoneBurner\SaltLite\Framework\App\App;
-use PhoneBurner\SaltLite\Framework\Container\ObjectContainer\ImmutableObjectContainer;
-use PhoneBurner\SaltLite\Framework\Container\ServiceProvider;
+use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Container\ObjectContainer\ImmutableObjectContainer;
+use PhoneBurner\SaltLite\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\ConnectionProvider;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use PhoneBurner\SaltLite\Framework\MessageBus\Container\MessageBusContainer;
 use PhoneBurner\SaltLite\Framework\MessageBus\Container\ReceiverContainer;
 use PhoneBurner\SaltLite\Framework\MessageBus\Container\SenderContainer;
 use PhoneBurner\SaltLite\Framework\MessageBus\EventListener\LogWorkerMessageFailedEvent;
-use PhoneBurner\SaltLite\Framework\MessageBus\Handler\InvokableMessageHandler;
+use PhoneBurner\SaltLite\Framework\MessageBus\EventListener\ResetServicesListener;
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\AmazonSqsTransportFactory;
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\AmqpTransportFactory;
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\DoctrineTransportFactory;
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\RedisTransportFactory;
-use PhoneBurner\SaltLite\Framework\Util\Attribute\Internal;
+use PhoneBurner\SaltLite\MessageBus\Handler\InvokableMessageHandler;
+use PhoneBurner\SaltLite\MessageBus\MessageBus;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Clock\ClockInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -186,8 +188,15 @@ final class MessageBusServiceProvider implements ServiceProvider
                 $app->get(SymfonyEventDispatcherInterface::class),
                 $app->get(LoggerInterface::class),
                 $app->get(ReceiverContainer::class)->keys(),
+                new ResetServicesListener(
+                    $app->get(LongRunningProcessServiceResetter::class),
+                    $app->get(LoggerInterface::class),
+                ),
+                $app->get(MessageBusContainer::class)->keys(),
             )),
         );
+
+        $app->set(LongRunningProcessServiceResetter::class, new LongRunningProcessServiceResetter());
 
         $app->set(
             StopWorkersCommand::class,

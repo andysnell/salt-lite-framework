@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\App;
 
-use PhoneBurner\SaltLite\Framework\App\Configuration\Configuration;
-use PhoneBurner\SaltLite\Framework\App\Configuration\ConfigurationFactory;
-use PhoneBurner\SaltLite\Framework\App\Event\ApplicationBootstrap;
-use PhoneBurner\SaltLite\Framework\App\Event\ApplicationTeardown;
-use PhoneBurner\SaltLite\Framework\Container\InvokingContainer;
-use PhoneBurner\SaltLite\Framework\Container\MutableContainer;
-use PhoneBurner\SaltLite\Framework\Container\ParameterOverride\OverrideCollection;
-use PhoneBurner\SaltLite\Framework\Container\ServiceContainer;
-use PhoneBurner\SaltLite\Framework\Container\ServiceContainer\ServiceContainerFactory;
+use PhoneBurner\SaltLite\App\App as AppContract;
+use PhoneBurner\SaltLite\App\Context;
+use PhoneBurner\SaltLite\App\Event\ApplicationBootstrap;
+use PhoneBurner\SaltLite\App\Event\ApplicationTeardown;
+use PhoneBurner\SaltLite\Configuration\Configuration;
+use PhoneBurner\SaltLite\Configuration\ConfigurationFactory;
+use PhoneBurner\SaltLite\Container\ParameterOverride\OverrideCollection;
+use PhoneBurner\SaltLite\Container\ServiceContainer;
+use PhoneBurner\SaltLite\Framework\Container\ServiceContainerFactory;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
 use const PhoneBurner\SaltLite\Framework\APP_ROOT;
@@ -27,15 +27,15 @@ use const PhoneBurner\SaltLite\Framework\APP_ROOT;
  * service container itself. The implemented container methods are really shortcuts to
  * the underlying service container.
  */
-class App implements MutableContainer, InvokingContainer
+class App implements AppContract
 {
     private static self|null $instance = null;
 
-    public readonly Environment $environment;
+    public Environment $environment;
 
-    public readonly ServiceContainer $services;
+    public ServiceContainer $services;
 
-    public readonly Configuration $config;
+    public Configuration $config;
 
     public static function booted(): bool
     {
@@ -61,6 +61,11 @@ class App implements MutableContainer, InvokingContainer
      */
     private function setup(): self
     {
+        // set error handler
+
+        // set exception handler
+
+        // dispatch bootstrap event
         $this->services->get(EventDispatcherInterface::class)->dispatch(new ApplicationBootstrap($this));
         return $this;
     }
@@ -109,10 +114,10 @@ class App implements MutableContainer, InvokingContainer
      *
      * Any additional
      */
-    private function __construct(public readonly Context $context)
+    private function __construct(public Context $context)
     {
         $this->environment = new Environment($context, APP_ROOT, $_SERVER, $_ENV);
-        $this->config = ConfigurationFactory::make($this);
+        $this->config = ConfigurationFactory::make($this->environment);
         $this->services = ServiceContainerFactory::make($this);
     }
 

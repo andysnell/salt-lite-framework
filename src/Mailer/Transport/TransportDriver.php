@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Mailer\Transport;
 
-use PhoneBurner\SaltLite\Framework\Util\Enum\WithStringBackedInstanceStaticMethod;
+use PhoneBurner\SaltLite\Enum\WithStringBackedInstanceStaticMethod;
 
 enum TransportDriver: string
 {

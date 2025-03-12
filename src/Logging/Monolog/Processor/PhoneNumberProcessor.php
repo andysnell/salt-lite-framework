@@ -6,7 +6,7 @@ namespace PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor;
 
 use Monolog\LogRecord;
 use Monolog\Processor\ProcessorInterface;
-use PhoneBurner\SaltLite\Framework\Domain\PhoneNumber\NullablePhoneNumber;
+use PhoneBurner\SaltLite\Domain\PhoneNumber\NullablePhoneNumber;
 
 class PhoneNumberProcessor implements ProcessorInterface
 {

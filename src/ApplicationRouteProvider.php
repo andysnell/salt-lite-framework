@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework;
 
-use PhoneBurner\SaltLite\Framework\Http\Domain\ContentType;
+use PhoneBurner\SaltLite\Framework\Http\Middleware\RestrictToNonProductionEnvironments;
 use PhoneBurner\SaltLite\Framework\Http\RequestHandler\CspViolationReportRequestHandler;
 use PhoneBurner\SaltLite\Framework\Http\RequestHandler\ErrorRequestHandler;
 use PhoneBurner\SaltLite\Framework\Http\RequestHandler\LogoutRequestHandler;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Definition\RouteDefinition;
-use PhoneBurner\SaltLite\Framework\Http\Routing\Domain\StaticFile;
-use PhoneBurner\SaltLite\Framework\Http\Routing\RouteProvider;
+use PhoneBurner\SaltLite\Framework\Http\RequestHandler\PhpInfoRequestHandler;
 use PhoneBurner\SaltLite\Framework\Http\Session\Middleware\EnableHttpSession;
+use PhoneBurner\SaltLite\Http\Domain\ContentType;
+use PhoneBurner\SaltLite\Http\Routing\Definition\RouteDefinition;
+use PhoneBurner\SaltLite\Http\Routing\Domain\StaticFile;
+use PhoneBurner\SaltLite\Http\Routing\RouteProvider;
 
 use function PhoneBurner\SaltLite\Framework\path;
 
@@ -33,6 +35,10 @@ class ApplicationRouteProvider implements RouteProvider
                 ->withHandler(LogoutRequestHandler::class)
                 ->withMiddleware(EnableHttpSession::class)
                 ->withName('logout'),
+
+            RouteDefinition::get('/phpinfo')
+                ->withHandler(PhpInfoRequestHandler::class)
+                ->withMiddleware(RestrictToNonProductionEnvironments::class),
 
             RouteDefinition::post('/csp')
                 ->withHandler(CspViolationReportRequestHandler::class),
