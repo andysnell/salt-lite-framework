@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use PhoneBurner\SaltLite\Framework\App\App;
 use PhoneBurner\SaltLite\App\Context;
 use PhoneBurner\SaltLite\App\Kernel;
+use PhoneBurner\SaltLite\Framework\App\App;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 

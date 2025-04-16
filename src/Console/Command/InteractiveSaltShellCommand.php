@@ -14,7 +14,6 @@ use PhoneBurner\SaltLite\Cache\AppendOnlyCache;
 use PhoneBurner\SaltLite\Cache\Cache;
 use PhoneBurner\SaltLite\Cache\Lock\LockFactory;
 use PhoneBurner\SaltLite\Configuration\Configuration;
-use PhoneBurner\SaltLite\Container\MutableContainer;
 use PhoneBurner\SaltLite\Container\ServiceContainer;
 use PhoneBurner\SaltLite\Cryptography\Asymmetric\Asymmetric;
 use PhoneBurner\SaltLite\Cryptography\Asymmetric\EncryptionKeyPair;
@@ -127,7 +126,7 @@ class InteractiveSaltShellCommand extends Command
         'updateCheck' => 'never',
     ];
 
-    public function __construct(private readonly MutableContainer $container)
+    public function __construct(private readonly App $app)
     {
         parent::__construct(self::NAME);
         $this->setDescription(self::DESCRIPTION);
@@ -136,13 +135,13 @@ class InteractiveSaltShellCommand extends Command
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $config = $this->container->get(Configuration::class)->get('console.shell') ?? [];
+        $config = $this->app->config->get('console.shell') ?? [];
         $shell_config = new PsyConfiguration($config['psysh'] ?? self::DEFAULT_CONFIG);
 
         $shell = new Shell($shell_config);
 
         $services = \array_unique(\array_merge(self::DEFAULT_SERVICES, $config['services'] ?? []));
-        $shell->setScopeVariables(\array_map($this->container->get(...), $services));
+        $shell->setScopeVariables(\array_map($this->app->get(...), $services));
 
         foreach (\array_unique(\array_merge(self::DEFAULT_IMPORTS, $config['services'] ?? [])) as $import) {
             $shell->addCode(\sprintf('use %s;', $import), true);

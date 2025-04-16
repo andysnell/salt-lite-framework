@@ -2,24 +2,20 @@
 
 declare(strict_types=1);
 
-use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
-use League\Flysystem\Local\LocalFilesystemAdapter;
+use PhoneBurner\SaltLite\Framework\Storage\Config\LocalFilesystemConfigStruct;
+use PhoneBurner\SaltLite\Framework\Storage\Config\S3FilesystemConfigStruct;
+use PhoneBurner\SaltLite\Framework\Storage\Config\StorageConfigStruct;
 use PhoneBurner\SaltLite\Framework\Storage\StorageDriver;
 
 use function PhoneBurner\SaltLite\Framework\env;
-use function PhoneBurner\SaltLite\Framework\path;
 
 return [
-    'storage' => [
-        'default' => env('SALT_DEFAULT_STORAGE_ADAPTER', StorageDriver::Local->value),
-        'drivers' => [
-            StorageDriver::Local->value => [
-                'adapter' => LocalFilesystemAdapter::class,
-                'root' => path('/storage/app'),
-            ],
-            StorageDriver::S3->value => [
-                'adapter' => AwsS3V3Adapter::class,
-                'client' => [
+    'storage' => new StorageConfigStruct(
+        default: env('SALT_DEFAULT_STORAGE_ADAPTER', StorageDriver::LOCAL),
+        drivers: [
+            StorageDriver::LOCAL => new LocalFilesystemConfigStruct(),
+            StorageDriver::S3 => new S3FilesystemConfigStruct(
+                client: [
                     'credentials' => [
                         'key' => env('SALT_AWS_S3_ACCESS_KEY_ID'),
                         'secret' => env('SALT_AWS_S3_SECRET_ACCESS_KEY'),
@@ -28,9 +24,9 @@ return [
                     'signature' => 'v4',
                     'version' => 'latest',
                 ],
-                'bucket-name' => env('SALT_AWS_S3_BUCKET_NAME'),
-                'prefix' => env('SALT_AWS_S3_PATH_PREFIX'),
-            ],
+                bucket_name: (string)env('SALT_AWS_S3_BUCKET_NAME'),
+                prefix: (string)env('SALT_AWS_S3_PATH_PREFIX'),
+            ),
         ],
-    ],
+    ),
 ];

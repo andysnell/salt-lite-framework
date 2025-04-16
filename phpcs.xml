@@ -7,6 +7,9 @@
     <arg name="colors"/>
     <arg value="spn"/>
     <ini name="memory_limit" value="-1"/>
+    <file>config</file>
+    <file>database</file>
+    <file>public</file>
     <file>src</file>
     <file>tests</file>
     <file>rector.php</file>

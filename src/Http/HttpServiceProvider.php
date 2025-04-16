@@ -159,11 +159,11 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             ),
         );
 
-        $app->set(JsonResponseTransformerStrategy::class, new NewInstanceServiceFactory());
+        $app->set(JsonResponseTransformerStrategy::class, NewInstanceServiceFactory::singleton());
 
-        $app->set(HtmlResponseTransformerStrategy::class, new NewInstanceServiceFactory());
+        $app->set(HtmlResponseTransformerStrategy::class, NewInstanceServiceFactory::singleton());
 
-        $app->set(TextResponseTransformerStrategy::class, new NewInstanceServiceFactory());
+        $app->set(TextResponseTransformerStrategy::class, NewInstanceServiceFactory::singleton());
 
         $app->set(
             CatchExceptionalResponses::class,
@@ -188,7 +188,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             ),
         );
 
-        $app->set(ErrorRequestHandler::class, new NewInstanceServiceFactory());
+        $app->set(ErrorRequestHandler::class, NewInstanceServiceFactory::singleton());
 
         $app->set(
             FastRouter::class,
@@ -208,7 +208,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             ),
         );
 
-        $app->set(FastRouteResultFactory::class, new NewInstanceServiceFactory());
+        $app->set(FastRouteResultFactory::class, NewInstanceServiceFactory::singleton());
 
         $app->set(
             DefinitionList::class,
@@ -238,7 +238,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             )),
         );
 
-        $app->set(CookieJar::class, new NewInstanceServiceFactory());
+        $app->set(CookieJar::class, NewInstanceServiceFactory::singleton());
 
         $app->set(
             ManageCookies::class,
@@ -279,7 +279,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             ),
         );
 
-        $app->set(StaticFileRequestHandler::class, new NewInstanceServiceFactory());
+        $app->set(StaticFileRequestHandler::class, NewInstanceServiceFactory::singleton());
 
         $app->set(SessionHandler::class, new SessionHandlerServiceFactory());
 

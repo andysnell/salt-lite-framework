@@ -1,8 +1,18 @@
 {
   "name": "phoneburner/salt-lite-framework",
-  "description": "Salt-Lite Framework",
+  "description": "SaltLite Framework",
   "type": "library",
-  "license": "proprietary",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Tim Lytle",
+      "email": "tim@phoneburner.com"
+    },
+    {
+      "name": "Andy Snell",
+      "email": "andy@phoneburner.com"
+    }
+  ],
   "config": {
     "platform": {
       "php": "8.4"
@@ -58,6 +68,9 @@
       "PhoneBurner\\SaltLite\\Framework\\Tests\\": "tests/"
     }
   },
+  "bin": [
+    "bin/salt"
+  ],
   "require": {
     "php": "^8.4",
     "ext-bcmath": "*",
@@ -78,6 +91,7 @@
     "ext-zip": "*",
     "ext-zlib": "*",
     "alek13/slack": "^2.3",
+    "aws/aws-sdk-php": "^3.343",
     "composer/composer": "^2.8",
     "crell/api-problem": "^3.7",
     "crell/attributeutils": "^1.2",
@@ -128,7 +142,8 @@
     "symfony/process": "^7.2.0",
     "symfony/redis-messenger": "^7.2.3",
     "symfony/scheduler": "^7.2.3",
-    "symfony/sendgrid-mailer": "^7.2.3"
+    "symfony/sendgrid-mailer": "^7.2.3",
+    "symfony/service-contracts": "^3.5"
   },
   "require-dev": {
     "filp/whoops": "^2.17",
@@ -142,6 +157,7 @@
     "symfony/var-dumper": "^7.2.3"
   },
   "scripts": {
+    "pre-autoload-dump": "Aws\\Script\\Composer\\Composer::removeUnusedServices",
     "lint": "@php vendor/bin/parallel-lint -j $(nproc --ignore=2) --show-deprecated --exclude vendor --exclude build .",
     "phpcbf": "@php vendor/bin/phpcbf --parallel=$(nproc --ignore=2) --report=full",
     "phpcs": "@php vendor/bin/phpcs --parallel=$(nproc --ignore=2) --report=full",
@@ -170,6 +186,10 @@
   "extra": {
     "branch-alias": {
       "dev-main": "1.0.x"
-    }
+    },
+    "aws/aws-sdk-php": [
+      "S3",
+      "Sqs"
+    ]
   }
 }

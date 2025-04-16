@@ -9,7 +9,7 @@ use PhoneBurner\SaltLite\Configuration\Struct\ConfigStructArrayAccess;
 use PhoneBurner\SaltLite\Configuration\Struct\ConfigStructSerialization;
 use PhoneBurner\SaltLite\Logging\LogLevel;
 
-readonly class LoggingHandlerConfigStruct implements ConfigStruct
+final readonly class LoggingHandlerConfigStruct implements ConfigStruct
 {
     use ConfigStructArrayAccess;
     use ConfigStructSerialization;

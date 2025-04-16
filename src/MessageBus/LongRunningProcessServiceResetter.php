@@ -4,27 +4,40 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\MessageBus;
 
+use Monolog\ResettableInterface;
+use PhoneBurner\SaltLite\Collections\WeakSet;
+use PhoneBurner\SaltLite\Container\ResettableService;
+use Symfony\Contracts\Service\ResetInterface;
+
 class LongRunningProcessServiceResetter
 {
     /**
-     * @var \WeakMap<object, string>
+     * Use a WeakSet to avoid holding references to services that would otherwise
+     * be garbage collected.
+     *
+     * @var WeakSet<ResetInterface|ResettableInterface|ResettableService>
      */
-    private \WeakMap $service_map;
+    private readonly WeakSet $services;
 
     public function __construct()
     {
-        $this->service_map = new \WeakMap();
+        $this->services = new WeakSet();
     }
 
-    public function add(object $service, string $method): void
+    public function add(ResetInterface|ResettableInterface|ResettableService $service): void
     {
-        $this->service_map[$service] = $method;
+        $this->services->add($service);
+    }
+
+    public function remove(ResetInterface|ResettableInterface|ResettableService $service): void
+    {
+        $this->services->remove($service);
     }
 
     public function reset(): void
     {
-        foreach ($this->service_map as $service => $method) {
-            $service->$method();
+        foreach ($this->services as $service) {
+            $service->reset();
         }
     }
 }

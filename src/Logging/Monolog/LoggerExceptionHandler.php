@@ -9,7 +9,8 @@ use PhoneBurner\SaltLite\App\BuildStage;
 
 /**
  * The exception handler for Throwable instances thrown within in the Monolog
- * logger while writing a log record.
+ * logger while writing a log record. This class is intentionally not final to
+ * allow for end-users to extend it and provide their own exception handling logic.
  */
 class LoggerExceptionHandler
 {

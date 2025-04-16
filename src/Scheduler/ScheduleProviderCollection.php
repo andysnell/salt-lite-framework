@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Scheduler;
 
-use Symfony\Component\Scheduler\ScheduleProviderInterface;
 use Symfony\Contracts\Service\ServiceProviderInterface;
 use Traversable;
 
 /**
- * @implements \IteratorAggregate<string, ScheduleProviderInterface>
- * @implements ServiceProviderInterface<ScheduleProviderInterface>
+ * @implements \IteratorAggregate<string, ScheduleProvider>
+ * @implements ServiceProviderInterface<ScheduleProvider>
  */
 final readonly class ScheduleProviderCollection implements ServiceProviderInterface, \IteratorAggregate
 {

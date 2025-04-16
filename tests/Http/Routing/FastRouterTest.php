@@ -138,7 +138,7 @@ final class FastRouterTest extends TestCase
 
         $result = $sut->resolveForRequest($post);
         self::assertInstanceOf(RouteFound::class, $result);
-        self::assertEquals(RouteMatch::make($all_route, ['id' => 100]), $result->getRouteMatch());
+        self::assertEquals(RouteMatch::make($all_route, ['id' => '100']), $result->getRouteMatch());
 
         $bad = $this->buildMockRequest()
             ->withRequestMethod(HttpMethod::Post)

@@ -2,17 +2,20 @@
 
 declare(strict_types=1);
 
+use PhoneBurner\SaltLite\Framework\Notifier\Config\NotifierConfigStruct;
+use PhoneBurner\SaltLite\Framework\Notifier\Slack\Config\SlackWebhookNotifierConfigStruct;
+
 use function PhoneBurner\SaltLite\Framework\env;
 
 return [
-    'notifier' => [
-        'slack_webhooks' => [
-            'endpoint' => (string)env('SALT_SLACK_WEBHOOK_URL'),
-            'default_options' => [
-                'username' => 'monitor',
+    'notifier' => new NotifierConfigStruct([
+        'slack_webhooks' => new SlackWebhookNotifierConfigStruct(
+            endpoint: (string)env('SALT_SLACK_WEBHOOK_URL'),
+            options: [
+                'username' => 'SaltLite',
                 'channel' => env('SALT_SLACK_DEFAULT_CHANNEL'),
                 'link_names' => true,
             ],
-        ],
-    ],
+        ),
+    ]),
 ];

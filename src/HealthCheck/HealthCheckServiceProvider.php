@@ -14,6 +14,7 @@ use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks\AmqpTranspo
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks\MySqlHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks\PhpRuntimeHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks\RedisHealthCheckService;
+use PhoneBurner\SaltLite\Framework\HealthCheck\Config\HealthCheckConfigStruct;
 use PhoneBurner\SaltLite\Framework\HealthCheck\RequestHandler\HealthCheckRequestHandler;
 use PhoneBurner\SaltLite\Framework\HealthCheck\RequestHandler\ReadyCheckRequestHandler;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Service\AppHealthCheckBuilder;
@@ -55,7 +56,7 @@ final class HealthCheckServiceProvider implements DeferrableServiceProvider
              ghost(static fn(AppHealthCheckBuilder $ghost): null => $ghost->__construct(
                  $app->get(Clock::class),
                  $app->get(LoggerInterface::class),
-                 \array_map($app->services->get(...), $app->config->get('health_check.services') ?: []),
+                 \array_map($app->services->get(...), $app->get(HealthCheckConfigStruct::class)->services),
                  \trim($app->config->get('app.name') . ' API Health Check'),
              )),
          );

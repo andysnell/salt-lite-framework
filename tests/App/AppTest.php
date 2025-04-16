@@ -19,8 +19,8 @@ final class AppTest extends TestCase
         self::assertTrue(App::booted());
         self::assertSame($app, App::instance());
 
-        self::assertSame('Salt-Lite Framework', $app->config->get('app.name'));
-        self::assertSame(JsonResponseTransformerStrategy::class, $app->config->get('http.exceptional_responses.default_transformer'));
+        self::assertSame('SaltLite Framework', $app->config->get('app.name'));
+        self::assertSame(JsonResponseTransformerStrategy::class, $app->config->get('http.exceptional_response_default_transformer'));
 
         self::assertTrue($app->has(JsonResponseTransformerStrategy::class));
         self::assertInstanceOf(JsonResponseTransformerStrategy::class, $app->get(JsonResponseTransformerStrategy::class));

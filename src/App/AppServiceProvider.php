@@ -27,14 +27,32 @@ use PhoneBurner\SaltLite\Container\InvokingContainer;
 use PhoneBurner\SaltLite\Container\MutableContainer;
 use PhoneBurner\SaltLite\Container\ServiceContainer;
 use PhoneBurner\SaltLite\Container\ServiceContainer\ServiceContainerAdapter;
+use PhoneBurner\SaltLite\Container\ServiceFactory\ConfigStructServiceFactory;
 use PhoneBurner\SaltLite\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Cryptography\Defaults;
 use PhoneBurner\SaltLite\Cryptography\KeyManagement\KeyChain;
 use PhoneBurner\SaltLite\Cryptography\Natrium;
 use PhoneBurner\SaltLite\Framework\App\App as FrameworkApp;
 use PhoneBurner\SaltLite\Framework\App\Config\AppConfigStruct;
+use PhoneBurner\SaltLite\Framework\App\ErrorHandling\ErrorHandler;
+use PhoneBurner\SaltLite\Framework\App\ErrorHandling\ExceptionHandler;
+use PhoneBurner\SaltLite\Framework\App\ErrorHandling\NullErrorHandler;
+use PhoneBurner\SaltLite\Framework\App\ErrorHandling\NullExceptionHandler;
+use PhoneBurner\SaltLite\Framework\Cache\Config\CacheConfigStruct;
 use PhoneBurner\SaltLite\Framework\Console\CliKernel;
+use PhoneBurner\SaltLite\Framework\Console\Config\ConsoleConfigStruct;
+use PhoneBurner\SaltLite\Framework\Container\Config\ContainerConfigStruct;
+use PhoneBurner\SaltLite\Framework\Database\Config\DatabaseConfigStruct;
+use PhoneBurner\SaltLite\Framework\EventDispatcher\Config\EventDispatcherConfigStruct;
+use PhoneBurner\SaltLite\Framework\HealthCheck\Config\HealthCheckConfigStruct;
+use PhoneBurner\SaltLite\Framework\Http\Config\HttpConfigStruct;
 use PhoneBurner\SaltLite\Framework\Http\HttpKernel;
+use PhoneBurner\SaltLite\Framework\Logging\Config\LoggingConfigStruct;
+use PhoneBurner\SaltLite\Framework\Mailer\Config\MailerConfigStruct;
+use PhoneBurner\SaltLite\Framework\MessageBus\Config\MessageBusConfigStruct;
+use PhoneBurner\SaltLite\Framework\Notifier\Config\NotifierConfigStruct;
+use PhoneBurner\SaltLite\Framework\Scheduler\Config\SchedulerConfigStruct;
+use PhoneBurner\SaltLite\Framework\Storage\Config\StorageConfigStruct;
 use PhoneBurner\SaltLite\Logging\LogTrace;
 use PhoneBurner\SaltLite\Type\Type;
 use Psr\Clock\ClockInterface;
@@ -48,6 +66,23 @@ use function PhoneBurner\SaltLite\Framework\ghost;
 #[Internal('Override Definitions in Application Service Providers')]
 final class AppServiceProvider implements ServiceProvider
 {
+    const array SERVICE_LEVEL_CONFIG_STRUCTS = [
+        'app' => AppConfigStruct::class,
+        'cache' => CacheConfigStruct::class,
+        'console' => ConsoleConfigStruct::class,
+        'container' => ContainerConfigStruct::class,
+        'database' => DatabaseConfigStruct::class,
+        'event_dispatcher' => EventDispatcherConfigStruct::class,
+        'health_check' => HealthCheckConfigStruct::class,
+        'http' => HttpConfigStruct::class,
+        'logging' => LoggingConfigStruct::class,
+        'mailer' => MailerConfigStruct::class,
+        'message_bus' => MessageBusConfigStruct::class,
+        'notifier' => NotifierConfigStruct::class,
+        'scheduler' => SchedulerConfigStruct::class,
+        'storage' => StorageConfigStruct::class,
+    ];
+
     public static function bind(): array
     {
         return [
@@ -66,8 +101,8 @@ final class AppServiceProvider implements ServiceProvider
         $app->set(Environment::class, static fn (App $app): never => throw new NotResolvable(Environment::class));
         $app->set(Configuration::class, static fn (App $app): never => throw new NotResolvable(Configuration::class));
 
-        // When asked for a concrete instance or an implementation of either of
-        // the two container interfaces, the container should return itself, unless
+        // When asked for a concrete instance or an implementation of a
+        // container-like interface, the container should return itself, unless
         // specifically asking for the ServiceContainer. These are defined here,
         // and not in the bind method, since they already exist and lazy loading
         // would add unnecessary overhead.
@@ -79,12 +114,23 @@ final class AppServiceProvider implements ServiceProvider
 
         // These are the few services that should always be eagerly instantiated
         // since they are used on every request and are less expensive to create
-        // than to wrap with a closure to defer instantiation.
+        // than to wrap with a closure to defer instantiation. They should also
+        // be safe to instantiate this early in the application lifecycle, since
+        // they are not dependent on configuration.
+        $app->set(ErrorHandler::class, new NullErrorHandler());
+        $app->set(ExceptionHandler::class, new NullExceptionHandler());
         $app->set(LogTrace::class, LogTrace::make());
         $app->set(BuildStage::class, $app->environment->stage);
         $app->set(Context::class, $app->environment->context);
         $app->set(Clock::class, new SystemClock());
         $app->set(HighResolutionTimer::class, new SystemHighResolutionTimer());
+
+        // It is probably safe for us to resolve the service level config structs
+        // eagerly; however, for the sake of being extra cautious, we will wrap the
+        // services in a service factory.
+        foreach (self::SERVICE_LEVEL_CONFIG_STRUCTS as $key => $config_struct) {
+            $app->set($config_struct, new ConfigStructServiceFactory($key));
+        }
 
         // Note: we use a regular closure here instead of binding the interface to
         // a concrete implementation because we may be in a context where there
@@ -97,12 +143,13 @@ final class AppServiceProvider implements ServiceProvider
         }));
 
         $app->set(Natrium::class, static function (App $app): Natrium {
+            $config = Type::of(AppConfigStruct::class, $app->get(AppConfigStruct::class));
             return new Natrium(
-                new KeyChain(Type::of(AppConfigStruct::class, $app->config->get('app'))->key),
+                new KeyChain($config->key),
                 $app->get(Clock::class),
                 new Defaults(
-                    $app->config->get('app')->symmetric_algorithm,
-                    $app->config->get('app')->asymmetric_algorithm,
+                    $config->symmetric_algorithm,
+                    $config->asymmetric_algorithm,
                 ),
             );
         });

@@ -6,10 +6,14 @@ namespace PhoneBurner\SaltLite\Framework\MessageBus;
 
 use PhoneBurner\SaltLite\App\App;
 use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Clock\Clock;
 use PhoneBurner\SaltLite\Container\ObjectContainer\ImmutableObjectContainer;
+use PhoneBurner\SaltLite\Container\ServiceFactory\NewInstanceServiceFactory;
 use PhoneBurner\SaltLite\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\ConnectionProvider;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
+use PhoneBurner\SaltLite\Framework\MessageBus\Config\BusConfigStruct;
+use PhoneBurner\SaltLite\Framework\MessageBus\Config\MessageBusConfigStruct;
 use PhoneBurner\SaltLite\Framework\MessageBus\Container\MessageBusContainer;
 use PhoneBurner\SaltLite\Framework\MessageBus\Container\ReceiverContainer;
 use PhoneBurner\SaltLite\Framework\MessageBus\Container\SenderContainer;
@@ -17,12 +21,14 @@ use PhoneBurner\SaltLite\Framework\MessageBus\EventListener\LogWorkerMessageFail
 use PhoneBurner\SaltLite\Framework\MessageBus\EventListener\ResetServicesListener;
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\AmazonSqsTransportFactory;
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\AmqpTransportFactory;
+use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\ContainerTransportFactory;
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\DoctrineTransportFactory;
+use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\InMemoryTransportFactory;
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\RedisTransportFactory;
+use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\SyncTransportFactory;
 use PhoneBurner\SaltLite\MessageBus\Handler\InvokableMessageHandler;
 use PhoneBurner\SaltLite\MessageBus\MessageBus;
 use Psr\Cache\CacheItemPoolInterface;
-use Psr\Clock\ClockInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
@@ -61,6 +67,7 @@ final class MessageBusServiceProvider implements ServiceProvider
             MessageBusInterface::class => SymfonyMessageBusAdapter::class,
             MessageBus::class => SymfonyMessageBusAdapter::class,
             RoutableMessageBus::class => SymfonyRoutableMessageBusAdapter::class,
+            TransportFactory::class => ContainerTransportFactory::class,
         ];
     }
 
@@ -70,12 +77,12 @@ final class MessageBusServiceProvider implements ServiceProvider
         $app->set(
             MessageBusContainer::class,
             static fn(App $app): MessageBusContainer => new MessageBusContainer(\array_map(
-                static fn (array $bus): SymfonyMessageBusAdapter => ghost(
+                static fn (BusConfigStruct $bus): SymfonyMessageBusAdapter => ghost(
                     static fn(SymfonyMessageBusAdapter $ghost): null => $ghost->__construct(
-                        \array_map($app->services->get(...), $bus['middleware'] ?: []),
+                        \array_map($app->services->get(...), $bus->middleware),
                     ),
                 ),
-                $app->config->get('message_bus.bus') ?: [],
+                $app->get(MessageBusConfigStruct::class)->bus,
             )),
         );
 
@@ -93,14 +100,10 @@ final class MessageBusServiceProvider implements ServiceProvider
         );
 
         $app->set(
-            TransportFactory::class,
-            static fn(App $app): TransportFactory => new TransportFactory(
-                $app->get(MessageBusContainer::class),
-                $app->get(ClockInterface::class),
-                $app->get(RedisTransportFactory::class),
-                $app->get(DoctrineTransportFactory::class),
-                $app->get(AmqpTransportFactory::class),
-                $app->get(AmazonSqsTransportFactory::class),
+            ContainerTransportFactory::class,
+            static fn(App $app): ContainerTransportFactory => new ContainerTransportFactory(
+                $app->services,
+                $app->get(MessageBusConfigStruct::class)->transport_factories,
             ),
         );
 
@@ -121,14 +124,22 @@ final class MessageBusServiceProvider implements ServiceProvider
         );
 
         $app->set(
-            AmqpTransportFactory::class,
-            static fn(App $app): AmqpTransportFactory => new AmqpTransportFactory(),
+            SyncTransportFactory::class,
+            static fn(App $app): SyncTransportFactory => new SyncTransportFactory(
+                $app->get(MessageBusContainer::class),
+            ),
         );
 
         $app->set(
-            AmazonSqsTransportFactory::class,
-            static fn(App $app): AmazonSqsTransportFactory => new AmazonSqsTransportFactory(),
+            InMemoryTransportFactory::class,
+            static fn(App $app): InMemoryTransportFactory => new InMemoryTransportFactory(
+                $app->get(Clock::class),
+            ),
         );
+
+        $app->set(AmqpTransportFactory::class, NewInstanceServiceFactory::singleton());
+
+        $app->set(AmazonSqsTransportFactory::class, NewInstanceServiceFactory::singleton());
 
         $app->set(
             SenderContainer::class,
@@ -196,22 +207,16 @@ final class MessageBusServiceProvider implements ServiceProvider
             )),
         );
 
-        $app->set(LongRunningProcessServiceResetter::class, new LongRunningProcessServiceResetter());
+        $app->set(LongRunningProcessServiceResetter::class, NewInstanceServiceFactory::singleton());
 
         $app->set(
             StopWorkersCommand::class,
             static fn(App $app): StopWorkersCommand => new StopWorkersCommand($app->get(CacheItemPoolInterface::class)),
         );
 
-        $app->set(
-            AddErrorDetailsStampListener::class,
-            static fn(App $app): AddErrorDetailsStampListener => new AddErrorDetailsStampListener(),
-        );
+        $app->set(AddErrorDetailsStampListener::class, NewInstanceServiceFactory::singleton());
 
-        $app->set(
-            DispatchPcntlSignalListener::class,
-            static fn(App $app): DispatchPcntlSignalListener => new DispatchPcntlSignalListener(),
-        );
+        $app->set(DispatchPcntlSignalListener::class, NewInstanceServiceFactory::singleton());
 
         $app->set(
             SendFailedMessageForRetryListener::class,
@@ -252,10 +257,8 @@ final class MessageBusServiceProvider implements ServiceProvider
                 );
             },
         );
-        $app->set(
-            StopWorkerOnCustomStopExceptionListener::class,
-            static fn(App $app): StopWorkerOnCustomStopExceptionListener => new StopWorkerOnCustomStopExceptionListener(),
-        );
+
+        $app->set(StopWorkerOnCustomStopExceptionListener::class, NewInstanceServiceFactory::singleton());
 
         $app->set(
             StopWorkerOnRestartSignalListener::class,

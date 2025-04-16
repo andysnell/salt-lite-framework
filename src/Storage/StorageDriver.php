@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Storage;
 
-enum StorageDriver: string
+/**
+ * Note: this class is intentionally not an enum, since the end user may implement
+ * their own storage driver or use different names for the same driver. (Breaking
+ * the requirement for an enum to be a closed set of values.)
+ */
+final readonly class StorageDriver
 {
-    case Local = 'local';
-    case S3 = 's3';
+    public const string LOCAL = 'local';
+    public const string S3 = 's3';
 }

@@ -1,18 +1,25 @@
-# Salt-Lite Framework
+<p align="center"><a href="https://github.com/phoneburner/salt-lite-framework" target="_blank">
+<img src="public/images/salt-lite-logo.svg" width="350" alt="Logo"/>
+</a></p>
+
+# SaltLite Framework
 
 > Feels like home, just without the salty tears of frustration
 
-The Salt-Lite Framework is a "batteries-included" PHP framework, modeled on other
-modern frameworks like Symfony and Laravel, derived from the original Salt project.
+The SaltLite Framework is a "batteries-included", very-highly-opinionated PHP 
+framework, derived from the original Salt framework/application used by PhoneBurner.
+While modeled on other modern "general purpose" frameworks like Symfony and Laravel, 
+the SaltLite Framework is designed and optimized as an API backend. 
+
 Ideally, it adapts the best core features of Salt without dragging along unnecessary
-complexity, technical debt and design decisions we regret. The goal is to provide
-users with a robust framework with minimum cognitive overhead from the original
+complexity, technical debt, and the (many) design decisions we regret. The goal is
+to provide users with a robust framework with minimum cognitive overhead from the original
 Salt framework, avoiding the pitfalls of bringing in a full-fledged third-party
 framework and trying to adapt that to our needs.
 
 ### Guiding Principles
 
-1. PSRs are good, but not the end-all-be-all
+1. Compatiblity with the PSRs should be the general rule, but sensible deviations are allowed, especially in the name of type safety.
 2. Where practical, third-party library code should be wrapped in a way that lets us expose our own interface. This
    allows us to swap out the underlying library without changing application code.
 3. Separation of "framework" and "application" concerns
@@ -26,7 +33,7 @@ framework and trying to adapt that to our needs.
 - Overriding configuration values is done via environment variables, not by adding local configuration files.
 - Database migrations are handled by
   the [Doctrine Migrations](https://www.doctrine-project.org/projects/migrations.html) library, as opposed to Phinx.
-- PHPUnit 11 is used for testing, with ParaTest for parallel execution, this is
+- PHPUnit 12 is used for testing, this is
   a significant upgrade from the previous version. Notably unit tests are defined
   with attributes and data providers must be defined as static functions.
 - When cast to a string, `\PhoneBurner\SaltLite\Domain\PhoneNumber\DomesticPhoneNumber` is formatted as an

@@ -1,18 +1,16 @@
 <?php
 
-/**
- * Message bus configuration
- */
-
 declare(strict_types=1);
 
 use PhoneBurner\SaltLite\Framework\Database\Doctrine\ConnectionFactory;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
+use PhoneBurner\SaltLite\Framework\MessageBus\Config\BusConfigStruct;
+use PhoneBurner\SaltLite\Framework\MessageBus\Config\MessageBusConfigStruct;
 use PhoneBurner\SaltLite\Framework\MessageBus\Config\TransportConfigStruct;
+use PhoneBurner\SaltLite\Framework\MessageBus\Transport;
 use PhoneBurner\SaltLite\MessageBus\Handler\InvokableMessageHandler;
 use PhoneBurner\SaltLite\MessageBus\Message\InvokableMessage;
 use PhoneBurner\SaltLite\MessageBus\MessageBus;
-use PhoneBurner\SaltLite\Framework\MessageBus\Transport;
 use Symfony\Component\Console\Messenger\RunCommandMessage;
 use Symfony\Component\Console\Messenger\RunCommandMessageHandler;
 use Symfony\Component\Mailer\Messenger\MessageHandler as EmailMessageHandler;
@@ -28,16 +26,16 @@ use Symfony\Component\Process\Messenger\RunProcessMessage;
 use Symfony\Component\Process\Messenger\RunProcessMessageHandler;
 
 return [
-    'message_bus' => [
-        'bus' => [
-            MessageBus::DEFAULT => [
-                'middleware' => [
+    'message_bus' => new MessageBusConfigStruct(
+        bus: [
+            MessageBus::DEFAULT => new BusConfigStruct(
+                middleware: [
                     SendMessageMiddleware::class,
                     HandleMessageMiddleware::class,
                 ],
-            ],
+            ),
         ],
-        'handlers' => [
+        handlers: [
             InvokableMessage::class => [
                 InvokableMessageHandler::class,
             ],
@@ -54,12 +52,12 @@ return [
                 RunProcessMessageHandler::class,
             ],
         ],
-        'routing' => [ // messages not mapped to a transport are handled synchronously.
+        routing: [ // messages not mapped to a transport are handled synchronously.
             InvokableMessage::class => [Transport::ASYNC],
             SendEmailMessage::class => [Transport::ASYNC],
             RedispatchMessage::class => [Transport::ASYNC],
         ],
-        'senders' => [
+        senders: [
             Transport::ASYNC => new TransportConfigStruct(
                 class: RedisTransport::class,
                 connection: RedisManager::DEFAULT,
@@ -70,7 +68,7 @@ return [
                 ],
             ),
         ],
-        'receivers' => [
+        receivers: [
             Transport::ASYNC => new TransportConfigStruct(
                 class: RedisTransport::class,
                 connection: RedisManager::DEFAULT,
@@ -81,7 +79,7 @@ return [
                 ],
             ),
         ],
-        'failure_senders' => [
+        failure_senders: [
             Transport::ASYNC => new TransportConfigStruct(
                 class: DoctrineTransport::class,
                 connection: ConnectionFactory::DEFAULT,
@@ -92,7 +90,7 @@ return [
                 ],
             ),
         ],
-        'retry_strategy' => [
+        retry_strategy: [
             Transport::ASYNC => [
                 'class' => MultiplierRetryStrategy::class,
                 'params' => [
@@ -102,5 +100,5 @@ return [
                 ],
             ],
         ],
-    ],
+    ),
 ];

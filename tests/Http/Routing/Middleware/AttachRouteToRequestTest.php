@@ -25,13 +25,13 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 final class AttachRouteToRequestTest extends TestCase
 {
-    private MockObject&Router $router;
+    private MockObject $router;
 
     private MockObject&ServerRequestInterface $request;
 
     private MockObject&RequestHandlerInterface $next_handler;
 
-    private ResponseInterface $response;
+    private MockObject&ResponseInterface $response;
 
     private AttachRouteToRequest $sut;
 

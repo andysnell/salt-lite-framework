@@ -5,6 +5,7 @@ declare(strict_types=1);
 use PhoneBurner\SaltLite\Cache\CacheDriver;
 use PhoneBurner\SaltLite\Framework\Database\Config\AmpqConfigStruct;
 use PhoneBurner\SaltLite\Framework\Database\Config\AmpqConnectionConfigStruct;
+use PhoneBurner\SaltLite\Framework\Database\Config\DatabaseConfigStruct;
 use PhoneBurner\SaltLite\Framework\Database\Config\DoctrineConfigStruct;
 use PhoneBurner\SaltLite\Framework\Database\Config\DoctrineConnectionConfigStruct;
 use PhoneBurner\SaltLite\Framework\Database\Config\DoctrineEntityManagerConfigStruct;
@@ -16,8 +17,8 @@ use function PhoneBurner\SaltLite\Framework\env;
 use function PhoneBurner\SaltLite\Framework\path;
 
 return [
-    'database' => [
-        'ampq' => new AmpqConfigStruct(
+    'database' => new DatabaseConfigStruct(
+        ampq: new AmpqConfigStruct(
             connections: [
                 'default' => new AmpqConnectionConfigStruct(
                     host: env('SALT_RABBITMQ_HOST'),
@@ -27,7 +28,7 @@ return [
                 ),
             ],
         ),
-        'redis' => new RedisConfigStruct(
+        redis: new RedisConfigStruct(
             connections: [
                 'default' => new RedisConnectionConfigStruct(
                     host: env('SALT_REDIS_HOST'),
@@ -36,7 +37,7 @@ return [
             ],
             timeout: 5,
         ),
-        'doctrine' => new DoctrineConfigStruct(
+        doctrine: new DoctrineConfigStruct(
             connections: [
                 'default' => new DoctrineConnectionConfigStruct(
                     host: env('SALT_MYSQL_HOST'),
@@ -67,5 +68,5 @@ return [
             ],
             types: [],
         ),
-    ],
+    ),
 ];

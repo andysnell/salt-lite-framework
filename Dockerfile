@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM php:8.4-fpm as development
-ENV PATH "/app/bin:/app/vendor/bin:/home/dev/composer/bin:$PATH"
-ENV COMPOSER_HOME "/home/dev/composer"
+ENV PATH "/app/bin:/app/vendor/bin:/app/build/composer/bin:$PATH"
+ENV COMPOSER_HOME "/app/build/composer"
 ENV SALT_BUILD_STAGE "development"
 ENV PHP_PEAR_PHP_BIN="php -d error_reporting=E_ALL&~E_DEPRECATED"
 ENV XDEBUG_MODE "off"

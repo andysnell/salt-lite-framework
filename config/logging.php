@@ -3,9 +3,7 @@
 declare(strict_types=1);
 
 use Monolog\Formatter\JsonFormatter;
-use Monolog\Formatter\LineFormatter;
 use Monolog\Formatter\LogglyFormatter;
-use Monolog\Handler\ErrorLogHandler;
 use Monolog\Handler\LogglyHandler;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Handler\SlackWebhookHandler;
@@ -13,11 +11,11 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 use PhoneBurner\SaltLite\Framework\Logging\Config\LoggingConfigStruct;
 use PhoneBurner\SaltLite\Framework\Logging\Config\LoggingHandlerConfigStruct;
-use PhoneBurner\SaltLite\Logging\LogLevel;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\EnvironmentProcessor;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\LogTraceProcessor;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\PhoneNumberProcessor;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\PsrMessageInterfaceProcessor;
+use PhoneBurner\SaltLite\Logging\LogLevel;
 
 use function PhoneBurner\SaltLite\Framework\env;
 use function PhoneBurner\SaltLite\Framework\path;
@@ -34,7 +32,6 @@ return [
             PsrLogMessageProcessor::class, // must be after any processors that mutate context
         ],
         // Configure Handlers By Build Stage
-        // @see \PhoneBurner\SaltLite\Framework\Logging\LoggerServiceFactory
         handlers: stage(
             [
                 new LoggingHandlerConfigStruct(
@@ -74,10 +71,6 @@ return [
                     level: LogLevel::instance(env('SALT_PSR3_LOG_LEVEL', LogLevel::Debug)),
                 ),
             ],
-        ),
-        fallback_handler: new LoggingHandlerConfigStruct(
-            handler_class: ErrorLogHandler::class,
-            formatter_class: LineFormatter::class,
         ),
     ),
 ];

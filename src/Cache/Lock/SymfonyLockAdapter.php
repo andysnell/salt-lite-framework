@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Lock\SharedLockInterface;
 
 #[Internal]
-class SymfonyLockAdapter implements Lock, LoggerAwareInterface
+class SymfonyLockAdapter implements Lock, LoggerAwareInterface, SharedLockInterface
 {
     public function __construct(private readonly SharedLockInterface $lock)
     {
@@ -45,6 +45,19 @@ class SymfonyLockAdapter implements Lock, LoggerAwareInterface
         return false;
     }
 
+    public function acquireRead(
+        bool $blocking = false,
+        int $timeout_seconds = 300,
+        int $delay_microseconds = 250_000,
+    ): bool {
+        return $this->acquire(
+            $blocking,
+            $timeout_seconds,
+            $delay_microseconds,
+            SharedLockMode::Read,
+        );
+    }
+
     #[\Override]
     public function release(): void
     {
@@ -52,7 +65,7 @@ class SymfonyLockAdapter implements Lock, LoggerAwareInterface
     }
 
     #[\Override]
-    public function refresh(Ttl|null $ttl = null): void
+    public function refresh(Ttl|float|null $ttl = null): void
     {
         $this->lock->refresh($ttl instanceof Ttl ? $ttl->seconds : $ttl);
     }
@@ -81,5 +94,20 @@ class SymfonyLockAdapter implements Lock, LoggerAwareInterface
     public function wrapped(): SharedLockInterface
     {
         return $this->lock;
+    }
+
+    public function isAcquired(): bool
+    {
+        return $this->lock->isAcquired();
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->lock->isExpired();
+    }
+
+    public function getRemainingLifetime(): float|null
+    {
+        return $this->lock->getRemainingLifetime();
     }
 }

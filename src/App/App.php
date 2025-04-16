@@ -12,6 +12,10 @@ use PhoneBurner\SaltLite\Configuration\Configuration;
 use PhoneBurner\SaltLite\Configuration\ConfigurationFactory;
 use PhoneBurner\SaltLite\Container\ParameterOverride\OverrideCollection;
 use PhoneBurner\SaltLite\Container\ServiceContainer;
+use PhoneBurner\SaltLite\Framework\App\ErrorHandling\ErrorHandler;
+use PhoneBurner\SaltLite\Framework\App\ErrorHandling\ExceptionHandler;
+use PhoneBurner\SaltLite\Framework\App\ErrorHandling\NullErrorHandler;
+use PhoneBurner\SaltLite\Framework\App\ErrorHandling\NullExceptionHandler;
 use PhoneBurner\SaltLite\Framework\Container\ServiceContainerFactory;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
@@ -62,8 +66,16 @@ class App implements AppContract
     private function setup(): self
     {
         // set error handler
+        $error_handler = $this->services->get(ErrorHandler::class);
+        if (! $error_handler instanceof NullErrorHandler) {
+            \set_error_handler($error_handler);
+        }
 
         // set exception handler
+        $exception_handler = $this->services->get(ExceptionHandler::class);
+        if (! $exception_handler instanceof NullExceptionHandler) {
+            \set_exception_handler($exception_handler);
+        }
 
         // dispatch bootstrap event
         $this->services->get(EventDispatcherInterface::class)->dispatch(new ApplicationBootstrap($this));
@@ -111,8 +123,8 @@ class App implements AppContract
      * the configuration and container are dependent on the instance of the App,
      * both factories must return lazy ghost instances, even though the instances
      * will be instantiated almost immediately.
-     *
-     * Any additional
+     * For example, configuration files may use functions like path() or env()
+     * which may be dependent on the App instance.
      */
     private function __construct(public Context $context)
     {

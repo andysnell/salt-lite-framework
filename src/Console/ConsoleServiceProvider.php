@@ -8,7 +8,6 @@ use Crell\AttributeUtils\ClassAnalyzer;
 use PhoneBurner\SaltLite\App\App;
 use PhoneBurner\SaltLite\Attribute\Usage\Internal;
 use PhoneBurner\SaltLite\Container\DeferrableServiceProvider;
-use PhoneBurner\SaltLite\Container\ServiceFactory\NewInstanceServiceFactory;
 use PhoneBurner\SaltLite\Framework\App\Command\DebugAppKeysCommand;
 use PhoneBurner\SaltLite\Framework\Console\Command\InteractiveSaltShellCommand;
 use PhoneBurner\SaltLite\Framework\Console\EventListener\ConsoleErrorListener;
@@ -91,6 +90,9 @@ final class ConsoleServiceProvider implements DeferrableServiceProvider
 
         $app->set(ConsoleApplication::class, new ConsoleApplicationServiceFactory());
 
-        $app->set(InteractiveSaltShellCommand::class, new NewInstanceServiceFactory(InteractiveSaltShellCommand::class, [$app]));
+        $app->set(
+            InteractiveSaltShellCommand::class,
+            static fn(App $app): InteractiveSaltShellCommand => new InteractiveSaltShellCommand($app),
+        );
     }
 }

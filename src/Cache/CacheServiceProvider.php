@@ -15,6 +15,7 @@ use PhoneBurner\SaltLite\Cache\CacheAdapter;
 use PhoneBurner\SaltLite\Cache\CacheDriver;
 use PhoneBurner\SaltLite\Cache\InMemoryCache;
 use PhoneBurner\SaltLite\Cache\Lock\LockFactory;
+use PhoneBurner\SaltLite\Cache\Psr6\CacheItemPoolFactory as CacheItemPoolFactoryContract;
 use PhoneBurner\SaltLite\Configuration\Exception\InvalidConfiguration;
 use PhoneBurner\SaltLite\Container\DeferrableServiceProvider;
 use PhoneBurner\SaltLite\Container\ServiceFactory\NewInstanceServiceFactory;
@@ -45,6 +46,7 @@ final class CacheServiceProvider implements DeferrableServiceProvider
             CacheInterface::class,
             CacheItemPoolInterface::class,
             CacheItemPoolFactory::class,
+            CacheItemPoolFactoryContract::class,
             SymfonyNamedKeyFactory::class,
             LockFactory::class,
         ];
@@ -56,6 +58,7 @@ final class CacheServiceProvider implements DeferrableServiceProvider
             Cache::class => CacheAdapter::class,
             CacheInterface::class => CacheAdapter::class,
             CacheItemPoolInterface::class => CacheAdapter::class,
+            CacheItemPoolFactoryContract::class => CacheItemPoolFactory::class,
         ];
     }
 
@@ -92,7 +95,7 @@ final class CacheServiceProvider implements DeferrableServiceProvider
             )),
         );
 
-        $app->set(SymfonyNamedKeyFactory::class, new NewInstanceServiceFactory());
+        $app->set(SymfonyNamedKeyFactory::class, NewInstanceServiceFactory::singleton());
 
         $app->set(
             LockFactory::class,

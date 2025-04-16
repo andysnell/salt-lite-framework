@@ -6,26 +6,20 @@ namespace PhoneBurner\SaltLite\Framework\Scheduler;
 
 use PhoneBurner\SaltLite\App\App;
 use PhoneBurner\SaltLite\Attribute\Usage\Internal;
-use PhoneBurner\SaltLite\Cache\CacheKey;
-use PhoneBurner\SaltLite\Cache\Lock\LockFactory;
+use PhoneBurner\SaltLite\Configuration\Exception\InvalidConfiguration;
 use PhoneBurner\SaltLite\Container\DeferrableServiceProvider;
-use PhoneBurner\SaltLite\Framework\Cache\Lock\SymfonyLockAdapter;
 use PhoneBurner\SaltLite\Framework\MessageBus\Container\ReceiverContainer;
 use PhoneBurner\SaltLite\Framework\Scheduler\Command\ConsumeScheduledMessagesCommand;
-use PhoneBurner\SaltLite\Time\Ttl;
 use PhoneBurner\SaltLite\Type\Type;
-use Psr\Cache\CacheItemPoolInterface;
 use Psr\Clock\ClockInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Cache\Adapter\ProxyAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
 use Symfony\Component\Messenger\RoutableMessageBus;
 use Symfony\Component\Scheduler\Command\DebugCommand;
 use Symfony\Component\Scheduler\EventListener\DispatchSchedulerEventListener;
 use Symfony\Component\Scheduler\Generator\MessageGenerator;
 use Symfony\Component\Scheduler\Messenger\SchedulerTransport;
-use Symfony\Component\Scheduler\ScheduleProviderInterface;
 
 /**
  * @codeCoverageIgnore
@@ -52,21 +46,15 @@ final class SchedulerServiceProvider implements DeferrableServiceProvider
     public static function register(App $app): void
     {
         $app->set(ScheduleProviderCollection::class, static function (App $app): ScheduleProviderCollection {
-            $cache = $app->get(CacheItemPoolInterface::class);
-
             $schedule_providers = [];
-            foreach ($app->config->get('scheduler.schedule_providers') ?: [] as $name => $class) {
-                $key = CacheKey::make('scheduler', $name);
-                $lock = Type::of(SymfonyLockAdapter::class, $app->get(LockFactory::class)
-                    ->make($key, Ttl::seconds(60)))
-                    ->wrapped();
+            foreach ($app->config->get('scheduler.schedule_providers') ?: [] as $schedule_provider_class) {
+                \assert(Type::isClassStringOf(ScheduleProvider::class, $schedule_provider_class));
+                $name = $schedule_provider_class::getName();
+                if (\array_key_exists($name, $schedule_providers)) {
+                    throw new InvalidConfiguration('Duplicate schedule provider name: ' . $name);
+                }
 
-                $schedule_provider = Type::of(ScheduleProviderInterface::class, $app->get($class));
-                $schedule_provider->getSchedule()
-                    ->lock($lock)
-                    ->stateful(new ProxyAdapter($cache, (string)$key));
-
-                $schedule_providers[$name] = $schedule_provider;
+                $schedule_providers[$name] = $app->get($schedule_provider_class);
             }
 
             return new ScheduleProviderCollection($schedule_providers);
@@ -86,9 +74,10 @@ final class SchedulerServiceProvider implements DeferrableServiceProvider
 
                 // Add a transport instance for every configured schedule provider
                 $receiver_locator = new ReceiverContainer();
-                foreach ($app->get(ScheduleProviderCollection::class) as $name => $schedule_provider) {
-                    $receiver_locator->set('schedule_' . $name, new SchedulerTransport(
-                        new MessageGenerator($schedule_provider, $name, $clock),
+                foreach ($app->get(ScheduleProviderCollection::class) as $schedule_provider) {
+                    \assert($schedule_provider instanceof ScheduleProvider);
+                    $receiver_locator->set('schedule_' . $schedule_provider::getName(), new SchedulerTransport(
+                        new MessageGenerator($schedule_provider, $schedule_provider::getName(), $clock),
                     ));
                 }
 

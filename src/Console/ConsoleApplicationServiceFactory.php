@@ -42,6 +42,7 @@ class ConsoleApplicationServiceFactory implements ServiceFactory
         $application->setCatchErrors(false);
 
         OrmConsoleRunner::addCommands($application, $app->get(EntityManagerProvider::class));
+        /** @phpstan-ignore staticMethod.internalClass */
         MigrationConsoleRunner::addCommands($application, DependencyFactory::fromConnection(
             new ConfigurationArray([
                 'table_storage' => $default_connection->migrations->table_storage,

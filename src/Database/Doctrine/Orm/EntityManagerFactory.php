@@ -167,13 +167,12 @@ class EntityManagerFactory
         $factory = new DefaultCacheFactory($regions_config, match ($cache_driver) {
             CacheDriver::Remote => $this->cache_factory->make(CacheDriver::Remote, \sprintf('orm.%s.entity.', $name)),
             CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, \sprintf('orm.%s.entity.', $name)),
-            default => throw new \LogicException('Unsupported Cache Type for Doctrine ORM Entity Cache'),
+            CacheDriver::File => throw new \LogicException('Unsupported Cache Type for Doctrine ORM Entity Cache'),
         });
 
         $factory->setRegion(new DefaultRegion(CacheRegion::APPEND_ONLY, match ($cache_driver) {
             CacheDriver::File, CacheDriver::Remote => $this->cache_factory->createFileCacheItemPool(CacheType::Entity->value, $cache_path),
             CacheDriver::Memory => $this->cache_factory->make(CacheDriver::Memory, \sprintf('orm.%s.entity.', $name)),
-            default => throw new \LogicException('Unsupported Cache Type for Doctrine ORM Entity Cache (Append Only Region)'),
         }));
 
         $doctrine_config->setSecondLevelCacheEnabled(true);
