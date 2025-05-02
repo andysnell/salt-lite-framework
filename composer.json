@@ -113,7 +113,7 @@
     "phoneburner/api-handler": "dev-develop",
     "phoneburner/http-tortilla": "dev-develop",
     "phoneburner/link-tortilla": "dev-main",
-    "phoneburner/salt-lite": "dev-main",
+    "phoneburner/salt-lite": "^1.0@dev",
     "psr/cache": "^3.0.0",
     "psr/clock": "^1.0.0",
     "psr/container": "^2.0.2",
@@ -185,7 +185,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-main": "1.0.x"
+      "dev-main": "1.0.x-dev"
     },
     "aws/aws-sdk-php": [
       "S3",

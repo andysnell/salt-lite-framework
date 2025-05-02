@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "25e17857c311ff554bebbb7fe5521158",
+    "content-hash": "f9e4b90f2102152f75300cadb2e2cb35",
     "packages": [
         {
             "name": "alek13/slack",
@@ -3621,16 +3621,16 @@
         },
         {
             "name": "nesbot/carbon",
-            "version": "3.9.0",
+            "version": "3.9.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/CarbonPHP/carbon.git",
-                "reference": "6d16a8a015166fe54e22c042e0805c5363aef50d"
+                "reference": "ced71f79398ece168e24f7f7710462f462310d4d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/6d16a8a015166fe54e22c042e0805c5363aef50d",
-                "reference": "6d16a8a015166fe54e22c042e0805c5363aef50d",
+                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/ced71f79398ece168e24f7f7710462f462310d4d",
+                "reference": "ced71f79398ece168e24f7f7710462f462310d4d",
                 "shasum": ""
             },
             "require": {
@@ -3723,7 +3723,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-03-27T12:57:33+00:00"
+            "time": "2025-05-01T19:51:51+00:00"
         },
         {
             "name": "nikic/fast-route",
@@ -4211,12 +4211,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:phoneburner/salt-lite.git",
-                "reference": "ed381f582108d2dae88b0b4a7a505cd4fa284a34"
+                "reference": "7b9fec884f3b7a57b9d2055b864fc24f88e15209"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phoneburner/salt-lite/zipball/ed381f582108d2dae88b0b4a7a505cd4fa284a34",
-                "reference": "ed381f582108d2dae88b0b4a7a505cd4fa284a34",
+                "url": "https://api.github.com/repos/phoneburner/salt-lite/zipball/7b9fec884f3b7a57b9d2055b864fc24f88e15209",
+                "reference": "7b9fec884f3b7a57b9d2055b864fc24f88e15209",
                 "shasum": ""
             },
             "require": {
@@ -4277,7 +4277,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "1.0.x"
+                    "dev-main": "1.0.x-dev"
                 }
             },
             "autoload": {
@@ -4349,7 +4349,7 @@
                 "source": "https://github.com/phoneburner/salt-lite/tree/main",
                 "issues": "https://github.com/phoneburner/salt-lite/issues"
             },
-            "time": "2025-04-30T23:49:26+00:00"
+            "time": "2025-05-02T00:48:00+00:00"
         },
         {
             "name": "psr/cache",
