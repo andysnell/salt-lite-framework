@@ -32,7 +32,7 @@ final readonly class ShellConfigStruct implements ConfigStruct
     ];
 
     /**
-     * @param list<class-string> $services Application Services to inject into the shell
+     * @param array<string, class-string> $services Map of variable names to service class-strings to inject into the shell
      * @param list<class-string> $imports Application Imports to inject into the shell
      * @param array<string,mixed> $psysh Configuration for PsySH
      * @link https://github.com/bobthecow/psysh/wiki/Config-options
