@@ -37,8 +37,11 @@
 /rector.php                 export-ignore
 /resources/                 export-ignore
 /settings.ini               export-ignore
+/bin/                       export-ignore
 /tests/                     export-ignore
 /caddy/                     export-ignore
+/config/                    export-ignore
+/database/                  export-ignore
 /public/                    export-ignore
 /resources/                 export-ignore
 /storage/                   export-ignore

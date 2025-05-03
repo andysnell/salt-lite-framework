@@ -68,9 +68,6 @@
       "PhoneBurner\\SaltLite\\Framework\\Tests\\": "tests/"
     }
   },
-  "bin": [
-    "bin/salt"
-  ],
   "require": {
     "php": "^8.4",
     "ext-bcmath": "*",
