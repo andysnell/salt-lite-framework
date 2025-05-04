@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Tests\HealthCheck\ComponentHealthChecks;
 
 use Carbon\CarbonImmutable;
-use PhoneBurner\SaltLite\Clock\StaticClock;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks\RedisHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\ComponentHealthCheck;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthStatus;
 use PhoneBurner\SaltLite\Logging\LogTrace;
+use PhoneBurner\SaltLite\Time\Clock\StaticClock;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;

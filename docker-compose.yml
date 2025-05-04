@@ -1,7 +1,10 @@
 services:
   web:
     container_name: "salt-lite-framework-web"
-    image: caddy:latest
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: development-web
     platform: linux/amd64
     restart: unless-stopped
     cap_add:
@@ -25,11 +28,13 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-      target: development
+      target: development-php
     platform: linux/amd64
+    restart: unless-stopped
+    user: "dev"
     volumes:
       - ${SOURCE_DIR:-./}:/app
-      - ./settings.ini:/usr/local/etc/php/conf.d/settings.ini
+      - ./php-development.ini:/usr/local/etc/php/conf.d/settings.ini
     env_file:
       - .env
     environment:

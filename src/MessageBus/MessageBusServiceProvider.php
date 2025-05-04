@@ -6,7 +6,6 @@ namespace PhoneBurner\SaltLite\Framework\MessageBus;
 
 use PhoneBurner\SaltLite\App\App;
 use PhoneBurner\SaltLite\Attribute\Usage\Internal;
-use PhoneBurner\SaltLite\Clock\Clock;
 use PhoneBurner\SaltLite\Container\ObjectContainer\ImmutableObjectContainer;
 use PhoneBurner\SaltLite\Container\ServiceFactory\NewInstanceServiceFactory;
 use PhoneBurner\SaltLite\Container\ServiceProvider;
@@ -28,6 +27,7 @@ use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\RedisTransportFac
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\SyncTransportFactory;
 use PhoneBurner\SaltLite\MessageBus\Handler\InvokableMessageHandler;
 use PhoneBurner\SaltLite\MessageBus\MessageBus;
+use PhoneBurner\SaltLite\Time\Clock\Clock;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;

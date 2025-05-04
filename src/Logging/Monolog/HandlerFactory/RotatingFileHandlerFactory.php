@@ -20,6 +20,7 @@ class RotatingFileHandlerFactory implements MonologHandlerFactory
 
     public function make(LoggingHandlerConfigStruct $config): HandlerInterface
     {
+        \assert($config->handler_class === RotatingFileHandler::class);
         return new RotatingFileHandler(
             $config->handler_options['filename'] ?? throw new InvalidHandlerConfiguration('Missing Rotating File Handler Filename'),
             $config->handler_options['max_files'] ?? 7,

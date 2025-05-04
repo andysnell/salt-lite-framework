@@ -6,11 +6,11 @@ namespace PhoneBurner\SaltLite\Framework\Http\Session\Handler;
 
 use FilesystemIterator;
 use PhoneBurner\SaltLite\Attribute\Usage\Internal;
-use PhoneBurner\SaltLite\Clock\Clock;
 use PhoneBurner\SaltLite\Cryptography\Random\Random;
 use PhoneBurner\SaltLite\Filesystem\FileWriter;
 use PhoneBurner\SaltLite\Framework\Http\Session\SessionHandler;
 use PhoneBurner\SaltLite\Http\Session\SessionId;
+use PhoneBurner\SaltLite\Time\Clock\Clock;
 use PhoneBurner\SaltLite\Time\Ttl;
 
 use const PhoneBurner\SaltLite\Framework\APP_ROOT;

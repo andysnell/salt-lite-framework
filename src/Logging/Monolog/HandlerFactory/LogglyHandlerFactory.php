@@ -10,6 +10,7 @@ use Monolog\Handler\LogglyHandler;
 use Monolog\Level;
 use PhoneBurner\SaltLite\Framework\Logging\Config\LoggingHandlerConfigStruct;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Exception\InvalidHandlerConfiguration;
+use PhoneBurner\SaltLite\Framework\Logging\Monolog\Handler\ResettableLogglyHandler;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\MonologFormatterFactory;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\MonologHandlerFactory;
 
@@ -23,10 +24,18 @@ class LogglyHandlerFactory implements MonologHandlerFactory
 
     public function make(LoggingHandlerConfigStruct $config): HandlerInterface
     {
-        return new LogglyHandler(
-            $config->handler_options['token'] ?? throw new InvalidHandlerConfiguration('Missing Loggly API Token'),
-            Level::from($config->level->toMonlogLogLevel()),
-            $config->bubble,
-        )->setFormatter($this->formatters->make($config));
+        return (match ($config->handler_class) {
+            ResettableLogglyHandler::class => new ResettableLogglyHandler(
+                $config->handler_options['token'] ?? throw new InvalidHandlerConfiguration('Missing Loggly API Token'),
+                Level::from($config->level->toMonlogLogLevel()),
+                $config->bubble,
+            ),
+            LogglyHandler::class => new LogglyHandler(
+                $config->handler_options['token'] ?? throw new InvalidHandlerConfiguration('Missing Loggly API Token'),
+                Level::from($config->level->toMonlogLogLevel()),
+                $config->bubble,
+            ),
+            default => throw new InvalidHandlerConfiguration('Invalid Handler Class for Factory'),
+        })->setFormatter($this->formatters->make($config));
     }
 }

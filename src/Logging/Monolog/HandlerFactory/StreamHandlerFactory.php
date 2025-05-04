@@ -21,6 +21,7 @@ class StreamHandlerFactory implements MonologHandlerFactory
 
     public function make(LoggingHandlerConfigStruct $config): HandlerInterface
     {
+        \assert($config->handler_class === StreamHandler::class);
         return new StreamHandler(
             $config->handler_options['stream'] ?? throw new InvalidHandlerConfiguration('Missing Stream Handler Stream/Path'),
             Level::from($config->level->toMonlogLogLevel()),

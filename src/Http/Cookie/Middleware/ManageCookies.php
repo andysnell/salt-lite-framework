@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\Http\Cookie\Middleware;
 
-use PhoneBurner\SaltLite\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\Http\Cookie\CookieEncrypter;
 use PhoneBurner\SaltLite\Http\Cookie\CookieJar;
 use PhoneBurner\SaltLite\Http\Domain\HttpHeader;
 use PhoneBurner\SaltLite\Http\Response\Exceptional\ServerErrorResponse;
+use PhoneBurner\SaltLite\Time\Clock\Clock;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;

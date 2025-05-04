@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory;
 
-use PhoneBurner\SaltLite\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\MessageBus\Config\TransportConfigStruct;
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory;
+use PhoneBurner\SaltLite\Time\Clock\Clock;
 use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 

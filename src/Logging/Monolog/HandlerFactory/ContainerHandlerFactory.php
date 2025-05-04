@@ -14,6 +14,7 @@ use Monolog\Handler\SlackWebhookHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\TestHandler;
 use PhoneBurner\SaltLite\Framework\Logging\Config\LoggingHandlerConfigStruct;
+use PhoneBurner\SaltLite\Framework\Logging\Monolog\Handler\ResettableLogglyHandler;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\MonologHandlerFactory;
 use Psr\Container\ContainerInterface;
 
@@ -25,6 +26,7 @@ class ContainerHandlerFactory implements MonologHandlerFactory
     public const array DEFAULT_FACTORIES = [
             ErrorLogHandler::class => ErrorLogHandlerFactory::class,
             LogglyHandler::class => LogglyHandlerFactory::class,
+            ResettableLogglyHandler::class => LogglyHandlerFactory::class,
             NoopHandler::class => NoopHandlerFactory::class,
             NullHandler::class => NullHandlerFactory::class,
             RotatingFileHandler::class => RotatingFileHandlerFactory::class,

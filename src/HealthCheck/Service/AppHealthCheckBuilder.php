@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\HealthCheck\Service;
 
-use PhoneBurner\SaltLite\Clock\Clock;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthCheckService;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthCheck;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Domain\HealthStatus;
 use PhoneBurner\SaltLite\Framework\HealthCheck\HealthCheckBuilder;
+use PhoneBurner\SaltLite\Time\Clock\Clock;
 use Psr\Log\LoggerInterface;
 
 class AppHealthCheckBuilder implements HealthCheckBuilder

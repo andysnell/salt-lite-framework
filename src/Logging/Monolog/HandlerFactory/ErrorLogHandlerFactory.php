@@ -19,6 +19,8 @@ class ErrorLogHandlerFactory implements MonologHandlerFactory
 
     public function make(LoggingHandlerConfigStruct $config): HandlerInterface
     {
+        \assert($config->handler_class === ErrorLogHandler::class);
+
         return new ErrorLogHandler(
             $config->handler_options['message_type'] ?? ErrorLogHandler::OPERATING_SYSTEM,
             Level::from($config->level->toMonlogLogLevel()),

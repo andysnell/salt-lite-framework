@@ -13,6 +13,7 @@ class NoopHandlerFactory implements MonologHandlerFactory
 {
     public function make(LoggingHandlerConfigStruct $config): HandlerInterface
     {
+        \assert($config->handler_class === NoopHandler::class);
         return new NoopHandler();
     }
 }

@@ -7,7 +7,6 @@ namespace PhoneBurner\SaltLite\Framework\HealthCheck;
 use Doctrine\DBAL\Connection;
 use PhoneBurner\SaltLite\App\App;
 use PhoneBurner\SaltLite\Attribute\Usage\Internal;
-use PhoneBurner\SaltLite\Clock\Clock;
 use PhoneBurner\SaltLite\Container\DeferrableServiceProvider;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use PhoneBurner\SaltLite\Framework\HealthCheck\ComponentHealthChecks\AmqpTransportHealthCheckService;
@@ -19,6 +18,7 @@ use PhoneBurner\SaltLite\Framework\HealthCheck\RequestHandler\HealthCheckRequest
 use PhoneBurner\SaltLite\Framework\HealthCheck\RequestHandler\ReadyCheckRequestHandler;
 use PhoneBurner\SaltLite\Framework\HealthCheck\Service\AppHealthCheckBuilder;
 use PhoneBurner\SaltLite\Logging\LogTrace;
+use PhoneBurner\SaltLite\Time\Clock\Clock;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpTransport;
 

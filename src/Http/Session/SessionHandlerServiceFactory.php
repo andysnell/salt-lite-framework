@@ -6,7 +6,6 @@ namespace PhoneBurner\SaltLite\Framework\Http\Session;
 
 use PhoneBurner\SaltLite\App\App;
 use PhoneBurner\SaltLite\Cache\Lock\LockFactory;
-use PhoneBurner\SaltLite\Clock\Clock;
 use PhoneBurner\SaltLite\Container\ServiceFactory;
 use PhoneBurner\SaltLite\Cryptography\Natrium;
 use PhoneBurner\SaltLite\Cryptography\Random\Random;
@@ -23,6 +22,7 @@ use PhoneBurner\SaltLite\Framework\Http\Session\Handler\NullSessionHandler;
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\RedisSessionHandler;
 use PhoneBurner\SaltLite\Http\Cookie\CookieJar;
 use PhoneBurner\SaltLite\String\Encoding\Encoding;
+use PhoneBurner\SaltLite\Time\Clock\Clock;
 use PhoneBurner\SaltLite\Type\Type;
 
 use function PhoneBurner\SaltLite\Framework\ghost;

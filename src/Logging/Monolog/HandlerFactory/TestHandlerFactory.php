@@ -19,6 +19,7 @@ class TestHandlerFactory implements MonologHandlerFactory
 
     public function make(LoggingHandlerConfigStruct $config): HandlerInterface
     {
+        \assert($config->handler_class === TestHandler::class);
         return new TestHandler(
             Level::from($config->level->toMonlogLogLevel()),
             $config->bubble,

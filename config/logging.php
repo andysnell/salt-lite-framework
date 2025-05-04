@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LogglyFormatter;
-use Monolog\Handler\LogglyHandler;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Handler\SlackWebhookHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 use PhoneBurner\SaltLite\Framework\Logging\Config\LoggingConfigStruct;
 use PhoneBurner\SaltLite\Framework\Logging\Config\LoggingHandlerConfigStruct;
+use PhoneBurner\SaltLite\Framework\Logging\Monolog\Handler\ResettableLogglyHandler;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\EnvironmentProcessor;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\LogTraceProcessor;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\Processor\PhoneNumberProcessor;
@@ -35,7 +35,7 @@ return [
         handlers: stage(
             [
                 new LoggingHandlerConfigStruct(
-                    handler_class: LogglyHandler::class,
+                    handler_class: ResettableLogglyHandler::class,
                     handler_options: [
                         'token' => env('SALT_LOGGLY_TOKEN'),
                     ],

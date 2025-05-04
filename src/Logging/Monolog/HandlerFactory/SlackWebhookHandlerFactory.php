@@ -20,6 +20,7 @@ class SlackWebhookHandlerFactory implements MonologHandlerFactory
 
     public function make(LoggingHandlerConfigStruct $config): HandlerInterface
     {
+        \assert($config->handler_class === SlackWebhookHandler::class);
         return new SlackWebhookHandler(
             $config->handler_options['webhook_url'] ?? throw new InvalidHandlerConfiguration('Missing Slack Webhook URL'),
             $config->handler_options['channel'] ?? null,
