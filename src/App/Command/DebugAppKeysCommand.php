@@ -4,11 +4,22 @@ declare(strict_types=1);
 
 namespace PhoneBurner\SaltLite\Framework\App\Command;
 
+use PhoneBurner\SaltLite\Cryptography\Asymmetric\EncryptionKeyPair;
+use PhoneBurner\SaltLite\Cryptography\Asymmetric\EncryptionPublicKey;
+use PhoneBurner\SaltLite\Cryptography\Asymmetric\KeyPair;
+use PhoneBurner\SaltLite\Cryptography\Asymmetric\PublicKey;
+use PhoneBurner\SaltLite\Cryptography\Asymmetric\SignatureKeyPair;
+use PhoneBurner\SaltLite\Cryptography\Asymmetric\SignaturePublicKey;
+use PhoneBurner\SaltLite\Cryptography\KeyManagement\Key;
 use PhoneBurner\SaltLite\Cryptography\KeyManagement\KeyChain;
 use PhoneBurner\SaltLite\Cryptography\Natrium;
+use PhoneBurner\SaltLite\Cryptography\Paseto\Paserk;
+use PhoneBurner\SaltLite\Cryptography\Symmetric\SharedKey;
 use PhoneBurner\SaltLite\String\Encoding\Encoding;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -21,6 +32,10 @@ class DebugAppKeysCommand extends Command
 
     public const string DESCRIPTION = 'Display the public keys used by the application.';
 
+    public const string SECRET_TEMPLATE = "<comment>SEC: %s</comment>\nPUB: %s";
+
+    public const string PUBLIC_TEMPLATE = "PUB: %s";
+
     private readonly KeyChain $key_chain;
 
     public function __construct(Natrium $natrium)
@@ -28,17 +43,24 @@ class DebugAppKeysCommand extends Command
         $this->key_chain = $natrium->keys;
         parent::__construct(self::NAME);
         $this->setDescription(self::DESCRIPTION);
-        $this->addOption('secret', description: 'Display the shared (symmetric) App Key, and the secret/public (asymmetric) key pairs for encryption and digital signatures.');
-        $this->addOption('encoding', 'e', InputOption::VALUE_REQUIRED, 'The encoding to use for the keys, one of "base64", "base64url", or "hex"', 'base64', [
-            'base64',
-            'base64url',
-            'hex',
-        ]);
+        $this->addOption(
+            name: 'secret',
+            description: 'Display the shared key (symmetric) and secret key values (asymmetric).',
+        );
+        $this->addOption(
+            name: 'encoding',
+            shortcut: 'e',
+            mode: InputOption::VALUE_REQUIRED,
+            description: 'The encoding to use for the keys, one of "base64", "base64url", or "hex"',
+            default: 'base64',
+            suggestedValues: ['base64', 'base64url', 'hex'],
+        );
     }
 
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $show_secrets = (bool)$input->getOption('secret');
         $encoding = match ($input->getOption('encoding') ?? 'base64') {
             'base64' => Encoding::Base64,
             'base64url' => Encoding::Base64Url,
@@ -46,46 +68,106 @@ class DebugAppKeysCommand extends Command
             default => throw new \InvalidArgumentException('Invalid encoding.'),
         };
 
+        // Display the default "app" shared, encryption, and signature keys
+        $keys = [
+            ['name' => 'app', 'key' => $this->key_chain->shared()],
+            ['name' => 'app', 'key' => $this->key_chain->encryption()],
+            ['name' => 'app', 'key' => $this->key_chain->signature()],
+        ];
+
+        // Collect any other keys in the keychain
+        foreach ($this->key_chain as $name => $key) {
+            $keys[] = ['name' => $name, 'key' => $key];
+        }
+
         $io = new SymfonyStyle($input, $output);
         $output->write(\PHP_EOL);
-        $input->getOption('secret')
-            ? $this->displaySecretKeys($io, $encoding)
-            : $this->displayPublicKeys($io, $encoding);
-
+        $this->displayKeys($keys, $io, $encoding, $show_secrets);
         $output->write(\PHP_EOL);
         return Command::SUCCESS;
     }
 
-    private function displaySecretKeys(OutputInterface $output, Encoding $encoding): void
-    {
-        $output->writeln('<comment>Shared Keys</comment>');
+    private function displayKeys(
+        array $keys,
+        OutputInterface $output,
+        Encoding $encoding,
+        bool $show_secrets = false,
+    ): void {
+        $output->writeln('<comment>Application Key Chain</comment>');
         $output->writeln(\str_repeat('=', 96));
-        $output->writeln('App Key: ' . $this->key_chain->app_key->export($encoding));
-        $output->write(\PHP_EOL);
 
-        $output->writeln('<comment>X25519 Encryption Key Pair</comment>');
-        $output->writeln(\str_repeat('=', 96));
-        $encryption = $this->key_chain->encryption();
-        $output->writeln('Secret: ' . $encryption->secret->export($encoding));
-        $output->writeln('Public: ' . $encryption->public->export($encoding));
-        $output->write(\PHP_EOL);
+        $table = new Table($output);
+        $table->setHeaders(['Name', 'Ops', 'Type', 'Key', 'PASERK ID']);
 
-        $output->writeln('<comment>Ed25519 Signature Key Pair</comment>');
-        $output->writeln(\str_repeat('=', 96));
-        $signature = $this->key_chain->signature();
-        $output->writeln('Secret: ' . $signature->secret->export($encoding));
-        $output->writeln('Public: ' . $signature->public->export($encoding));
+        $counter = 0;
+        foreach ($keys as ['name' => $name, 'key' => $key]) {
+            if (++$counter > 1) {
+                $table->addRow(new TableSeparator());
+            }
+            $table->addRow([
+                $name,
+                $this->formatKeyOperation($key),
+                $this->formatKeyType($key),
+                $this->formatKeyMaterial($show_secrets, $key, $encoding),
+                $this->formatKeyIdMaterial($key),
+            ]);
+        }
+
+        $table->render();
+        $output->write(\PHP_EOL);
     }
 
-    private function displayPublicKeys(OutputInterface $output, Encoding $encoding): void
+    private function formatKeyMaterial(bool $show_secrets, Key $key, Encoding $encoding): string
     {
-        $output->writeln('<comment>Public Keys</comment>');
-        $output->writeln(\str_repeat('=', 80));
+        if ($key instanceof SharedKey) {
+            return \vsprintf("<comment>%s</comment>", [
+                $show_secrets ? $key->export($encoding) : '<hidden>',
+            ]);
+        }
 
-        $encryption_public_key = $this->key_chain->encryption()->public->export($encoding);
-        $output->writeln('Encryption (X25519): ' . $encryption_public_key);
+        if ($key instanceof PublicKey) {
+            return \vsprintf(self::PUBLIC_TEMPLATE, [
+                $key->public()->export($encoding),
+            ]);
+        }
 
-        $signature_public_key = $this->key_chain->signature()->public->export($encoding);
-        $output->writeln('Signature (Ed25519): ' . $signature_public_key);
+        if ($key instanceof KeyPair) {
+            return \vsprintf(self::SECRET_TEMPLATE, [
+                $show_secrets ? $key->secret()->export($encoding) : '<hidden>',
+                $key->public()->export($encoding),
+            ]);
+        }
+
+        return 'unknown';
+    }
+
+    private function formatKeyIdMaterial(Key $key): string
+    {
+        return match (true) {
+            $key instanceof SharedKey => (string)Paserk::lid($key),
+            $key instanceof SignaturePublicKey => (string)Paserk::pid($key),
+            $key instanceof SignatureKeyPair => \sprintf("%s\n%s", Paserk::sid($key), Paserk::pid($key)),
+            $key instanceof KeyPair => "N/A\nN/A",
+            default => 'N/A',
+        };
+    }
+
+    private function formatKeyOperation(mixed $key): string
+    {
+        return match (true) {
+            $key instanceof SignatureKeyPair, $key instanceof SignaturePublicKey => 'sig',
+            $key instanceof SharedKey, $key instanceof EncryptionKeyPair, $key instanceof EncryptionPublicKey => 'enc',
+            default => '???',
+        };
+    }
+
+    private function formatKeyType(mixed $key): string
+    {
+        return match (true) {
+            $key instanceof KeyPair => 'secret',
+            $key instanceof SharedKey => 'shared',
+            $key instanceof PublicKey => 'public',
+            default => 'other',
+        };
     }
 }
