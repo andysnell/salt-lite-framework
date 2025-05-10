@@ -9,12 +9,14 @@ parameters:
     paths:
         - bin
         - config
+        - public
         - src
         - tests
 
     ignoreErrors:
         - identifier: missingType.iterableValue
         - identifier: staticMethod.alreadyNarrowedType
+        - identifier: method.internalClass
         - message: '#PhoneBurner\\SaltLite\\Framework\\APP_ROOT not found.$#'
 
     # Strict Analysis
@@ -42,15 +44,8 @@ parameters:
     disallowedNamespaces:
         - namespace: '\DateTime'
           message: 'Use DateTimeImmutable instead'
-          allowIn:
-            - '*/tests/unit/Module/Telephony/Router/ReservationTest.php'
-
         - namespace: \Carbon\Carbon
           message: 'Use \Carbon\CarbonImmutable instead'
-          allowIn:
-            - '*/tests/unit/TestSupport/TimeStopper.php'
-            - '*/tests/unit/TestSupport/ResetCarbonTestNowAfterTests.php'
-            - '*/tests/unit/TestSupport/ResetCarbonTestNowBeforeClass.php'
 
     disallowedFunctionCalls:
         - function: 'var_dump()'

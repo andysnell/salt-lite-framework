@@ -16,7 +16,6 @@ RUN --mount=type=cache,target=/var/lib/apt,sharing=locked apt-get update && apt-
 # Install system dependencies
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked apt-get install --yes --quiet --no-install-recommends \
     curl \
-    git \
     jq \
     less \
     unzip \
@@ -49,6 +48,7 @@ RUN --mount=type=cache,target=/var/lib/apt,sharing=locked apt-get install --yes 
     autoconf  \
     automake \
     build-essential \
+    git \
     libtool \
     tcc
 RUN git clone --branch stable --depth 1 --no-tags  https://github.com/jedisct1/libsodium /usr/src/libsodium
@@ -85,6 +85,7 @@ FROM base AS production-php
 ARG GIT_COMMIT="undefined"
 ENV GIT_COMMIT=${GIT_COMMIT}
 ENV SALT_BUILD_STAGE="production"
+ENV COMPOSER_ROOT_VERSION=1.0.0
 WORKDIR /app
 COPY --link --from=php-extensions /usr/lib/x86_64-linux-gnu/ /usr/lib/x86_64-linux-gnu/
 COPY --link --from=php-extensions /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
@@ -93,7 +94,16 @@ COPY --link --from=php-extensions /usr/local/etc/php/php.ini /usr/local/etc/php/
 COPY --link --from=composer/composer:latest-bin /composer /usr/local/bin/composer
 COPY --link --from=libsodium /usr/local/lib/ /usr/local/lib/
 COPY --link php-production.ini /usr/local/etc/php/conf.d/settings.ini
-COPY --link --chown=1000:1000 . /app
+COPY --link --chown=1000:1000 ./bin /app/bin
+COPY --link --chown=1000:1000 ./config /app/config
+COPY --link --chown=1000:1000 ./database /app/database
+COPY --link --chown=1000:1000 ./public /app/public
+COPY --link --chown=1000:1000 ./resources /app/resources
+COPY --link --chown=1000:1000 ./src /app/src
+COPY --link --chown=1000:1000 ./storage /app/storage
+COPY --link --chown=1000:1000 ./composer.json ./composer.lock /app/
+COPY --link --chown=1000:1000 --from=production-redocly /spec/openapi.yaml /app/resources/views/openapi.yaml
+COPY --link --chown=1000:1000 --from=production-redocly /spec/openapi.html /app/resources/views/openapi.html
 RUN <<-EOF
     set -eux;
     mkdir -p /app/build/composer;
@@ -107,9 +117,11 @@ RUN --mount=type=cache,mode=0777,uid=1000,gid=1000,target=/app/build/composer/ca
     set -eux
     composer config --global github-oauth.github.com $(cat /run/secrets/GITHUB_TOKEN)
     composer install --classmap-authoritative --no-dev
-    salt orm:generate-proxies
-    salt routing:cache
+    SALT_APP_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= salt orm:generate-proxies
+    SALT_APP_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= salt routing:cache
     rm -f /app/storage/bootstrap/config.cache.php
+    # Remove the auth.json file to avoid baking the github key into the build
+    rm -f /app/build/composer/auth.json
 EOF
 
 FROM caddy:latest AS development-web

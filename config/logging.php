@@ -37,7 +37,7 @@ return [
                 new LoggingHandlerConfigStruct(
                     handler_class: ResettableLogglyHandler::class,
                     handler_options: [
-                        'token' => env('SALT_LOGGLY_TOKEN'),
+                        'token' => (string)env('SALT_LOGGLY_TOKEN'),
                     ],
                     formatter_class: LogglyFormatter::class,
                     level: LogLevel::instance(env('SALT_PSR3_LOG_LEVEL', LogLevel::Info)),
@@ -45,8 +45,8 @@ return [
                 new LoggingHandlerConfigStruct(
                     handler_class: SlackWebhookHandler::class,
                     handler_options: [
-                        'webhook_url' => env('SALT_SLACK_WEBHOOK_URL'),
-                        'channel' => env('SALT_SLACK_DEFAULT_CHANNEL'),
+                        'webhook_url' => (string)env('SALT_SLACK_WEBHOOK_URL'),
+                        'channel' => (string)env('SALT_SLACK_DEFAULT_CHANNEL'),
                     ],
                     formatter_class: LogglyFormatter::class,
                     level: LogLevel::Critical,

@@ -21,17 +21,17 @@ return [
         ampq: new AmpqConfigStruct(
             connections: [
                 'default' => new AmpqConnectionConfigStruct(
-                    host: env('SALT_RABBITMQ_HOST'),
+                    host: (string)env('SALT_RABBITMQ_HOST', 'rabbitmq'),
                     port: (int)env('SALT_RABBITMQ_PORT', 5672),
-                    user: env('SALT_RABBITMQ_USER'),
-                    password: env('SALT_RABBITMQ_PASS'),
+                    user: (string)env('SALT_RABBITMQ_USER'),
+                    password: (string)env('SALT_RABBITMQ_PASS'),
                 ),
             ],
         ),
         redis: new RedisConfigStruct(
             connections: [
                 'default' => new RedisConnectionConfigStruct(
-                    host: env('SALT_REDIS_HOST'),
+                    host: (string)env('SALT_REDIS_HOST', 'redis'),
                     port: (int)env('SALT_REDIS_PORT', 6379),
                 ),
             ],
@@ -40,11 +40,11 @@ return [
         doctrine: new DoctrineConfigStruct(
             connections: [
                 'default' => new DoctrineConnectionConfigStruct(
-                    host: env('SALT_MYSQL_HOST'),
+                    host: (string)env('SALT_MYSQL_HOST', 'mysql'),
                     port: (int)env('SALT_MYSQL_PORT', 3306),
-                    dbname: env('SALT_MYSQL_NAME'),
-                    user: env('SALT_MYSQL_USER'),
-                    password: env('SALT_MYSQL_PASS'),
+                    dbname: (string)env('SALT_MYSQL_NAME'),
+                    user: (string)env('SALT_MYSQL_USER'),
+                    password: (string)env('SALT_MYSQL_PASS'),
                     entity_manager: new DoctrineEntityManagerConfigStruct(
                         entity_paths: [path('/src/')],
                         cache_path: path('/storage/doctrine/default/'),

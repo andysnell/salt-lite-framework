@@ -13,7 +13,7 @@ return [
             endpoint: (string)env('SALT_SLACK_WEBHOOK_URL'),
             options: [
                 'username' => 'SaltLite',
-                'channel' => env('SALT_SLACK_DEFAULT_CHANNEL'),
+                'channel' => (string)env('SALT_SLACK_DEFAULT_CHANNEL'),
                 'link_names' => true,
             ],
         ),

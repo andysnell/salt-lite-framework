@@ -17,10 +17,10 @@ return [
         async: (bool)env('SALT_MAILER_ASYNC', true),
         drivers: [
             TransportDriver::Smtp->value => new SmtpDriverConfigStruct(
-                host: env('SALT_SMTP_HOST', development: 'mailhog'),
-                port: env('SALT_SMTP_PORT', development: 1025),
-                user: env('SALT_SMTP_USER', development: 'foo'),
-                password: env('SALT_SMTP_PASS', development: 'bar'),
+                host: (string)env('SALT_SMTP_HOST', development: 'mailhog'),
+                port: (int)env('SALT_SMTP_PORT', development: 1025),
+                user: (string)env('SALT_SMTP_USER', development: 'foo'),
+                password: (string)env('SALT_SMTP_PASS', development: 'bar'),
                 encryption: (bool)env('SALT_SMTP_SECURITY', true, false),
             ),
             TransportDriver::SendGrid->value => new SendgridDriverConfigStruct(env('SALT_SENDGRID_API_KEY')),

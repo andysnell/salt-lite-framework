@@ -3,7 +3,6 @@
 /.github/
 /build/
 /vendor/
-/html/phpunit
 /storage
 
 .env

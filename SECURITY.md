@@ -8,16 +8,14 @@ contribution of external security researchers.
 
 ## Scope
 
-
 If you believe you've found a security issue in software that is maintained in
 this repository, we encourage you to notify us.
 
-| Version | In scope | Source code                                     |
-| ------- |:--------:|-------------------------------------------------|
-| latest  | ✅        | https://github.com/phoneburner/salt-lite-framework |
+| Version | In scope | Source code                                            |
+| ------- |:--------:|--------------------------------------------------------|
+| latest  | ✅        | https://github.com/phoneburner/salt-lite |
 
 ## How to Submit a Report
-
 
 To submit a vulnerability report, please contact us at tim@phoneburner.com.
 Your submission will be reviewed and validated by a member of our team.
@@ -25,15 +23,16 @@ Your submission will be reviewed and validated by a member of our team.
 ## Safe Harbor
 
 We support safe harbor for security researchers who:
-
 * Make a good faith effort to avoid privacy violations, destruction of data, and
   interruption or degradation of our services.
-* Only interact with accounts you own or with explicit permission of the account
-  holder. If you do encounter Personally Identifiable Information (PII) contact
-  us immediately, do not proceed with access, and immediately purge any local
-  information.
+* Only interact with accounts they own or with explicit permission of the account
+  holder.
 * Provide us with a reasonable amount of time to resolve vulnerabilities prior
   to any disclosure to the public or a third party.
+
+If you do encounter an issue concerning Personally Identifiable Information (PII), contact
+us immediately, do not proceed with further access, and immediately purge any local
+information.
 
 We will consider activities conducted consistent with this policy to constitute
 "authorized" conduct and will not pursue civil action or initiate a complaint to
