@@ -25,6 +25,8 @@ use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\DoctrineTransport
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\InMemoryTransportFactory;
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\RedisTransportFactory;
 use PhoneBurner\SaltLite\Framework\MessageBus\TransportFactory\SyncTransportFactory;
+use PhoneBurner\SaltLite\Logging\LogLevel;
+use PhoneBurner\SaltLite\Logging\PsrLoggerAdapter;
 use PhoneBurner\SaltLite\MessageBus\Handler\InvokableMessageHandler;
 use PhoneBurner\SaltLite\MessageBus\MessageBus;
 use PhoneBurner\SaltLite\Time\Clock\Clock;
@@ -197,7 +199,7 @@ final class MessageBusServiceProvider implements ServiceProvider
                 $app->get(RoutableMessageBus::class),
                 $app->get(ReceiverContainer::class),
                 $app->get(SymfonyEventDispatcherInterface::class),
-                $app->get(LoggerInterface::class),
+                new PsrLoggerAdapter($app->get(LoggerInterface::class), LogLevel::Debug),
                 $app->get(ReceiverContainer::class)->keys(),
                 new ResetServicesListener(
                     $app->get(LongRunningProcessServiceResetter::class),
@@ -264,7 +266,7 @@ final class MessageBusServiceProvider implements ServiceProvider
             StopWorkerOnRestartSignalListener::class,
             static fn(App $app): StopWorkerOnRestartSignalListener => new StopWorkerOnRestartSignalListener(
                 $app->get(CacheItemPoolInterface::class),
-                $app->get(LoggerInterface::class),
+                new PsrLoggerAdapter($app->get(LoggerInterface::class), LogLevel::Debug),
             ),
         );
 
