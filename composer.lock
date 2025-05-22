@@ -4017,13 +4017,13 @@
             "version": "dev-main",
             "source": {
                 "type": "git",
-                "url": "git@github.com:phoneburner/salt-lite.git",
-                "reference": "d848c54a636187e04734e435edcd02a9190a9ea0"
+                "url": "https://github.com/phoneburner/salt-lite.git",
+                "reference": "c21a841e446ea4a9bd556580a9119973a9857b8b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phoneburner/salt-lite/zipball/d848c54a636187e04734e435edcd02a9190a9ea0",
-                "reference": "d848c54a636187e04734e435edcd02a9190a9ea0",
+                "url": "https://api.github.com/repos/phoneburner/salt-lite/zipball/c21a841e446ea4a9bd556580a9119973a9857b8b",
+                "reference": "c21a841e446ea4a9bd556580a9119973a9857b8b",
                 "shasum": ""
             },
             "require": {
@@ -4156,7 +4156,7 @@
                 "source": "https://github.com/phoneburner/salt-lite/tree/main",
                 "issues": "https://github.com/phoneburner/salt-lite/issues"
             },
-            "time": "2025-05-12T21:11:35+00:00"
+            "time": "2025-05-22T16:50:54+00:00"
         },
         {
             "name": "psr/cache",
