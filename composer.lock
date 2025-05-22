@@ -4018,12 +4018,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:phoneburner/salt-lite.git",
-                "reference": "8dfe5e9c0b4f0d8ad15a814722b08564ad105805"
+                "reference": "d848c54a636187e04734e435edcd02a9190a9ea0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phoneburner/salt-lite/zipball/8dfe5e9c0b4f0d8ad15a814722b08564ad105805",
-                "reference": "8dfe5e9c0b4f0d8ad15a814722b08564ad105805",
+                "url": "https://api.github.com/repos/phoneburner/salt-lite/zipball/d848c54a636187e04734e435edcd02a9190a9ea0",
+                "reference": "d848c54a636187e04734e435edcd02a9190a9ea0",
                 "shasum": ""
             },
             "require": {
@@ -4074,11 +4074,11 @@
                 "phoneburner/composer-replacements": "dev-main",
                 "phoneburner/salt-lite-phpstan": "dev-main",
                 "php-parallel-lint/php-parallel-lint": "^1.4",
-                "phpunit/phpunit": "^12.1.2",
+                "phpunit/phpunit": "^12.1.4",
                 "psy/psysh": "^0.12.8",
-                "rector/rector": "^2.0.7",
+                "rector/rector": "^2.0.15",
                 "roave/security-advisories": "dev-latest",
-                "symfony/var-dumper": "^7.2.3"
+                "symfony/var-dumper": "^7.2.6"
             },
             "default-branch": true,
             "type": "library",
@@ -4156,7 +4156,7 @@
                 "source": "https://github.com/phoneburner/salt-lite/tree/main",
                 "issues": "https://github.com/phoneburner/salt-lite/issues"
             },
-            "time": "2025-05-07T00:28:40+00:00"
+            "time": "2025-05-12T21:11:35+00:00"
         },
         {
             "name": "psr/cache",
