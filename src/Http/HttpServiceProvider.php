@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PhoneBurner\SaltLite\Framework\Http;
 
 use Laminas\HttpHandlerRunner\Emitter\EmitterInterface;
-use Laminas\HttpHandlerRunner\Emitter\SapiStreamEmitter;
 use PhoneBurner\SaltLite\App\App;
 use PhoneBurner\SaltLite\Attribute\Usage\Internal;
 use PhoneBurner\SaltLite\Container\DeferrableServiceProvider;
@@ -13,6 +12,7 @@ use PhoneBurner\SaltLite\Container\ServiceFactory\NewInstanceServiceFactory;
 use PhoneBurner\SaltLite\Cryptography\Natrium;
 use PhoneBurner\SaltLite\Framework\Http\Cookie\CookieEncrypter;
 use PhoneBurner\SaltLite\Framework\Http\Cookie\Middleware\ManageCookies;
+use PhoneBurner\SaltLite\Framework\Http\Emitter\MappingEmitter;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\CatchExceptionalResponses;
 use PhoneBurner\SaltLite\Framework\Http\Middleware\TransformHttpExceptionResponses;
 use PhoneBurner\SaltLite\Framework\Http\RequestHandler\CspViolationReportRequestHandler;
@@ -130,7 +130,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
 
         $app->set(
             EmitterInterface::class,
-            static fn(App $app): EmitterInterface => new SapiStreamEmitter(),
+            static fn(App $app): EmitterInterface => new MappingEmitter(),
         );
 
         $app->set(
