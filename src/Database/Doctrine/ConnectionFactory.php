@@ -54,6 +54,7 @@ class ConnectionFactory
 
         \assert(\in_array($config->driver, DriverManager::getAvailableDrivers(), true));
 
+        /** @phpstan-ignore-next-line Version Lag with PHPStan-Doctrine Has Mismatch in Expected Array Shape */
         return DriverManager::getConnection([
             'host' => $config->host,
             'port' => $config->port,
@@ -63,6 +64,7 @@ class ConnectionFactory
             'driver' => $config->driver,
             'charset' => $config->charset,
             'driverOptions' => $config->driver_options,
+            'serverVersion' => $config->server_version,
         ], $connection_config);
     }
 

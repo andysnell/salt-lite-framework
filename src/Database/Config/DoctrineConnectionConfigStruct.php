@@ -27,6 +27,7 @@ final readonly class DoctrineConnectionConfigStruct implements ConfigStruct
         public DoctrineMigrationsConfigStruct $migrations,
         public CacheDriver|null $result_cache_driver = null,
         public string $driver = 'pdo_mysql',
+        public string|null $server_version = null,
         public string $charset = 'utf8mb4',
         public array $driver_options = [],
         public bool $enable_logging = false,

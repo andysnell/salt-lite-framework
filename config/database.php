@@ -63,6 +63,7 @@ return [
                             'PhoneBurner\SaltLite\Migrations' => path('/database/migrations'),
                         ],
                     ),
+                    server_version: env('SALT_MYSQL_SERVER_VERSION'),
                     enable_logging: env('SALT_DOCTRINE_ENABLE_LOGGING', false),
                 ),
             ],
