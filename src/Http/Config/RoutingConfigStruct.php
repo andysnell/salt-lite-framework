@@ -11,10 +11,14 @@ use PhoneBurner\SaltLite\Http\Routing\RequestHandler\NotFoundRequestHandler;
 use PhoneBurner\SaltLite\Http\Routing\RouteProvider;
 use Psr\Http\Server\RequestHandlerInterface;
 
+use const PhoneBurner\SaltLite\Framework\APP_ROOT;
+
 final readonly class RoutingConfigStruct implements ConfigStruct
 {
     use ConfigStructArrayAccess;
     use ConfigStructSerialization;
+
+    public const string DEFAULT_CACHE_PATH = APP_ROOT . '/storage/bootstrap/routes.cache.php';
 
     /**
      * @param class-string<RequestHandlerInterface> $fallback_handler

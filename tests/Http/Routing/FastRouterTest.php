@@ -10,6 +10,7 @@ use FastRoute\RouteCollector;
 use Generator;
 use IteratorAggregate;
 use LogicException;
+use PhoneBurner\SaltLite\Framework\Http\Config\RoutingConfigStruct;
 use PhoneBurner\SaltLite\Framework\Http\Routing\FastRoute\FastRouteDispatcherFactory;
 use PhoneBurner\SaltLite\Framework\Http\Routing\FastRoute\FastRouteMatch;
 use PhoneBurner\SaltLite\Framework\Http\Routing\FastRoute\FastRouteResultFactory;
@@ -116,8 +117,7 @@ final class FastRouterTest extends TestCase
             $definition_list,
             new FastRouteDispatcherFactory(
                 $this->createMock(LoggerInterface::class),
-                false,
-                '/tmp/should_not_be_used',
+                new RoutingConfigStruct(false),
             ),
             new FastRouteResultFactory(),
         );

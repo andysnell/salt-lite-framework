@@ -203,8 +203,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             FastRouteDispatcherFactory::class,
             static fn(App $app): FastRouteDispatcherFactory => new FastRouteDispatcherFactory(
                 $app->get(LoggerInterface::class),
-                (bool)$app->config->get('http.routing.route_cache.enable'),
-                (string)$app->config->get('http.routing.route_cache.filepath'),
+                $app->config->get('http.routing'),
             ),
         );
 

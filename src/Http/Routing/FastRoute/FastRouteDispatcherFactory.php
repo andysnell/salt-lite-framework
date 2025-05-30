@@ -10,6 +10,7 @@ use FastRoute\Dispatcher\GroupCountBased as GroupCountBasedDispatcher;
 use FastRoute\RouteCollector;
 use FastRoute\RouteParser\Std as StdRouteParser;
 use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Framework\Http\Config\RoutingConfigStruct;
 use PhoneBurner\SaltLite\Serialization\VarExport;
 use Psr\Log\LoggerInterface;
 
@@ -18,8 +19,7 @@ class FastRouteDispatcherFactory
 {
     public function __construct(
         private readonly LoggerInterface $logger,
-        private readonly bool $cache_enable,
-        private readonly string $cache_file,
+        private readonly RoutingConfigStruct $config,
     ) {
     }
 
@@ -38,11 +38,12 @@ class FastRouteDispatcherFactory
      */
     public function make(callable $route_definition_callback): Dispatcher
     {
-        if ($this->cache_enable && \file_exists($this->cache_file)) {
+        $cache_file = $this->config->cache_path ?: RoutingConfigStruct::DEFAULT_CACHE_PATH;
+        if ($this->config->enable_cache && \file_exists($cache_file)) {
             try {
-                return new GroupCountBasedDispatcher(require $this->cache_file);
+                return new GroupCountBasedDispatcher(require $cache_file);
             } catch (\Throwable $e) { // Includes \ParseError
-                @\unlink($this->cache_file);
+                @\unlink($cache_file);
                 $this->logger->critical('Route Cache File Read Failed', ['exception' => $e]);
             }
         }
@@ -51,9 +52,9 @@ class FastRouteDispatcherFactory
         $route_definition_callback($route_collector);
         $dispatch_data = $route_collector->getData();
 
-        if ($this->cache_enable) {
+        if ($this->config->enable_cache) {
             try {
-                VarExport::toFile($this->cache_file, $dispatch_data);
+                VarExport::toFile($cache_file, $dispatch_data);
             } catch (\Throwable $e) {
                 $this->logger->critical('Route Cache File Write Failed', ['exception' => $e]);
             }
