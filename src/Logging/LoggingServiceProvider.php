@@ -6,7 +6,9 @@ namespace PhoneBurner\SaltLite\Framework\Logging;
 
 use Monolog\Processor\PsrLogMessageProcessor;
 use PhoneBurner\SaltLite\App\App;
+use PhoneBurner\SaltLite\App\BuildStage;
 use PhoneBurner\SaltLite\Attribute\Usage\Internal;
+use PhoneBurner\SaltLite\Container\ServiceFactory\DeferredServiceFactory;
 use PhoneBurner\SaltLite\Container\ServiceFactory\NewInstanceServiceFactory;
 use PhoneBurner\SaltLite\Container\ServiceProvider;
 use PhoneBurner\SaltLite\Framework\Logging\Config\LoggingConfigStruct;
@@ -23,6 +25,7 @@ use PhoneBurner\SaltLite\Framework\Logging\Monolog\HandlerFactory\RotatingFileHa
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\HandlerFactory\SlackWebhookHandlerFactory;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\HandlerFactory\StreamHandlerFactory;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\HandlerFactory\TestHandlerFactory;
+use PhoneBurner\SaltLite\Framework\Logging\Monolog\LoggerExceptionHandler;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\MonologFormatterFactory;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\MonologHandlerFactory;
 use PhoneBurner\SaltLite\Framework\Logging\Monolog\MonologLoggerServiceFactory;
@@ -51,7 +54,7 @@ final class LoggingServiceProvider implements ServiceProvider
     #[\Override]
     public static function register(App $app): void
     {
-        $app->set(LoggerInterface::class, $app->get(LoggerServiceFactory::class));
+        $app->set(LoggerInterface::class, new DeferredServiceFactory(LoggerServiceFactory::class));
 
         $app->set(
             MonologLoggerServiceFactory::class,
@@ -142,5 +145,19 @@ final class LoggingServiceProvider implements ServiceProvider
         $app->set(NoopHandlerFactory::class, NewInstanceServiceFactory::singleton());
 
         $app->set(NullHandlerFactory::class, NewInstanceServiceFactory::singleton());
+
+        $app->set(
+            LoggerExceptionHandler::class,
+            static fn(App $app): LoggerExceptionHandler => new LoggerExceptionHandler(
+                $app->get(BuildStage::class),
+            ),
+        );
+
+        $app->set(
+            MonologLoggerServiceFactory::class,
+            static fn(App $app): MonologLoggerServiceFactory => new MonologLoggerServiceFactory(
+                $app->get(MonologHandlerFactory::class),
+            ),
+        );
     }
 }

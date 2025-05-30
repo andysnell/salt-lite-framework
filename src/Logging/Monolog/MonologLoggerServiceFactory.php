@@ -16,7 +16,6 @@ use Monolog\Logger;
 use PhoneBurner\SaltLite\App\App;
 use PhoneBurner\SaltLite\Framework\Logging\Config\LoggingConfigStruct;
 use PhoneBurner\SaltLite\Framework\Logging\LoggerServiceFactory;
-use PhoneBurner\SaltLite\Framework\Logging\Monolog\LoggerExceptionHandler;
 use PhoneBurner\SaltLite\Framework\MessageBus\LongRunningProcessServiceResetter;
 use PhoneBurner\SaltLite\Logging\PsrLoggerAdapter;
 use PhoneBurner\SaltLite\String\Str;

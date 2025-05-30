@@ -33,6 +33,8 @@ use PhoneBurner\SaltLite\Time\Clock\Clock;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Messenger\RunCommandMessageHandler;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
 use Symfony\Component\Messenger\Command\ConsumeMessagesCommand;
 use Symfony\Component\Messenger\Command\DebugCommand;
@@ -54,6 +56,7 @@ use Symfony\Component\Messenger\Retry\RetryStrategyInterface;
 use Symfony\Component\Messenger\RoutableMessageBus;
 use Symfony\Component\Messenger\Transport\Sender\SendersLocator;
 use Symfony\Component\Messenger\Transport\Serialization\PhpSerializer;
+use Symfony\Component\Process\Messenger\RunProcessMessageHandler;
 
 use function PhoneBurner\SaltLite\Framework\ghost;
 
@@ -291,5 +294,14 @@ final class MessageBusServiceProvider implements ServiceProvider
                 $app->get(MessageBusInterface::class),
             )),
         );
+
+        $app->set(
+            RunCommandMessageHandler::class,
+            static fn(App $app): RunCommandMessageHandler => new RunCommandMessageHandler(
+                $app->get(Application::class),
+            ),
+        );
+
+        $app->set(RunProcessMessageHandler::class, NewInstanceServiceFactory::singleton());
     }
 }
