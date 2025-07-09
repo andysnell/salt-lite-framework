@@ -156,10 +156,11 @@ down:
 bash: build/docker/docker-compose.json
 	$(docker-php) bash
 
+# Run the PsySH REPL shell
 .PHONY: shell psysh
 shell psysh: build/.install
 	docker compose up --detach
-	$(docker-php) vendor/bin/psysh
+	$(docker-php) salt shell
 
 .PHONY: lint phpcbf phpcs phpstan phpunit phpunit-coverage rector rector-dry-run test
 lint phpcbf phpcs phpstan phpunit phpunit-coverage rector rector-dry-run test: build/.install
