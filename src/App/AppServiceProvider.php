@@ -50,6 +50,7 @@ use PhoneBurner\SaltLite\Framework\Notifier\Config\NotifierConfigStruct;
 use PhoneBurner\SaltLite\Framework\Scheduler\Config\SchedulerConfigStruct;
 use PhoneBurner\SaltLite\Framework\Storage\Config\StorageConfigStruct;
 use PhoneBurner\SaltLite\Logging\LogTrace;
+use PhoneBurner\SaltLite\Random\Randomizer;
 use PhoneBurner\SaltLite\Time\Clock\Clock;
 use PhoneBurner\SaltLite\Time\Clock\HighResolutionTimer;
 use PhoneBurner\SaltLite\Time\Clock\SystemClock;
@@ -124,6 +125,7 @@ final class AppServiceProvider implements ServiceProvider
         $app->set(Context::class, $app->environment->context);
         $app->set(Clock::class, new SystemClock());
         $app->set(HighResolutionTimer::class, new SystemHighResolutionTimer());
+        $app->set(Randomizer::class, new Randomizer());
 
         // It is probably safe for us to resolve the service level config structs
         // eagerly; however, for the sake of being extra cautious, we will wrap the

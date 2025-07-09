@@ -8,7 +8,6 @@ use PhoneBurner\SaltLite\App\App;
 use PhoneBurner\SaltLite\Cache\Lock\LockFactory;
 use PhoneBurner\SaltLite\Container\ServiceFactory;
 use PhoneBurner\SaltLite\Cryptography\Natrium;
-use PhoneBurner\SaltLite\Cryptography\Random\Random;
 use PhoneBurner\SaltLite\Framework\Database\Redis\RedisManager;
 use PhoneBurner\SaltLite\Framework\Http\Config\SessionConfigStruct;
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\CompressingSessionHandlerDecorator;
@@ -21,6 +20,7 @@ use PhoneBurner\SaltLite\Framework\Http\Session\Handler\LockingSessionHandlerDec
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\NullSessionHandler;
 use PhoneBurner\SaltLite\Framework\Http\Session\Handler\RedisSessionHandler;
 use PhoneBurner\SaltLite\Http\Cookie\CookieJar;
+use PhoneBurner\SaltLite\Random\Randomizer;
 use PhoneBurner\SaltLite\String\Encoding\Encoding;
 use PhoneBurner\SaltLite\Time\Clock\Clock;
 use PhoneBurner\SaltLite\Type\Type;
@@ -41,7 +41,7 @@ class SessionHandlerServiceFactory implements ServiceFactory
             FileSessionHandler::class => new FileSessionHandler(
                 $app->get(Clock::class),
                 $config->ttl,
-                $app->get(Random::class),
+                $app->get(Randomizer::class),
                 $config->file_path,
             ),
             CookieSessionHandler::class => new CookieSessionHandler(

@@ -106,8 +106,11 @@ final class RemoteCacheMarshallerTest extends TestCase
     #[DataProvider('providesScalarTestValuesWithSerializer')]
     #[Test]
     #[WithoutErrorHandler]
-    public function simpleAndScalarValuesCanBeBase64Encoded(Serializer $serializer, mixed $value): void
-    {
+    public function simpleAndScalarValuesCanBeBase64Encoded(
+        Serializer $serializer,
+        mixed $value,
+        mixed $dummy = null,
+    ): void {
         $sut = new RemoteCacheMarshaller($serializer, true, true);
         ['foo' => $marshalled] = $sut->marshall(['foo' => $value], $failed);
 
@@ -119,7 +122,7 @@ final class RemoteCacheMarshallerTest extends TestCase
     #[DataProvider('providesComplexTestValuesWithSerializer')]
     #[Test]
     #[WithoutErrorHandler]
-    public function complexValuesCanBeBase64Encoded(Serializer $serializer, mixed $value): void
+    public function complexValuesCanBeBase64Encoded(Serializer $serializer, mixed $value,): void
     {
         $sut = new RemoteCacheMarshaller($serializer, true, true);
         ['foo' => $marshalled] = $sut->marshall(['foo' => $value], $failed);

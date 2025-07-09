@@ -6,10 +6,10 @@ namespace PhoneBurner\SaltLite\Framework\Http\Session\Handler;
 
 use FilesystemIterator;
 use PhoneBurner\SaltLite\Attribute\Usage\Internal;
-use PhoneBurner\SaltLite\Cryptography\Random\Random;
 use PhoneBurner\SaltLite\Filesystem\FileWriter;
 use PhoneBurner\SaltLite\Framework\Http\Session\SessionHandler;
 use PhoneBurner\SaltLite\Http\Session\SessionId;
+use PhoneBurner\SaltLite\Random\Randomizer;
 use PhoneBurner\SaltLite\Time\Clock\Clock;
 use PhoneBurner\SaltLite\Time\Ttl;
 
@@ -23,7 +23,7 @@ final class FileSessionHandler extends SessionHandler
     public function __construct(
         private readonly Clock $clock,
         private readonly Ttl $ttl,
-        private readonly Random $random,
+        private readonly Randomizer $randomizer,
         private readonly string $path = self::DEFAULT_STORAGE_PATH,
     ) {
     }
@@ -34,7 +34,7 @@ final class FileSessionHandler extends SessionHandler
         // optimize for the other "self-garbage-collecting" implementations by
         // handling probabilistic garbage collection here. By default, at scale we
         // expect 2% of requests to trigger garbage collection.
-        if ($this->random->int(1, 100) <= 2) {
+        if ($this->randomizer->int(1, 100) <= 2) {
             $this->gc($this->ttl->inSeconds());
             \clearstatcache(); // prevents stale cached mtime/is_file affecting
         }

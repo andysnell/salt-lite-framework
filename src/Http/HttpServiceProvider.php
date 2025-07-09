@@ -92,6 +92,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             TextResponseTransformerStrategy::class,
             SessionHandler::class,
             SessionManager::class,
+            SessionManagerContract::class,
             LogoutRequestHandler::class,
         ];
     }

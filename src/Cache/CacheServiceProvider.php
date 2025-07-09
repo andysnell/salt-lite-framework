@@ -43,6 +43,7 @@ final class CacheServiceProvider implements DeferrableServiceProvider
             AppendOnlyCache::class,
             Cache::class,
             InMemoryCache::class,
+            CacheAdapter::class,
             CacheInterface::class,
             CacheItemPoolInterface::class,
             CacheItemPoolFactory::class,
