@@ -16,9 +16,10 @@ binding in an application service provider.
     - It registers the logger with a , suggesting support for flushing logs in long-running processes like queue workers. `LongRunningProcessServiceResetter`
 
 ### Exception Handling
-By default, the underlying Monolog instance is configured with the 
+
+By default, the underlying Monolog instance is configured with the
 `LoggerExceptionHandler` class, which suppresses all `\Throwable` instances thrown
-while recording log messages when in Production. This is done to prevent the 
+while recording log messages when in Production. This is done to prevent the
 application from crashing when a log message cannot be recorded. In the Development
 and Integration build stages, the `\Throwable` is rethrown. The instance of the
 `LoggerExceptionHandler` is resolved from the container, so this behavior can be

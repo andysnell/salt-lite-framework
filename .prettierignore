@@ -1,0 +1,6 @@
+# Ignore the build and vendor directories
+build
+vendor
+
+# Ignore Generated Files
+composer.lock

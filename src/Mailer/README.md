@@ -25,7 +25,7 @@ public function sendMessage(
         ->addTo(new EmailAddress($recipient))
         ->setTextBody("Hello, World!")
         ->attach(Attachment::fromPath($environment->root() . '/storage/doc.pdf'));
-    
+
     $mailer->send($email);
 }
 ```

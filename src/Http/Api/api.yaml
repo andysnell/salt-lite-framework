@@ -3,7 +3,7 @@ info:
   title: API Components
   description: Reusable OpenAPI Components Related to API Domain Objects
   version: 1.0.0
-paths: { }
+paths: {}
 components:
   parameters:
     OffsetQueryParameter:

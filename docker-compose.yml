@@ -39,7 +39,7 @@ services:
       - .env
     environment:
       PHP_IDE_CONFIG: "serverName=cli" # Used by PhpStorm for path mapping
-      COMPOSER_AUTH: "{\"github-oauth\": {\"github.com\":\"${GITHUB_TOKEN}\"}}"
+      COMPOSER_AUTH: '{"github-oauth": {"github.com":"${GITHUB_TOKEN}"}}'
     extra_hosts:
       - host.docker.internal:host-gateway
 
@@ -95,7 +95,7 @@ services:
     volumes:
       - redis-data:/data:delegated
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "ping"]
       timeout: 10s
       retries: 3
       start_period: 10s

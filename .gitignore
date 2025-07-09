@@ -1,12 +1,29 @@
+# Ignore IDE, & AI Directories
 /.cursor
-/.idea/
-/.github/
-/build/
-/vendor/
+/.idea
+/.junie
+/.phpstorm.meta.php
+/.run
+/.vscode
+
+# Ignore Build and Vendor Directories
+/build
+/vendor
 /storage
 
+# Ignore environment files, except for the default distribution file
 .env
-phpunit.xml
-user.ini
+.env.dist
+*.private.env.json
+!.env.dist
+
+# Ignore boilerplate and development tooling files
 docker-compose.override.yml
+phpstan-baseline.*.neon
+phpstan-baseline.*.php
+phpstan-baseline.neon
+phpstan-baseline.php
 phpstan.neon
+phpunit.xml
+*.ini
+

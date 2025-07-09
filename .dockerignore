@@ -1,30 +1,46 @@
-.cursor
-.idea
-.github
-.phpstorm.meta.php
-build
-deploy
-infrastructure
-storage
-public/local
-public/phpunit
-vendor
+# Ignore IDE, AI, & GitHub Directories
+/.cursor
+/.idea
+/.junie
+/.phpstorm.meta.php
+/.run
+/.vscode
 
-.editorconfig
+# Ignore GitHub Actions and CI/CD Directories
+/.github
+
+# Ignore Build, Test and Vendor Directories
+/build
+/vendor
+/tests
+/storage
+
+# Ignore environment files, except for the default distribution file
 .env
-.env.production
+.env.*
+*.private.env.json
+!.env.dist
+
+# Ignore boilerplate and development tooling files
+*.http
+.editorconfig
 .gitattributes
 .gitignore
+.prettierignore
+Dockerfile
 Makefile
+README.md
 behat.yml
 docker-compose.override.yml
+docker-compose.yml
+http-client.env.json
 phpcs.xml
+phpstan-baseline.*.neon
+phpstan-baseline.*.php
+phpstan-baseline.neon
+phpstan-baseline.php
 phpstan.dist.neon
 phpstan.neon
 phpunit.dist.xml
 phpunit.xml
-README.md
 rector.php
-
-# Do not ignore".gitignore" files intended to preserve directory structure
-!storage/**/.gitignore

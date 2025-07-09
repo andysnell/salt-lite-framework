@@ -1,7 +1,18 @@
 SHELL := bash
-.DEFAULT_GOAL := build
+.SHELLFLAGS = -ec
+.DEFAULT_GOAL := build/.install
+.WAIT:
 
-app = docker compose run --rm php
+_WARN := "\033[33m%s\033[0m %s\n"  # Yellow text template for "printf"
+_INFO := "\033[32m%s\033[0m %s\n" # Green text template for "printf"
+_ERROR := "\033[31m%s\033[0m %s\n" # Red text template for "printf"
+
+##------------------------------------------------------------------------------
+# Command Aliases & Function/Variable Definitions
+##------------------------------------------------------------------------------
+
+docker-php = docker compose run --rm php
+docker-run = docker run --rm --env-file "$${PWD}/.env" --user=$$(id -u):$$(id -g)
 
 # Define behavior to safely source file (1) to dist file (2), without overwriting
 # if the dist file already exists. This is more portable than using `cp --no-clobber`.
@@ -34,38 +45,89 @@ define check-token
 	fi
 endef
 
+# Define behavior to generate a new 256-bit key for the application, if it is
+# not already set in the .env file.
 define generate-key
 	if grep -q "^$(1)=" ".env"; then \
 		KEY_VALUE=$$(grep "^$(1)=" ".env" | cut -d'=' -f2); \
 		if [ -z "$$KEY_VALUE" ]; then \
-			NEW_KEY=$$(docker run --rm php:8.4-fpm php -r 'echo "base64:" . \base64_encode(\random_bytes(32));'); \
+			NEW_KEY=$$(head -c 32 /dev/urandom | base64); \
 			sed -i "s;^$(1)=.*;$(1)=$$NEW_KEY;" ".env"; \
 			echo "New $(1) generated successfully!"; \
 		else \
 			echo "$(1) is already set."; \
 		fi; \
 	else \
-		NEW_KEY=$$(docker run --rm php:8.4-fpm php -r 'echo "base64:" . \base64_encode(\random_bytes(32));'); \
-		echo -e "\$(1)=$$NEW_KEY" >> ".env"; \
+		NEW_KEY=$$(head -c 32 /dev/urandom | base64); \
+		echo -e "$(1)=$$NEW_KEY" >> ".env"; \
 		echo "New $(1) generated successfully!"; \
 	fi
 endef
 
-phpunit.xml:
-	@$(call copy-safe,phpunit.dist.xml,phpunit.xml)
+define confirm
+	printf -v PROMPT $(_WARN) $(1)  [y/N];
+	read -p "$$PROMPT" CONFIRMATION;
+	if [[ ! "$$CONFIRMATION" =~ ^[Yy] ]]; then \
+		echo "Exiting..."; \
+		exit 1; \
+	fi
+endef
+
+BUILD_DIRS = build/.phpunit.cache \
+	build/composer \
+	build/docker \
+	build/phpstan \
+	build/phpunit \
+	build/psysh/config \
+	build/psysh/data \
+	build/psysh/tmp \
+	build/rector
+
+##------------------------------------------------------------------------------
+# Docker Targets
+##------------------------------------------------------------------------------
+
+build/docker/docker-compose.json: Dockerfile docker-compose.yml | build/docker
+	docker compose pull --quiet --policy="always"
+	COMPOSE_BAKE=true docker compose build \
+		--pull \
+		--build-arg USER_UID=$$(id -u) \
+		--build-arg USER_GID=$$(id -g)
+	touch "$@" # required to consistently update the file mtime
+
+build/docker/salt-lite-%.json: Dockerfile | build/docker
+	docker buildx build --target="$*" --pull --load --tag="salt-lite-$*" --file Dockerfile .
+	docker image inspect "salt-lite-$*" > "$@"
+
+##------------------------------------------------------------------------------
+# Build/Setup/Teardown Targets
+##------------------------------------------------------------------------------
+
+.env:
+	@$(call copy-safe,.env.dist,.env)
 
 phpstan.neon:
 	@$(call copy-safe,phpstan.dist.neon,phpstan.neon)
 
-.env:
-	@$(call copy-safe,.env.dist,.env)
-	@$(call generate-key,SALT_APP_KEY)
-	@$(call check-token,GITHUB_TOKEN)
+phpunit.xml:
+	@$(call copy-safe,phpunit.dist.xml,phpunit.xml)
 
-vendor: | .env
-	@docker compose pull
-	@docker compose build --pull
-	@$(app) composer install
+$(BUILD_DIRS): | .env phpstan.neon phpunit.xml
+	mkdir --parents "$@"
+
+vendor: build/composer build/docker/docker-compose.json composer.json composer.lock | .env
+	mkdir --parents "$@"
+	@$(call check-token,GITHUB_TOKEN)
+	$(docker-php) composer install
+	@touch vendor
+
+build/.install : vendor build/docker/salt-lite-prettier.json | $(BUILD_DIRS)
+	@echo "Application Build Complete."
+	@touch build/.install
+
+.PHONY: clean
+clean:
+	$(docker-php) rm -rf ./build ./vendor ./storage
 
 # The build target dependencies must be set as "order-only" prerequisites to prevent
 # the target from being rebuilt everytime the dependencies are updated.
@@ -78,17 +140,9 @@ clean:
 	$(app) rm -rf ./build ./vendor
 	$(app) find /app/ -type f -not -name .gitignore -delete
 
-# Rebuild the Docker images and reinstall dependencies. Note that this target only
-# works _after_ the initial build target has been run at least once, so it does not
-# actually duplicate the "vendor" target.
-.PHONY: install
-install: build
-	@docker compose pull
-	@docker compose build --pull
-	@$(app) composer install
-	$(app) find /app/storage/bootstrap -type f -not -name .gitignore -delete
-	$(app) find /app/storage/cache -type f -not -name .gitignore -delete
-	$(app) find /app/storage/doctrine -type f -not -name .gitignore -delete
+##------------------------------------------------------------------------------
+# Code Quality, Testing & Utility Targets
+##------------------------------------------------------------------------------
 
 .PHONY: up
 up:
@@ -99,60 +153,46 @@ down:
 	docker compose down --remove-orphans
 
 .PHONY: bash
-bash: build
-	@$(app) bash
+bash: build/docker/docker-compose.json
+	$(docker-php) bash
 
-.PHONY: lint
-lint: build
-	@$(app) composer run-script lint
+.PHONY: shell psysh
+shell psysh: build/.install
+	docker compose up --detach
+	$(docker-php) vendor/bin/psysh
 
-# Run tests, aliased to "phpunit" for consistency with other tooling targets.
-.PHONY: test phpunit
-phpunit: test
-test: build
-	@$(app) composer run-script test
+.PHONY: lint phpcbf phpcs phpstan phpunit phpunit-coverage rector rector-dry-run test
+lint phpcbf phpcs phpstan phpunit phpunit-coverage rector rector-dry-run test: build/.install
+	$(docker-php) composer run-script "$@"
 
-# Generate HTML PHPUnit test coverage report, aliased to "phpunit-coverage" for consistency with other tooling targets.
-.PHONY: test-coverage phpunit-coverage
-phpunit-coverage: test-coverage
-test-coverage: build
-	@$(app) composer run-script test-coverage
+.NOTPARALLEL: ci pre-ci preci
+.PHONY: ci pre-ci preci
+ci: lint phpcs phpstan phpunit prettier-check rector-dry-run
 
+.NOTPARALLEL: pre-ci preci
+.PHONY: pre-ci preci
+pre-ci preci: prettier-write rector phpcbf ci
+
+# Run the PHP development server to serve the HTML test coverage report on port 8000.
 .PHONY: serve-coverage
 serve-coverage:
 	@docker compose run --rm --publish 8000:80 php php -S 0.0.0.0:80 -t /app/build/phpunit
 
-.PHONY: phpcs
-phpcs: build
-	@$(app) composer run-script phpcs
+##------------------------------------------------------------------------------
+# Prettier Code Formatter for JSON, YAML, HTML, Markdown, and CSS Files
+# Example Usage: `make prettier-check`, `makeprettier-write`
+##------------------------------------------------------------------------------
 
-.PHONY: phpcbf
-phpcbf: build
-	@$(app) composer run-script phpcbf
+.PHONY: prettier-%
+prettier-%: | build/docker/salt-lite-prettier.json
+	$(docker-run) --volume $${PWD}:/app salt-lite-prettier --$* .
 
-.PHONY: phpstan
-phpstan: build
-	@$(app) composer run-script phpstan
+##------------------------------------------------------------------------------
+# Enable Makefile Overrides
+#
+# If a "build/Makefile" exists, it can define additional targets/behavior and/or
+# override the targets of this Makefile. Note that this declaration has to occur
+# at the end of the file in order to effect the override behavior.
+##------------------------------------------------------------------------------
 
-.PHONY: rector
-rector: build
-	@$(app) composer run-script rector
-
-.PHONY: rector-dry-run
-rector-dry-run: build
-	@$(app) composer run-script rector-dry-run
-
-# Runs all the code quality checks: lint, phpstan, phpcs, and rector-dry-run".
-.PHONY: ci
-ci: build
-	@$(app) composer run-script ci
-
-# Runs the automated fixer tools, then run the code quality checks in one go, aliased to "preci".
-.PHONY: pre-ci preci
-preci: pre-ci
-pre-ci: build phpcbf rector ci
-
-# Run the PsySH REPL shell
-.PHONY: shell
-shell: build up
-	@$(app) ./bin/salt shell
+-include build/Makefile

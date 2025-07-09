@@ -15,15 +15,15 @@ Please use the issue tracker to report any bugs found with this project. When
 submitting a bug report, please include enough information to reproduce the
 bug. A good bug report includes the following sections:
 
-* **Description**: Provide a short and clear description of the bug.
-* **Steps to reproduce**: Provide steps to reproduce the behavior you are experiencing. Please try to
+- **Description**: Provide a short and clear description of the bug.
+- **Steps to reproduce**: Provide steps to reproduce the behavior you are experiencing. Please try to
   keep this as short as possible. If able, create a reproducible script (agnostic
   of any particular framework) you are using. This will help us to quickly debug the issue.
-* **Expected behavior**: Provide a short and clear description of what you expect to happen.
-* **Screenshots or output**: If applicable, add screenshots or program output to help explain your problem.
-* **Environment details**: Provide details about the system where you're using this package, such as PHP
+- **Expected behavior**: Provide a short and clear description of what you expect to happen.
+- **Screenshots or output**: If applicable, add screenshots or program output to help explain your problem.
+- **Environment details**: Provide details about the system where you're using this package, such as PHP
   version and operating system.
-* **Additional context**: Provide any additional context that may help us debug the problem.
+- **Additional context**: Provide any additional context that may help us debug the problem.
 
 ⚠️ _**DO NOT include passwords or other sensitive information in your bug report.**_
 
@@ -47,7 +47,7 @@ Unless the changes are trivial, like adding documentation or fixing a typo, plea
 open an issue first to discuss the feature before you submit a pull request. This
 helps us to understand the feature, scope of change, and ensure the correct
 semantic versioning of the project. It also allows discussion of the _feature_to
-live separately from the pull request _implementing_ the feature, as it might take
+live separately from the pull request \_implementing_ the feature, as it might take
 a couple multiple iterations to get the feature right.
 
 Please recognize that some features won't fit with the goals of this project and
@@ -137,13 +137,14 @@ development and testing. For convenience, the project includes a `docker-compose
 development process and tooling.
 
 #### Installation and Environment Setup
+
 > Note: This guide assumes your host environment is Unix-like (Linux, macOS, WSL2), and that Docker is already installed.
 
 Fork and clone this repository locally, navigate to the project root, and run the
 (i.e. `cd /path/to/repository`) and then execute the following command to build
 the Docker image, create build files, and install Composer dependencies:
 
-``` bash
+```bash
 make
 ```
 
@@ -179,13 +180,8 @@ make phpunit
 <!-- References -->
 
 [GitHub]: https://github.com/phoneburner/salt-lite-framework
-
 [Issues]: https://github.com/phoneburner/salt-lite-framework/issues
-
 [Pull Requests]: https://github.com/phoneburner/salt-lite-framework/pulls
-
 [per-cs]: https://www.php-fig.org/per/coding-style/
-
 [GitHub Flow]: https://guides.github.com/introduction/flow/
-
 [PhoneBurner PHP Coding Standard]: https://github.com/PhoneBurnerOpenSource/php-coding-standard

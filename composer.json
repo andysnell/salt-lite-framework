@@ -158,11 +158,11 @@
     "phpcbf": "@php vendor/bin/phpcbf --parallel=$(nproc --ignore=2) --report=full",
     "phpcs": "@php vendor/bin/phpcs --parallel=$(nproc --ignore=2) --report=full",
     "phpstan": "@php vendor/bin/phpstan analyze --memory-limit=-1 --verbose",
-    "test": [
+    "phpunit": [
       "@putenv XDEBUG_MODE=off",
       "@php vendor/bin/phpunit"
     ],
-    "test-coverage": [
+    "phpunit-coverage": [
       "@putenv XDEBUG_MODE=coverage",
       "@php vendor/bin/phpunit --coverage-html=build/phpunit"
     ],
