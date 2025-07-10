@@ -10,11 +10,14 @@ use PhoneBurner\SaltLite\Attribute\Usage\Internal;
 use PhoneBurner\SaltLite\Container\DeferrableServiceProvider;
 use PhoneBurner\SaltLite\Framework\App\Command\DebugAppKeysCommand;
 use PhoneBurner\SaltLite\Framework\Console\Command\InteractiveSaltShellCommand;
+use PhoneBurner\SaltLite\Framework\Console\Config\ShellConfigStruct;
 use PhoneBurner\SaltLite\Framework\Console\EventListener\ConsoleErrorListener;
 use PhoneBurner\SaltLite\Framework\EventDispatcher\Command\DebugEventListenersCommand;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Command\CacheRoutesCommand;
 use PhoneBurner\SaltLite\Framework\Http\Routing\Command\ListRoutesCommand;
 use PhoneBurner\SaltLite\Framework\Scheduler\Command\ConsumeScheduledMessagesCommand;
+use PhoneBurner\SaltLite\Type\Type;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\CommandLoader\CommandLoaderInterface;
@@ -92,7 +95,10 @@ final class ConsoleServiceProvider implements DeferrableServiceProvider
 
         $app->set(
             InteractiveSaltShellCommand::class,
-            static fn(App $app): InteractiveSaltShellCommand => new InteractiveSaltShellCommand($app),
+            static fn(App $app): InteractiveSaltShellCommand => new InteractiveSaltShellCommand(
+                Type::of(ShellConfigStruct::class, $app->config->get('console.shell')),
+                $app->get(ContainerInterface::class),
+            ),
         );
     }
 }
