@@ -4,16 +4,14 @@ ARG USER_UID=1000
 ARG USER_GID=1000
 WORKDIR /
 SHELL ["/bin/bash", "-c"]
-ENV COMPOSER_HOME="/app/build/composer" \
-    PATH="/app/bin:/app/vendor/bin:/app/build/composer/bin:$PATH" \
-    PHP_PEAR_PHP_BIN="php -d error_reporting=E_ALL&~E_DEPRECATED" \
-    SALT_BUILD_STAGE="development" \
-    XDEBUG_MODE="off"
+ENV PATH="/app/bin:/app/vendor/bin:/app/build/composer/bin:$PATH"
+ENV XDEBUG_MODE="off"
 
 # Create a non-root user to run the application
-RUN groupadd --gid $USER_GID dev && useradd --uid $USER_UID --gid $USER_GID --groups www-data --shell /bin/bash dev
+RUN groupadd --gid $USER_GID dev  \
+    && useradd --uid $USER_UID --gid $USER_GID --groups www-data --create-home --shell /bin/bash dev
 
-# Update the package list and install the latest version of the packages
+    # Update the package list and install the latest version of the packages
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked apt-get update && apt-get dist-upgrade --yes
 
 # Install system dependencies
@@ -29,6 +27,7 @@ RUN --mount=type=cache,target=/var/lib/apt,sharing=locked apt-get install --yes 
 
 # Install PHP Extensions
 FROM base AS php-extensions
+ENV PHP_PEAR_PHP_BIN="php -d error_reporting=E_ALL&~E_DEPRECATED"
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked apt-get install --yes --quiet --no-install-recommends \
     libgmp-dev \
     libicu-dev \
@@ -68,11 +67,12 @@ FROM base AS development-php
 ARG GIT_COMMIT="undefined"
 ENV GIT_COMMIT=${GIT_COMMIT}
 ENV SALT_BUILD_STAGE="development"
+ENV COMPOSER_HOME="/home/dev/.composer"
+ENV COMPOSER_CACHE_DIR="/app/build/composer/cache"
 WORKDIR /app
 # Header files from zlib are needed for the xdebug extension
-COPY --link --from=php-extensions /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu/
-# Header files from zlib are needed for the xdebug extension
 COPY --link --from=php-extensions /usr/include/ /usr/include/
+COPY --link --from=php-extensions /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu/
 COPY --link --from=php-extensions /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu/
 COPY --link --from=php-extensions /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 COPY --link --from=php-extensions /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
@@ -83,6 +83,9 @@ RUN --mount=type=tmpfs,target=/tmp/pear <<-EOF
   set -eux
   MAKEFLAGS="-j$(nproc)" pecl install xdebug
   docker-php-ext-enable xdebug
+  mkdir -p /home/dev/.composer
+  composer self-update --clean-backups
+  chown -R dev:dev /app /home/dev
 EOF
 USER dev
 
@@ -91,41 +94,43 @@ ARG GIT_COMMIT="undefined"
 ENV GIT_COMMIT=${GIT_COMMIT}
 ENV SALT_BUILD_STAGE="production"
 ENV COMPOSER_ROOT_VERSION=1.0.0
+ENV COMPOSER_HOME="/app/build/composer"
+ENV COMPOSER_CACHE_DIR="/app/build/composer/cache"
 WORKDIR /app
 COPY --link --from=php-extensions /usr/lib/x86_64-linux-gnu/ /usr/lib/x86_64-linux-gnu/
 COPY --link --from=php-extensions /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 COPY --link --from=php-extensions /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
 COPY --link --from=php-extensions /usr/local/etc/php/php.ini /usr/local/etc/php/php.ini
-COPY --link --from=composer/composer:latest-bin /composer /usr/local/bin/composer
 COPY --link --from=libsodium /usr/local/lib/ /usr/local/lib/
 COPY --link php-production.ini /usr/local/etc/php/conf.d/settings.ini
-COPY --link --chown=1000:1000 ./bin /app/bin
-COPY --link --chown=1000:1000 ./config /app/config
-COPY --link --chown=1000:1000 ./database /app/database
-COPY --link --chown=1000:1000 ./public /app/public
-COPY --link --chown=1000:1000 ./resources /app/resources
-COPY --link --chown=1000:1000 ./src /app/src
-COPY --link --chown=1000:1000 ./storage /app/storage
-COPY --link --chown=1000:1000 ./composer.json ./composer.lock /app/
-COPY --link --chown=1000:1000 --from=production-redocly /spec/openapi.yaml /app/resources/views/openapi.yaml
-COPY --link --chown=1000:1000 --from=production-redocly /spec/openapi.html /app/resources/views/openapi.html
+COPY --link --chown=$USER_UID:$USER_GID ./bin /app/bin
+COPY --link --chown=$USER_UID:$USER_GID ./config /app/config
+COPY --link --chown=$USER_UID:$USER_GID ./database /app/database
+COPY --link --chown=$USER_UID:$USER_GID ./public /app/public
+COPY --link --chown=$USER_UID:$USER_GID ./resources /app/resources
+COPY --link --chown=$USER_UID:$USER_GID ./src /app/src
+COPY --link --chown=$USER_UID:$USER_GID ./composer.json ./composer.lock /app/
 RUN <<-EOF
     set -eux;
     mkdir -p /app/build/composer;
+    mkdir -p /app/storage
     chown -R dev:dev /app
     find /app/storage -type d -exec chmod 0777 {} \;
     find /app/storage -type f -exec chmod 0666 {} \;
 EOF
 USER dev
-RUN --mount=type=cache,mode=0777,uid=1000,gid=1000,target=/app/build/composer/cache \
-    --mount=type=secret,id=GITHUB_TOKEN,uid=1000,gid=1000,required=true <<-EOF
+RUN --mount=type=bind,from=composer/composer,source=/usr/bin/composer,target=/usr/local/bin/composer \
+    --mount=type=cache,mode=0777,uid=$USER_UID,gid=$USER_GID,target=/app/build/composer \
+    --mount=type=secret,id=GITHUB_TOKEN,env=GITHUB_TOKEN,required=false <<-EOF
     set -eux
-    composer config --global github-oauth.github.com $(cat /run/secrets/GITHUB_TOKEN)
+    [ -n "${GITHUB_TOKEN}" ] && composer config --global github-oauth.github.com ${GITHUB_TOKEN}
+    export SALT_APP_KEY=$(head -c 32 /dev/urandom | base64) # temporary key for build
     composer install --classmap-authoritative --no-dev
-    SALT_APP_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= salt orm:generate-proxies
-    SALT_APP_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= salt routing:cache
+    salt orm:generate-proxies
+    salt routing:cache
+
+    # Remove the storage cache and auth.json file to avoid baking the them into the build
     rm -f /app/storage/bootstrap/config.cache.php
-    # Remove the auth.json file to avoid baking the github key into the build
     rm -f /app/build/composer/auth.json
 EOF
 
