@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "75cfd820f1280d9b7e2318cc0efee925",
+    "content-hash": "ee58f0c4f8ffe0322bb79d10c4898c39",
     "packages": [
         {
             "name": "alek13/slack",
@@ -1747,6 +1747,452 @@
                 }
             ],
             "time": "2025-03-06T22:45:56+00:00"
+        },
+        {
+            "name": "eventsauce/clock",
+            "version": "1.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/EventSaucePHP/Clock.git",
+                "reference": "e3c9505fe568806ceea1a4b897f0f994232305df"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/EventSaucePHP/Clock/zipball/e3c9505fe568806ceea1a4b897f0f994232305df",
+                "reference": "e3c9505fe568806ceea1a4b897f0f994232305df",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0",
+                "psr/clock": "^1.0"
+            },
+            "provide": {
+                "psr/clock-implementation": "1.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^v3.65.0",
+                "phpstan/phpstan": "^2.0",
+                "phpunit/phpunit": "^9.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "EventSauce\\Clock\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Frank de Jonge",
+                    "email": "info@frenky.net"
+                }
+            ],
+            "description": "Consume time from a Clock",
+            "keywords": [
+                "EventSauce",
+                "clock",
+                "time"
+            ],
+            "support": {
+                "issues": "https://github.com/EventSaucePHP/Clock/issues",
+                "source": "https://github.com/EventSaucePHP/Clock/tree/1.2.2"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/frankdejonge",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-12-14T23:18:33+00:00"
+        },
+        {
+            "name": "eventsauce/eventsauce",
+            "version": "3.7.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/EventSaucePHP/EventSauce.git",
+                "reference": "a53f6688a83f6042d42a4b9c13ece5bc829d4243"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/EventSaucePHP/EventSauce/zipball/a53f6688a83f6042d42a4b9c13ece5bc829d4243",
+                "reference": "a53f6688a83f6042d42a4b9c13ece5bc829d4243",
+                "shasum": ""
+            },
+            "require": {
+                "eventsauce/clock": "^1.0",
+                "eventsauce/object-hydrator": "^0.4.2 | ^0.5 | ^1.0.0",
+                "php": "^8.0",
+                "psr/clock": "^1.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.0",
+                "nikic/php-parser": "^v4.10.4",
+                "pestphp/pest": "^1.23|^2.0|^3.0",
+                "phpstan/phpstan": "^1.11.11",
+                "phpunit/phpunit": "^9.5.23|^10.0|^11.0|^12.0",
+                "ramsey/uuid": "^4.0",
+                "symfony/yaml": "^5.0 | ^6.0 | ^7.0"
+            },
+            "suggest": {
+                "eventsauce/code-generation": "Code generation for EventSauce",
+                "eventsauce/doctrine-message-repository": "Doctrine implementation of the message repository",
+                "eventsauce/test-utilities": "Base test tooling for testing aggregates"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-version/2.0": "2.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "EventSauce\\EventSourcing\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Frank de Jonge",
+                    "email": "info@frenky.net"
+                }
+            ],
+            "description": "A pragmatic event sourcing library for PHP with a focus on developer experience.",
+            "homepage": "https://eventsauce.io/",
+            "support": {
+                "issues": "https://github.com/EventSaucePHP/EventSauce/issues",
+                "source": "https://github.com/EventSaucePHP/EventSauce/tree/3.7.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/frankdejonge",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-07-01T07:16:26+00:00"
+        },
+        {
+            "name": "eventsauce/id-encoding",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/EventSaucePHP/IdEncoding.git",
+                "reference": "c297ecb0c4778a058dd0629072d941c4fa9aa1c5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/EventSaucePHP/IdEncoding/zipball/c297ecb0c4778a058dd0629072d941c4fa9aa1c5",
+                "reference": "c297ecb0c4778a058dd0629072d941c4fa9aa1c5",
+                "shasum": ""
+            },
+            "require": {
+                "ramsey/uuid": "^4.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "EventSauce\\IdEncoding\\": "./"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Frank de Jonge",
+                    "email": "info@frankdejonge.nl"
+                }
+            ],
+            "description": "ID encoding utility",
+            "support": {
+                "source": "https://github.com/EventSaucePHP/IdEncoding/tree/1.0.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/frankdejonge",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-05-27T13:57:16+00:00"
+        },
+        {
+            "name": "eventsauce/message-repository-for-doctrine",
+            "version": "1.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/EventSaucePHP/MessageRepositoryForDoctrine.git",
+                "reference": "2c745194f6cc17d243d71a02210369e3c59d08e2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/EventSaucePHP/MessageRepositoryForDoctrine/zipball/2c745194f6cc17d243d71a02210369e3c59d08e2",
+                "reference": "2c745194f6cc17d243d71a02210369e3c59d08e2",
+                "shasum": ""
+            },
+            "require": {
+                "doctrine/dbal": "^3.1|^4.0",
+                "eventsauce/eventsauce": "^3.0",
+                "eventsauce/id-encoding": "^1.0",
+                "eventsauce/message-repository-table-schema": "^1.0",
+                "eventsauce/uuid-encoding": "^1.0",
+                "ramsey/uuid": "^4.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "EventSauce\\MessageRepository\\DoctrineMessageRepository\\": "./"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Frank de Jonge",
+                    "email": "info@frankdejonge.nl"
+                }
+            ],
+            "description": "Message Repository for Doctrine DBAL 3",
+            "support": {
+                "source": "https://github.com/EventSaucePHP/MessageRepositoryForDoctrine/tree/1.2.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/frankdejonge",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-05-14T14:43:33+00:00"
+        },
+        {
+            "name": "eventsauce/message-repository-table-schema",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/EventSaucePHP/MessageRepositoryTableSchema.git",
+                "reference": "328135bfab4b1a939fa3ea13a7f4421fd30abd37"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/EventSaucePHP/MessageRepositoryTableSchema/zipball/328135bfab4b1a939fa3ea13a7f4421fd30abd37",
+                "reference": "328135bfab4b1a939fa3ea13a7f4421fd30abd37",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "EventSauce\\MessageRepository\\TableSchema\\": "./"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Frank de Jonge",
+                    "email": "info@frankdejonge.nl"
+                }
+            ],
+            "description": "Message Repository Table Schema",
+            "support": {
+                "source": "https://github.com/EventSaucePHP/MessageRepositoryTableSchema/tree/1.0.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/frankdejonge",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-05-27T13:57:16+00:00"
+        },
+        {
+            "name": "eventsauce/object-hydrator",
+            "version": "1.6.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/EventSaucePHP/ObjectHydrator.git",
+                "reference": "bbc848ba06acaa8ca6edd84ba6f1ea70ea03dcf2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/EventSaucePHP/ObjectHydrator/zipball/bbc848ba06acaa8ca6edd84ba6f1ea70ea03dcf2",
+                "reference": "bbc848ba06acaa8ca6edd84ba6f1ea70ea03dcf2",
+                "shasum": ""
+            },
+            "require": {
+                "ext-fileinfo": "*",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.4",
+                "league/construct-finder": "^1.1",
+                "phpbench/phpbench": "^1.2",
+                "phpstan/phpstan": "^1.7",
+                "phpunit/phpunit": "^9.5.11",
+                "ramsey/uuid": "^4.2"
+            },
+            "suggest": {
+                "league/construct-finder": "Find all classes in a directory for the best dumped hydrators."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "EventSauce\\ObjectHydrator\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Frank de Jonge",
+                    "email": "info@frankdejonge.nl"
+                }
+            ],
+            "description": "Converts structured data into strict objects.",
+            "keywords": [
+                "construction",
+                "constructor",
+                "hydration",
+                "mapper"
+            ],
+            "support": {
+                "issues": "https://github.com/EventSaucePHP/ObjectHydrator/issues",
+                "source": "https://github.com/EventSaucePHP/ObjectHydrator/tree/1.6.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/frankdejonge",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-12-14T23:23:52+00:00"
+        },
+        {
+            "name": "eventsauce/uuid-encoding",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/EventSaucePHP/UuidEncoding.git",
+                "reference": "f6bd8994b9a7f689d751acd9256badc677645bdf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/EventSaucePHP/UuidEncoding/zipball/f6bd8994b9a7f689d751acd9256badc677645bdf",
+                "reference": "f6bd8994b9a7f689d751acd9256badc677645bdf",
+                "shasum": ""
+            },
+            "require": {
+                "ramsey/uuid": "^4.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "EventSauce\\UuidEncoding\\": "./"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Frank de Jonge",
+                    "email": "info@frankdejonge.nl"
+                }
+            ],
+            "description": "UUID encoding utility",
+            "support": {
+                "source": "https://github.com/EventSaucePHP/UuidEncoding/tree/1.0.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/frankdejonge",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-05-27T13:57:16+00:00"
+        },
+        {
+            "name": "filp/whoops",
+            "version": "2.18.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/filp/whoops.git",
+                "reference": "59a123a3d459c5a23055802237cb317f609867e5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/filp/whoops/zipball/59a123a3d459c5a23055802237cb317f609867e5",
+                "reference": "59a123a3d459c5a23055802237cb317f609867e5",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1 || ^8.0",
+                "psr/log": "^1.0.1 || ^2.0 || ^3.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.0",
+                "phpunit/phpunit": "^7.5.20 || ^8.5.8 || ^9.3.3",
+                "symfony/var-dumper": "^4.0 || ^5.0"
+            },
+            "suggest": {
+                "symfony/var-dumper": "Pretty print complex values better with var-dumper available",
+                "whoops/soap": "Formats errors as SOAP responses"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.7-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Whoops\\": "src/Whoops/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Filipe Dobreira",
+                    "homepage": "https://github.com/filp",
+                    "role": "Developer"
+                }
+            ],
+            "description": "php error handling for cool kids",
+            "homepage": "https://filp.github.io/whoops/",
+            "keywords": [
+                "error",
+                "exception",
+                "handling",
+                "library",
+                "throwable",
+                "whoops"
+            ],
+            "support": {
+                "issues": "https://github.com/filp/whoops/issues",
+                "source": "https://github.com/filp/whoops/tree/2.18.3"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/denis-sokolov",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-06-16T00:02:10+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -6564,77 +7010,6 @@
                 }
             ],
             "time": "2025-06-27T17:24:01+00:00"
-        },
-        {
-            "name": "filp/whoops",
-            "version": "2.18.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/filp/whoops.git",
-                "reference": "59a123a3d459c5a23055802237cb317f609867e5"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/filp/whoops/zipball/59a123a3d459c5a23055802237cb317f609867e5",
-                "reference": "59a123a3d459c5a23055802237cb317f609867e5",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^7.1 || ^8.0",
-                "psr/log": "^1.0.1 || ^2.0 || ^3.0"
-            },
-            "require-dev": {
-                "mockery/mockery": "^1.0",
-                "phpunit/phpunit": "^7.5.20 || ^8.5.8 || ^9.3.3",
-                "symfony/var-dumper": "^4.0 || ^5.0"
-            },
-            "suggest": {
-                "symfony/var-dumper": "Pretty print complex values better with var-dumper available",
-                "whoops/soap": "Formats errors as SOAP responses"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.7-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Whoops\\": "src/Whoops/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Filipe Dobreira",
-                    "homepage": "https://github.com/filp",
-                    "role": "Developer"
-                }
-            ],
-            "description": "php error handling for cool kids",
-            "homepage": "https://filp.github.io/whoops/",
-            "keywords": [
-                "error",
-                "exception",
-                "handling",
-                "library",
-                "throwable",
-                "whoops"
-            ],
-            "support": {
-                "issues": "https://github.com/filp/whoops/issues",
-                "source": "https://github.com/filp/whoops/tree/2.18.3"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/denis-sokolov",
-                    "type": "github"
-                }
-            ],
-            "time": "2025-06-16T00:02:10+00:00"
         },
         {
             "name": "myclabs/deep-copy",

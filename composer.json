@@ -74,6 +74,9 @@
     "doctrine/migrations": "^3.8.2",
     "doctrine/orm": "^3.3.1",
     "dragonmantank/cron-expression": "^3.4",
+    "eventsauce/eventsauce": "^3.7",
+    "eventsauce/message-repository-for-doctrine": "^1.2",
+    "filp/whoops": "^2.18",
     "guzzlehttp/guzzle": "^7.9.2",
     "guzzlehttp/psr7": "^2.7",
     "laminas/laminas-diactoros": "^3.5",
@@ -119,7 +122,6 @@
     "symfony/service-contracts": "^3.5"
   },
   "require-dev": {
-    "filp/whoops": "^2.18.3",
     "phoneburner/coding-standard": "^1.0.0",
     "phoneburner/composer-replacements": "^1.0.0",
     "phoneburner/salt-lite-phpstan": "^0.1.0",
