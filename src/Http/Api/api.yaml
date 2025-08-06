@@ -100,17 +100,17 @@ components:
       allOf:
         - $ref: "#/components/schemas/Link"
         - description: >
-            Link Object represents a hyperlink from the containing resource to a URI, 
+            Link Object represents a hyperlink from the containing resource to a URI,
             with a human readable title.
         - type: object
-        - required:
+          required:
             - href
             - title
-        - properties:
+          properties:
             title:
               description: >
-                This title should be used anywhere a human-readable identifier 
-                is needed for the resource. For example, simple list view, 
+                This title should be used anywhere a human-readable identifier
+                is needed for the resource. For example, simple list view,
                 dropdown selects, a view of a related resource that is linked
                 to this resource.
               type: string
@@ -119,17 +119,17 @@ components:
       allOf:
         - $ref: "#/components/schemas/Link"
         - description: >
-            Link Object represents a hyperlink from the containing resource to a URI, 
+            Link Object represents a hyperlink from the containing resource to a URI,
             with a human readable title.
         - type: object
-        - required:
+          required:
             - href
             - templated
-        - properties:
+          properties:
             templated:
               description: >
-                This title should be used anywhere a human-readable identifier 
-                is needed for the resource. For example, simple list view, 
+                This title should be used anywhere a human-readable identifier
+                is needed for the resource. For example, simple list view,
                 dropdown selects, a view of a related resource that is linked
                 to this resource.
               type: boolean
@@ -211,7 +211,7 @@ components:
   responses:
     BadRequest:
       description: >
-        The resource could not be created because one or more of the request 
+        The resource could not be created because one or more of the request
         parameters were invalid or a required request parameter was missing.
       content:
         application/problem+json:
